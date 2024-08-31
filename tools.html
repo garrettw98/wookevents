@@ -709,6 +709,9 @@
         let chart;
 
         function createChart() {
+            if (chart) {
+                chart.destroy();
+            }
             const ctx = document.getElementById('profitChart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
@@ -923,10 +926,8 @@
 
         // Update the initializeInputs function to include the new inputs
         function initializeInputs() {
-            createChart();
             updateSlider();
-            updateChart();
-
+            
             // Add event listeners for all inputs
             document.querySelectorAll('input').forEach(input => {
                 input.addEventListener('change', updateChart);
@@ -934,59 +935,9 @@
         }
 
         // Call initializeInputs when the page loads
-        window.addEventListener('load', initializeInputs);
-
-        function calculateFixedCosts(ticketSales, eventLength, artistCost, equipmentCost, miscCost) {
-            const venueCost = 10 * ticketSales * eventLength;
-            return {
-                venueCost,
-                artistCost,
-                equipmentCost,
-                miscCost,
-                total: venueCost + artistCost + equipmentCost + miscCost
-            };
-        }
-
-        function setInitialValues() {
-            document.getElementById('totalEarlyBirdTickets').value = 100;
-            document.getElementById('earlyBirdTickets').value = 1;
-            document.getElementById('ticketSales').value = 550;
-            document.getElementById('ticketCost').value = 200;
-            document.getElementById('eventLength').value = 3;
-            document.getElementById('artistCost').value = 30000;
-            document.getElementById('equipmentCost').value = 15000;
-            document.getElementById('miscCost').value = 10000;
-        }
-
-        // Function to format currency inputs
-        function formatCurrencyInput(input) {
-            input.addEventListener('blur', function() {
-                this.value = parseFloat(this.value).toFixed(2);
-            });
-        }
-
-        function adjustLayout() {
-            const width = window.innerWidth;
-            const profitBreakdown = document.getElementById('profitBreakdown');
-            const graphContainer = document.querySelector('.graph-container');
-            
-            if (width <= 767) {
-                profitBreakdown.style.fontSize = '14px';
-                graphContainer.style.height = 'auto';
-            } else {
-                profitBreakdown.style.fontSize = '16px';
-                graphContainer.style.height = ''; // Reset to default
-            }
-            
-            if (chart) {
-                chart.resize();
-            }
-        }
-
         window.addEventListener('load', function() {
             setInitialValues();
-            createChart();
-            updateChart();
+            initializeInputs();
             adjustLayout();
 
             // Format currency inputs
