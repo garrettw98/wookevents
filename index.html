@@ -961,8 +961,8 @@
                     </div>
                 </div>
                 <div class="carousel-controls">
-                    <button class="prev-btn">&lt;</button>
-                    <button class="next-btn">&gt;</button>
+                    <button class="prev-btn" aria-label="Previous event">&lt;</button>
+                    <button class="next-btn" aria-label="Next event">&gt;</button>
                 </div>
             </div>
         </section>
@@ -1075,6 +1075,8 @@
         }
 
         function updateChart() {
+            if (!validateInputs()) return;
+
             const earlyBirdTickets = parseInt(document.getElementById('earlyBirdTickets').value);
             const ticketPrice = parseFloat(document.getElementById('ticketCost').value);
             const variableCost = 25; // Assuming $25 per ticket for food, drinks, etc.
@@ -1337,6 +1339,23 @@
             // Initialize the carousel
             showCard(currentIndex);
             startAutoSlide();
+        }
+
+        function validateInputs() {
+            const earlyBirdTickets = parseInt(document.getElementById('earlyBirdTickets').value);
+            const ticketCost = parseFloat(document.getElementById('ticketCost').value);
+
+            if (isNaN(earlyBirdTickets) || earlyBirdTickets < 50 || earlyBirdTickets > 1000) {
+                alert('Please enter a valid number of Early Bird Tickets between 50 and 1000.');
+                return false;
+            }
+
+            if (isNaN(ticketCost) || ticketCost < 50 || ticketCost > 500) {
+                alert('Please enter a valid Ticket Cost between $50 and $500.');
+                return false;
+            }
+
+            return true;
         }
 
         // Call initializeCarousel when the page loads
