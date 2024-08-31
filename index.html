@@ -22,21 +22,48 @@
             padding: 0;
         }
 
-        header, main, footer {
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+            width: 100%;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        header {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            text-align: center;
-            padding: 40px 20px;
-        }
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
 
-        h1, h2 {
-            margin-bottom: 20px;
+            .tagline {
+                font-size: 1rem;
+            }
         }
 
         .card {
@@ -785,8 +812,10 @@
 </head>
 <body>
     <header>
-        <h1>Wook Events</h1>
-        <p>Join our early bird community and potentially earn back your ticket cost.</p>
+        <div class="header-content">
+            <h1>Wook Events</h1>
+            <p class="tagline">Become an Early Bird, Shape the Future</p>
+        </div>
     </header>
 
     <main>
