@@ -1423,9 +1423,6 @@
             const otherVarCost = Number(document.getElementById('otherVarCost').value) || 0;
             const festivalDays = Number(document.getElementById('festivalDays').value) || 1;
 
-            console.log("Fixed costs:", { artistCost, equipmentCost, miscCost });
-            console.log("Variable costs:", { venueCost, otherVarCost, festivalDays });
-
             const totalFixedCosts = artistCost + equipmentCost + miscCost;
 
             const tiers = document.querySelectorAll('.tier-row');
@@ -1442,15 +1439,7 @@
                 totalTickets += qty;
                 totalRevenue += tierTotal;
 
-                console.log(`Tier ${index + 1}:`, { qty, price, tierTotal });
-
-                // Update tier total
-                const tierTotalElement = tier.querySelector('.tier-total');
-                if (tierTotalElement) {
-                    tierTotalElement.textContent = `$${tierTotal.toLocaleString()}`;
-                } else {
-                    console.error(`Tier total element not found for tier ${index + 1}`);
-                }
+                tier.querySelector('.tier-total').textContent = `$${tierTotal.toLocaleString()}`;
 
                 if (index === 0) { // Early Bird tier
                     earlyBirdQty = qty;
@@ -1458,8 +1447,6 @@
                 }
                 highestTierPrice = price; // This will end up being the price of the last tier
             });
-
-            console.log("Ticket totals:", { totalTickets, totalRevenue, earlyBirdQty, earlyBirdPrice });
 
             const varCostPerTicket = venueCost * festivalDays + otherVarCost;
             const totalVarCosts = totalTickets * varCostPerTicket;
@@ -1469,8 +1456,15 @@
             // Calculate key metrics
             const marginPerTicket = highestTierPrice - varCostPerTicket;
             
-            // Break-even point: total costs divided by highest tier price
-            const breakEvenPoint = totalCosts / highestTierPrice;
+            // Break-even point: account for Early Bird sales and other tiers
+            let breakEvenPoint = totalTickets;
+            let currentRevenue = totalRevenue;
+            let currentCosts = totalCosts;
+            while (currentRevenue < currentCosts) {
+                breakEvenPoint++;
+                currentRevenue += highestTierPrice;
+                currentCosts += varCostPerTicket;
+            }
             
             // Early Bird earn point: when net profit becomes positive
             const earlyBirdEarnPoint = Math.max(breakEvenPoint, (totalCosts - totalRevenue) / marginPerTicket + totalTickets);
@@ -1483,8 +1477,6 @@
             const avgEarlyBirdReturn = earlyBirdQty > 0 ? earlyBirdShare / earlyBirdQty : 0;
             const percentEarlyBirdReturn = earlyBirdPrice > 0 ? (avgEarlyBirdReturn / earlyBirdPrice) * 100 : 0;
             const companyShare = Math.max(0, netProfit - earlyBirdShare);
-
-            console.log("Calculated totals:", { totalFixedCosts, totalVarCosts, netProfit, earlyBirdShare, avgEarlyBirdReturn, percentEarlyBirdReturn, companyShare });
 
             console.log("Key metrics (before rounding):", { breakEvenPoint, earlyBirdEarnPoint, earlyBirdRefundPoint });
 
@@ -1520,7 +1512,9 @@
             console.log("Calculations update complete");
 
             // Update chart if it exists
-            updateChart();
+            if (typeof updateChart === 'function') {
+                updateChart();
+            }
         }
 
         function addEventListenersToNewInputs() {
