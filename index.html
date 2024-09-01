@@ -1189,15 +1189,14 @@
             <div class="key-points">
                 <h3>Key Points:</h3>
                 <ul>
-                    <li>Early Birds begin earning back at <span id="earlyBirdEarnPoint"></span> tickets sold</li>
+                    <li>Early Birds begin earning returns at <span id="earlyBirdEarnPoint"></span> tickets sold</li>
                     <li>Early Birds are fully refunded at <span id="earlyBirdRefundPoint"></span> tickets sold</li>
-                    <li>Breakeven Point: <span id="breakEvenPoint"></span> tickets</li>
                 </ul>
             </div>
 
             <p class="note">Note: These calculations update in real-time based on the inputs provided. Adjust the values to explore different scenarios and their potential impact on Among Wooks 2025.</p>
 
-            <canvas id="myChartCanvas"></canvas>
+            <canvas id="earlyBirdReturnsChart"></canvas>
         </section>
 
         <section id="faq" class="card">
@@ -1239,101 +1238,177 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ticketTiers = document.getElementById('ticketTiers');
-        let tierCount = 2; // Start with 2 tiers (Early Bird and Tier 1)
+        let earlyBirdReturnsChart;
 
-        function addTier() {
-            const tier = document.createElement('tr');
-            tier.className = 'tier-row';
-            tier.innerHTML = `
-                <td>Tier ${tierCount}</td>
-                <td>
-                    <label>Quantity: </label>
-                    <input type="number" class="financial-input tier-qty" value="100" min="0">
-                    <label>Price: $</label>
-                    <input type="number" class="financial-input tier-price" value="${200 + tierCount * 25}" min="0">
-                </td>
-                <td class="tier-total"></td>
-            `;
-            ticketTiers.insertBefore(tier, document.querySelector('.button-row'));
-            tierCount++;
-            updateCalculations();
-            updateButtons();
-            addEventListenersToNewInputs();
-        }
+        function updateCalculations() {
+            console.log("Updating calculations...");
 
-        function removeTier() {
-            if (tierCount > 2) {
-                ticketTiers.removeChild(ticketTiers.children[tierCount - 1]);
-                tierCount--;
-                updateCalculations();
-                updateButtons();
+            try {
+                // Fixed Costs
+                const artistCost = Number(document.getElementById('artistCost')?.value) || 0;
+                const equipmentCost = Number(document.getElementById('equipmentCost')?.value) || 0;
+                const miscCost = Number(document.getElementById('miscCost')?.value) || 0;
+                const totalFixedCosts = artistCost + equipmentCost + miscCost;
+
+                updateElement('artistCostTotal', `$${artistCost.toLocaleString()}`);
+                updateElement('equipmentCostTotal', `$${equipmentCost.toLocaleString()}`);
+                updateElement('miscCostTotal', `$${miscCost.toLocaleString()}`);
+                updateElement('totalFixedCosts', `$${totalFixedCosts.toLocaleString()}`);
+
+                // Variable Costs
+                const venueCost = Number(document.getElementById('venueCost')?.value) || 10; // Default to 10 if not set
+                const otherVarCost = Number(document.getElementById('otherVarCost')?.value) || 25; // Default to 25 if not set
+                const festivalDays = Number(document.getElementById('festivalDays')?.value) || 3; // Default to 3 if not set
+
+                // Ticket Tiers
+                const ticketTiers = document.getElementById('ticketTiers');
+                if (!ticketTiers) {
+                    console.error("Ticket tiers container not found");
+                    return;
+                }
+                const tiers = ticketTiers.querySelectorAll('.tier-row');
+                let totalTickets = 0;
+                let totalRevenue = 0;
+                let earlyBirdQty = 0;
+                let earlyBirdPrice = 0;
+
+                tiers.forEach((tier, index) => {
+                    const qty = Number(tier.querySelector('.tier-qty')?.value) || 0;
+                    const price = Number(tier.querySelector('.tier-price')?.value) || 0;
+                    const tierTotal = qty * price;
+                    totalTickets += qty;
+                    totalRevenue += tierTotal;
+
+                    updateElement(tier.querySelector('.tier-total'), `$${tierTotal.toLocaleString()}`);
+
+                    if (index === 0) { // Early Bird tier
+                        earlyBirdQty = qty;
+                        earlyBirdPrice = price;
+                    }
+                });
+
+                // Calculate variable costs
+                const totalVenueCost = venueCost * festivalDays * totalTickets;
+                const totalOtherVarCost = otherVarCost * totalTickets;
+                const totalVarCosts = totalVenueCost + totalOtherVarCost;
+
+                // Update variable costs in the DOM
+                updateElement('venueCostTotal', `$${totalVenueCost.toLocaleString()}`);
+                updateElement('otherVarCostTotal', `$${totalOtherVarCost.toLocaleString()}`);
+                updateElement('totalVarCosts', `$${totalVarCosts.toLocaleString()}`);
+                updateElement('totalRevenue', `$${totalRevenue.toLocaleString()}`);
+
+                // Profit Calculation
+                const netProfit = totalRevenue - totalFixedCosts - totalVarCosts;
+                updateElement('netProfit', `$${netProfit.toLocaleString()}`);
+
+                // Early Bird Share Calculation
+                const earlyBirdShare = Math.min(netProfit / 2, earlyBirdQty * earlyBirdPrice);
+                const avgEarlyBirdReturn = earlyBirdQty > 0 ? earlyBirdShare / earlyBirdQty : 0;
+                const percentEarlyBirdReturn = earlyBirdPrice > 0 ? (avgEarlyBirdReturn / earlyBirdPrice) * 100 : 0;
+                const companyShare = netProfit - earlyBirdShare;
+
+                updateElement('earlyBirdShare', `$${earlyBirdShare.toLocaleString()}`);
+                updateElement('avgEarlyBirdReturn', `$${avgEarlyBirdReturn.toFixed(2)}`);
+                updateElement('percentEarlyBirdReturn', `${percentEarlyBirdReturn.toFixed(2)}%`);
+                updateElement('companyShare', `$${companyShare.toLocaleString()}`);
+
+                // Key Points Calculations
+                const variableCostPerTicket = venueCost * festivalDays + otherVarCost;
+                let earlyBirdEarnPoint = 0;
+                let earlyBirdRefundPoint = 0;
+
+                // Calculate cumulative capacity and revenue for all tiers except the highest
+                let cumulativeCapacity = 0;
+                let cumulativeRevenue = 0;
+                let cumulativeVariableCosts = 0;
+                const highestTierIndex = tiers.length - 1;
+
+                for (let i = 0; i < highestTierIndex; i++) {
+                    const tierQty = Number(tiers[i].querySelector('.tier-qty').value) || 0;
+                    const tierPrice = Number(tiers[i].querySelector('.tier-price').value) || 0;
+                    
+                    cumulativeCapacity += tierQty;
+                    cumulativeRevenue += tierQty * tierPrice;
+                    cumulativeVariableCosts += tierQty * variableCostPerTicket;
+                }
+
+                const highestTierPrice = Number(tiers[highestTierIndex].querySelector('.tier-price').value) || 0;
+
+                // Calculate Early Bird Earn Point
+                const remainingCostToBreakEven = totalFixedCosts + cumulativeVariableCosts - cumulativeRevenue;
+                const profitPerHighestTierTicket = highestTierPrice - variableCostPerTicket;
+
+                if (remainingCostToBreakEven > 0) {
+                    const additionalTicketsNeeded = Math.ceil(remainingCostToBreakEven / profitPerHighestTierTicket);
+                    earlyBirdEarnPoint = cumulativeCapacity + additionalTicketsNeeded;
+                } else {
+                    earlyBirdEarnPoint = cumulativeCapacity;
+                }
+
+                // Calculate Early Bird Refund Point
+                const earlyBirdTotalRevenue = earlyBirdQty * earlyBirdPrice;
+                const requiredProfit = 2 * earlyBirdTotalRevenue;
+                const remainingProfitNeeded = requiredProfit - (cumulativeRevenue - totalFixedCosts - cumulativeVariableCosts);
+
+                if (remainingProfitNeeded > 0) {
+                    const additionalTicketsNeeded = Math.ceil(remainingProfitNeeded / profitPerHighestTierTicket);
+                    earlyBirdRefundPoint = cumulativeCapacity + additionalTicketsNeeded;
+                } else {
+                    earlyBirdRefundPoint = cumulativeCapacity;
+                }
+
+                updateElement('earlyBirdEarnPoint', earlyBirdEarnPoint.toLocaleString());
+                updateElement('earlyBirdRefundPoint', earlyBirdRefundPoint.toLocaleString());
+
+                // Update the chart
+                updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty);
+
+                console.log("All calculations complete");
+            } catch (error) {
+                console.error("Error in calculations:", error);
             }
         }
 
-        function updateButtons() {
-            const buttonRow = document.querySelector('.button-row');
-            buttonRow.innerHTML = `
-                <td colspan="2">
-                    ${tierCount > 2 ? '<button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>' : ''}
-                    <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
-                </td>
-                <td></td>
-            `;
-        }
+        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty) {
+            const ctx = document.getElementById('earlyBirdReturnsChart');
+            if (!ctx) {
+                console.error("Chart canvas not found");
+                return;
+            }
 
-        function initializeTiers() {
-            // Early Bird Tier
-            const earlyBirdTier = document.createElement('tr');
-            earlyBirdTier.className = 'tier-row';
-            earlyBirdTier.innerHTML = `
-                <td>Early Bird</td>
-                <td>
-                    <label>Quantity: </label>
-                    <input type="number" class="financial-input tier-qty" value="100" min="0">
-                    <label>Price: $</label>
-                    <input type="number" class="financial-input tier-price" value="200" min="0">
-                </td>
-                <td class="tier-total"></td>
-            `;
-            ticketTiers.appendChild(earlyBirdTier);
+            const data = [];
+            const labels = [];
+            const maxTickets = Math.max(totalTickets, earlyBirdRefundPoint, 1000); // Ensure we have enough data points
 
-            // Tier 1
-            const tier1 = document.createElement('tr');
-            tier1.className = 'tier-row';
-            tier1.innerHTML = `
-                <td>Tier 1</td>
-                <td>
-                    <label>Quantity: </label>
-                    <input type="number" class="financial-input tier-qty" value="100" min="0">
-                    <label>Price: $</label>
-                    <input type="number" class="financial-input tier-price" value="225" min="0">
-                </td>
-                <td class="tier-total"></td>
-            `;
-            ticketTiers.appendChild(tier1);
+            const revenuePerTicket = totalRevenue / totalTickets;
+            const variableCostPerTicket = totalVarCosts / totalTickets;
 
-            // Button row
-            const buttonRow = document.createElement('tr');
-            buttonRow.className = 'button-row';
-            ticketTiers.appendChild(buttonRow);
+            for (let i = 0; i <= maxTickets; i++) {
+                labels.push(i);
+                if (i < earlyBirdEarnPoint) {
+                    data.push(0); // Return is always at least 0
+                } else {
+                    const revenue = revenuePerTicket * i;
+                    const totalCost = totalFixedCosts + (variableCostPerTicket * i);
+                    const profit = Math.max(0, revenue - totalCost); // Ensure profit is never negative
+                    const earlyBirdShare = Math.min(profit / 2, earlyBirdQty * earlyBirdPrice);
+                    const returnPerTicket = earlyBirdShare / earlyBirdQty;
+                    data.push(Math.min(returnPerTicket, earlyBirdPrice));
+                }
+            }
 
-            updateButtons();
-        }
+            if (earlyBirdReturnsChart) {
+                earlyBirdReturnsChart.destroy();
+            }
 
-        initializeTiers();
-
-        let myChart;
-
-        function initializeChart() {
-            const ctx = document.getElementById('myChartCanvas').getContext('2d');
-            myChart = new Chart(ctx, {
+            earlyBirdReturnsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
+                    labels: labels,
                     datasets: [{
-                        label: 'Early Bird Return',
-                        data: [],
+                        label: 'Early Bird Returns ($)',
+                        data: data,
                         borderColor: 'rgb(75, 192, 192)',
                         tension: 0.1
                     }]
@@ -1344,7 +1419,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Tickets Sold'
+                                text: 'Total Tickets Sold'
                             }
                         },
                         y: {
@@ -1352,190 +1427,93 @@
                                 display: true,
                                 text: 'Early Bird Return ($)'
                             },
-                            beginAtZero: true
+                            min: 0, // Ensure y-axis starts at 0
+                            max: earlyBirdPrice
                         }
                     }
                 }
             });
         }
 
-        function updateChart() {
-            if (!myChart) {
-                initializeChart();
+        function updateElement(element, value) {
+            if (typeof element === 'string') {
+                element = document.getElementById(element);
             }
-
-            const tiers = document.querySelectorAll('.tier-row');
-            const tierData = Array.from(tiers).map(tier => ({
-                qty: Number(tier.querySelector('.tier-qty').value) || 0,
-                price: Number(tier.querySelector('.tier-price').value) || 0
-            }));
-
-            const earlyBirdQty = tierData[0].qty;
-            const earlyBirdPrice = tierData[0].price;
-            const totalFixedCosts = Number(document.getElementById('totalFixedCosts').textContent.replace(/[^0-9.-]+/g,"")) || 0;
-            const varCostPerTicket = Number(document.getElementById('venueCost').value) * Number(document.getElementById('festivalDays').value) +
-                                     Number(document.getElementById('otherVarCost').value) || 0;
-
-            const dataPoints = [];
-            const labels = [];
-            let currentTierIndex = 0;
-            let ticketsSold = 0;
-            let revenue = 0;
-
-            while (ticketsSold <= 1000) {
-                const totalCosts = totalFixedCosts + ticketsSold * varCostPerTicket;
-                const netProfit = revenue - totalCosts;
-                
-                let earlyBirdReturn = 0;
-                if (netProfit > 0) {
-                    earlyBirdReturn = Math.min(netProfit / 2, earlyBirdQty * earlyBirdPrice) / earlyBirdQty;
-                }
-
-                dataPoints.push(earlyBirdReturn);
-                labels.push(ticketsSold);
-
-                // Determine next ticket price
-                let nextTicketPrice = tierData[currentTierIndex].price;
-                let ticketsLeftInTier = tierData[currentTierIndex].qty - (ticketsSold - labels[0]);
-
-                if (ticketsLeftInTier <= 0 && currentTierIndex < tierData.length - 1) {
-                    currentTierIndex++;
-                    nextTicketPrice = tierData[currentTierIndex].price;
-                }
-
-                // Increment tickets sold and revenue
-                ticketsSold++;
-                revenue += nextTicketPrice;
-            }
-
-            myChart.data.labels = labels;
-            myChart.data.datasets[0].data = dataPoints;
-            myChart.update();
-        }
-
-        function updateCalculations() {
-            console.log("Updating calculations...");
-
-            const artistCost = Number(document.getElementById('artistCost').value) || 0;
-            const equipmentCost = Number(document.getElementById('equipmentCost').value) || 0;
-            const miscCost = Number(document.getElementById('miscCost').value) || 0;
-            const venueCost = Number(document.getElementById('venueCost').value) || 0;
-            const otherVarCost = Number(document.getElementById('otherVarCost').value) || 0;
-            const festivalDays = Number(document.getElementById('festivalDays').value) || 1;
-
-            const totalFixedCosts = artistCost + equipmentCost + miscCost;
-
-            const tiers = document.querySelectorAll('.tier-row');
-            let totalTickets = 0;
-            let totalRevenue = 0;
-            let earlyBirdQty = 0;
-            let earlyBirdPrice = 0;
-            let highestTierPrice = 0;
-
-            tiers.forEach((tier, index) => {
-                const qty = Number(tier.querySelector('.tier-qty').value) || 0;
-                const price = Number(tier.querySelector('.tier-price').value) || 0;
-                const tierTotal = qty * price;
-                totalTickets += qty;
-                totalRevenue += tierTotal;
-
-                tier.querySelector('.tier-total').textContent = `$${tierTotal.toLocaleString()}`;
-
-                if (index === 0) { // Early Bird tier
-                    earlyBirdQty = qty;
-                    earlyBirdPrice = price;
-                }
-                highestTierPrice = price; // This will end up being the price of the last tier
-            });
-
-            const varCostPerTicket = venueCost * festivalDays + otherVarCost;
-            const totalVarCosts = totalTickets * varCostPerTicket;
-            const totalCosts = totalFixedCosts + totalVarCosts;
-            const netProfit = totalRevenue - totalCosts;
-
-            // Calculate key metrics
-            const marginPerTicket = highestTierPrice - varCostPerTicket;
-            
-            // Break-even point: account for Early Bird sales and other tiers
-            let breakEvenPoint = totalTickets;
-            let currentRevenue = totalRevenue;
-            let currentCosts = totalCosts;
-            while (currentRevenue < currentCosts) {
-                breakEvenPoint++;
-                currentRevenue += highestTierPrice;
-                currentCosts += varCostPerTicket;
-            }
-            
-            // Early Bird earn point: when net profit becomes positive
-            const earlyBirdEarnPoint = Math.max(breakEvenPoint, (totalCosts - totalRevenue) / marginPerTicket + totalTickets);
-            
-            // Early Bird refund point: when net profit covers Early Bird tickets
-            const earlyBirdRefundPoint = (totalCosts + earlyBirdQty * earlyBirdPrice - totalRevenue) / marginPerTicket + totalTickets;
-
-            // Early Bird calculations
-            const earlyBirdShare = Math.max(0, Math.min(netProfit / 2, earlyBirdQty * earlyBirdPrice));
-            const avgEarlyBirdReturn = earlyBirdQty > 0 ? earlyBirdShare / earlyBirdQty : 0;
-            const percentEarlyBirdReturn = earlyBirdPrice > 0 ? (avgEarlyBirdReturn / earlyBirdPrice) * 100 : 0;
-            const companyShare = Math.max(0, netProfit - earlyBirdShare);
-
-            console.log("Key metrics (before rounding):", { breakEvenPoint, earlyBirdEarnPoint, earlyBirdRefundPoint });
-
-            // Update DOM
-            function updateElement(id, value) {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                } else {
-                    console.error(`Element with id '${id}' not found`);
-                }
-            }
-
-            updateElement('artistCostTotal', `$${artistCost.toLocaleString()}`);
-            updateElement('equipmentCostTotal', `$${equipmentCost.toLocaleString()}`);
-            updateElement('miscCostTotal', `$${miscCost.toLocaleString()}`);
-            updateElement('totalFixedCosts', `$${totalFixedCosts.toLocaleString()}`);
-            updateElement('venueCostTotal', `$${(venueCost * festivalDays * totalTickets).toLocaleString()}`);
-            updateElement('otherVarCostTotal', `$${(otherVarCost * totalTickets).toLocaleString()}`);
-            updateElement('totalVarCosts', `$${totalVarCosts.toLocaleString()}`);
-            updateElement('totalRevenue', `$${totalRevenue.toLocaleString()}`);
-            updateElement('netProfit', `$${netProfit.toLocaleString()}`);
-            updateElement('earlyBirdShare', `$${earlyBirdShare.toLocaleString()}`);
-            updateElement('avgEarlyBirdReturn', `$${avgEarlyBirdReturn.toFixed(2)}`);
-            updateElement('percentEarlyBirdReturn', `${percentEarlyBirdReturn.toFixed(2)}%`);
-            updateElement('companyShare', `$${companyShare.toLocaleString()}`);
-
-            // Round up only for the final display of key metrics
-            updateElement('breakEvenPoint', Math.ceil(breakEvenPoint).toLocaleString());
-            updateElement('earlyBirdEarnPoint', Math.ceil(earlyBirdEarnPoint).toLocaleString());
-            updateElement('earlyBirdRefundPoint', Math.ceil(earlyBirdRefundPoint).toLocaleString());
-
-            console.log("Calculations update complete");
-
-            // Update chart if it exists
-            if (typeof updateChart === 'function') {
-                updateChart();
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`Element not found:`, element);
             }
         }
 
-        function addEventListenersToNewInputs() {
-            document.querySelectorAll('.tier-row input').forEach(input => {
+        function initializeTiers() {
+            const ticketTiers = document.getElementById('ticketTiers');
+            if (!ticketTiers) {
+                console.error("Ticket tiers container not found");
+                return;
+            }
+
+            // Clear existing tiers
+            ticketTiers.innerHTML = '';
+
+            // Add Early Bird tier
+            addTier('Early Bird', 100, 200);
+
+            // Add Tier 1
+            addTier('Tier 1', 100, 225);
+
+            // Add button row
+            const buttonRow = document.createElement('tr');
+            buttonRow.className = 'button-row';
+            buttonRow.innerHTML = `
+                <td colspan="3">
+                    <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
+                </td>
+            `;
+            ticketTiers.appendChild(buttonRow);
+
+            updateCalculations();
+        }
+
+        function addTier(name = `Tier ${document.querySelectorAll('.tier-row').length}`, qty = 100, price = 250) {
+            const ticketTiers = document.getElementById('ticketTiers');
+            const newTier = document.createElement('tr');
+            newTier.className = 'tier-row';
+            newTier.innerHTML = `
+                <td>${name}</td>
+                <td>
+                    <label>Quantity: </label>
+                    <input type="number" class="financial-input tier-qty" value="${qty}" min="0">
+                    <label>Price: $</label>
+                    <input type="number" class="financial-input tier-price" value="${price}" min="0">
+                </td>
+                <td class="tier-total"></td>
+            `;
+            ticketTiers.insertBefore(newTier, ticketTiers.querySelector('.button-row'));
+
+            // Add event listeners to new inputs
+            newTier.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', updateCalculations);
             });
+
+            updateCalculations();
         }
 
-        // Add event listeners to all initial inputs
-        function initializeEventListeners() {
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', updateCalculations);
-            });
-        }
+        // Add event listeners to inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', updateCalculations);
+        });
 
-        // Call this function when the page loads
-        initializeEventListeners();
-        initializeChart();
+        // Make sure to call this function when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTiers();
+            // ... (other initialization code)
+        });
 
-        // Initial calculation and chart update
-        updateCalculations();
+        // Initial calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalculations();
+        });
     </script>
 </body>
 </html>
