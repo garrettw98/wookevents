@@ -781,27 +781,27 @@
 
         .tier-row {
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
+            align-items: center;
             margin-bottom: 15px;
             border-bottom: 1px solid #ddd;
             padding-bottom: 15px;
         }
 
         .tier-name {
-            flex: 1 0 100%;
+            flex: 0 0 25%;
             font-weight: bold;
-            margin-bottom: 10px;
+            padding-right: 10px;
         }
 
         .tier-inputs {
             flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
             margin-right: 15px;
         }
 
         .tier-total {
             flex: 0 0 auto;
-            align-self: center;
             font-weight: bold;
         }
 
@@ -821,17 +821,62 @@
         }
 
         @media (max-width: 480px) {
-            .tier-row {
-                flex-direction: column;
+            .tier-name {
+                flex: 0 0 30%;
+                font-size: 14px;
             }
 
             .tier-inputs {
-                margin-right: 0;
-                margin-bottom: 10px;
+                flex: 1 1 auto;
+            }
+
+            .tier-input {
+                width: 80px;
+                font-size: 14px;
             }
 
             .tier-total {
-                align-self: flex-start;
+                font-size: 14px;
+            }
+        }
+
+        .tier-total {
+            flex: 0 0 auto;
+            font-weight: bold;
+        }
+
+        .tier-input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 5px;
+        }
+
+        .tier-input-group label {
+            margin-bottom: 2px;
+        }
+
+        .tier-input {
+            width: 120px;
+            padding: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .tier-name {
+                flex: 0 0 30%;
+                font-size: 14px;
+            }
+
+            .tier-inputs {
+                flex: 1 1 auto;
+            }
+
+            .tier-input {
+                width: 80px;
+                font-size: 14px;
+            }
+
+            .tier-total {
+                font-size: 14px;
             }
         }
 
@@ -1417,6 +1462,10 @@
                         <tbody id="ticketTiers">
                             <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
+                        <div class="button-row">
+                            <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
+                            <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
+                        </div>
                         <tr class="section-header">
                             <td colspan="3">Profit Calculation and Distribution</td>
                         </tr>
@@ -1898,15 +1947,6 @@
 
             // Add Tier 1
             addTier('Tier 1', tier1QtyForFullRefund, tier1Price);
-
-            // Add button row
-            const buttonRow = document.createElement('div');
-            buttonRow.className = 'button-row';
-            buttonRow.innerHTML = `
-                <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
-                <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
-            `;
-            ticketTiers.appendChild(buttonRow);
 
             updateCalculations();
         }
