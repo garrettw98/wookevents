@@ -194,7 +194,7 @@
 
         .modern-table .total-row {
             font-weight: bold;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
         }
 
         .modern-table tr:hover {
@@ -575,7 +575,7 @@
 
         .modern-table .total-row {
             font-weight: bold;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
         }
 
         .modern-table tr:hover {
@@ -875,7 +875,7 @@
 
         .financial-table .total-row {
             font-weight: bold;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
         }
 
         .tier-row td {
@@ -913,6 +913,16 @@
         #next-event {
             margin-bottom: 30px;
         }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+
+        /* Remove this rule if it exists */
+        /* .total-row td {
+            border-top: 2px solid #000;
+        } */
     </style>
 </head>
 <body>
@@ -1144,6 +1154,11 @@
                             <td></td>
                             <td id="totalRevenue"></td>
                         </tr>
+                        <tr class="total-row">
+                            <td>Total Tickets</td>
+                            <td></td>
+                            <td id="totalTickets"></td>
+                        </tr>
                         
                         <tr class="section-header">
                             <td colspan="3">Profit Calculation</td>
@@ -1292,11 +1307,12 @@
                 const totalOtherVarCost = otherVarCost * totalTickets;
                 const totalVarCosts = totalVenueCost + totalOtherVarCost;
 
-                // Update variable costs in the DOM
+                // Update variable costs and revenue in the DOM
                 updateElement('venueCostTotal', `$${totalVenueCost.toLocaleString()}`);
                 updateElement('otherVarCostTotal', `$${totalOtherVarCost.toLocaleString()}`);
                 updateElement('totalVarCosts', `$${totalVarCosts.toLocaleString()}`);
                 updateElement('totalRevenue', `$${totalRevenue.toLocaleString()}`);
+                updateElement('totalTickets', totalTickets.toLocaleString());
 
                 // Profit Calculation
                 const netProfit = totalRevenue - totalFixedCosts - totalVarCosts;
