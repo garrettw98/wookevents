@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wook Events</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -20,6 +21,7 @@
             line-height: 1.6;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
         header {
@@ -51,9 +53,9 @@
         }
 
         main {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 10px;
         }
 
         @media (max-width: 768px) {
@@ -72,6 +74,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
+            overflow-x: auto;
         }
 
         .chart-container-wrapper {
@@ -83,8 +86,18 @@
 
         .chart-container {
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 800px; /* Limit maximum width on larger screens */
+            height: 300px; /* Set a reasonable fixed height */
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px; /* Slightly smaller height for mobile devices */
+            }
+        }
+
+        canvas {
+            max-width: 100%;
         }
 
         button {
@@ -529,12 +542,6 @@
             height: auto;
         }
 
-        @media (max-width: 768px) {
-            .chart-container {
-                height: 300px;
-            }
-        }
-
         .financial-breakdown-wrapper {
             display: flex;
             justify-content: space-between;
@@ -769,10 +776,16 @@
 
         .remove-tier-btn {
             background-color: #dc3545;
+            margin-left: 5px;
         }
 
         .tier-btn:hover {
             opacity: 0.8;
+        }
+
+        .tier-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         a.contact-link {
@@ -800,9 +813,17 @@
             cursor: pointer;
         }
 
+        .chart-container-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
         .chart-container {
-            height: 400px;
-            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 800px; /* Limit maximum width on larger screens */
+            height: 300px; /* Set a reasonable fixed height */
         }
 
         .ticket-section {
@@ -840,6 +861,7 @@
 
         .remove-tier-btn {
             background-color: #dc3545;
+            margin-left: 5px;
         }
 
         .tier-btn:hover {
@@ -907,6 +929,10 @@
 
             .inputs-section, .chart-section {
                 width: 100%;
+            }
+
+            .chart-container {
+                height: 250px; /* Slightly smaller height for mobile devices */
             }
         }
 
@@ -1149,38 +1175,39 @@
                         <tbody id="ticketTiers">
                             <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
-                        <tr class="total-row">
+                        <tr class="section-header">
+                            <td colspan="3">Profit Calculation and Distribution</td>
+                        </tr>
+                        <tr>
                             <td>Total Revenue</td>
                             <td></td>
                             <td id="totalRevenue"></td>
                         </tr>
-                        <tr class="total-row">
-                            <td>Total Tickets</td>
+                        <tr>
+                            <td>Total Costs (Fixed + Variable)</td>
                             <td></td>
-                            <td id="totalTickets"></td>
-                        </tr>
-                        
-                        <tr class="section-header">
-                            <td colspan="3">Profit Calculation</td>
+                            <td id="totalCosts"></td>
                         </tr>
                         <tr class="total-row">
                             <td>Net Profit</td>
                             <td></td>
                             <td id="netProfit"></td>
                         </tr>
-                        
-                        <tr class="section-header">
-                            <td colspan="3">Profit Distribution</td>
-                        </tr>
                         <tr>
-                            <td>Total Net Profit</td>
-                            <td id="netProfit"></td>
-                            <td></td>
+                            <td colspan="3"><strong>Profit Distribution</strong></td>
                         </tr>
                         <tr>
                             <td>Early Bird Share (50% of profit, capped at ticket price)</td>
                             <td id="earlyBirdShare"></td>
                             <td></td>
+                        </tr>
+                        <tr>
+                            <td>Company Share (Remaining profit)</td>
+                            <td id="companyShare"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>Early Bird Return Analysis</strong></td>
                         </tr>
                         <tr>
                             <td>Average Return per Early Bird Ticket</td>
@@ -1190,11 +1217,6 @@
                         <tr>
                             <td>Percentage of Early Bird Ticket Returned</td>
                             <td id="percentEarlyBirdReturn"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>Company Share (Remaining profit)</td>
-                            <td id="companyShare"></td>
                             <td></td>
                         </tr>
                     </tbody>
@@ -1211,7 +1233,11 @@
 
             <p class="note">Note: These calculations update in real-time based on the inputs provided. Adjust the values to explore different scenarios and their potential impact on Among Wooks 2025.</p>
 
-            <canvas id="earlyBirdReturnsChart"></canvas>
+            <div class="chart-container-wrapper">
+                <div class="chart-container">
+                    <canvas id="earlyBirdReturnsChart"></canvas>
+                </div>
+            </div>
         </section>
 
         <section id="faq" class="card">
@@ -1251,7 +1277,142 @@
         <p>Contact us: <a href="mailto:contact@wookevents.com" class="contact-link">contact@wookevents.com</a></p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ... existing script ...
+
+        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty) {
+            const ctx = document.getElementById('earlyBirdReturnsChart');
+            if (!ctx) {
+                console.error("Chart canvas not found");
+                return;
+            }
+
+            // Prepare data for Early Bird Returns line chart
+            const dataPoints = 100;
+            const step = Math.ceil(totalTickets / dataPoints);
+            const lineData = [];
+            const labels = [];
+
+            for (let i = 0; i <= totalTickets; i += step) {
+                labels.push(i);
+                if (i < earlyBirdEarnPoint) {
+                    lineData.push(0);
+                } else {
+                    const revenue = (totalRevenue / totalTickets) * i;
+                    const totalCost = totalFixedCosts + (totalVarCosts / totalTickets) * i;
+                    const profit = Math.max(0, revenue - totalCost);
+                    const earlyBirdShare = Math.min(profit / 2, earlyBirdQty * earlyBirdPrice);
+                    const returnPerTicket = earlyBirdShare / earlyBirdQty;
+                    lineData.push(Math.min(returnPerTicket, earlyBirdPrice));
+                }
+            }
+
+            // Prepare data for ticket tiers bar chart
+            const ticketTiers = document.querySelectorAll('.tier-row');
+            const barLabels = [];
+            const barData = [];
+            const barColors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(201, 203, 207, 0.8)'
+            ];
+
+            ticketTiers.forEach((tier, index) => {
+                const name = tier.querySelector('td:first-child').textContent.trim();
+                const qty = Number(tier.querySelector('.tier-qty').value);
+                barLabels.push(name);
+                barData.push(qty);
+            });
+
+            if (earlyBirdReturnsChart) {
+                earlyBirdReturnsChart.destroy();
+            }
+
+            earlyBirdReturnsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ticket Tiers'],
+                    datasets: [
+                        ...barLabels.map((label, index) => ({
+                            label: label,
+                            data: [barData[index]],
+                            backgroundColor: barColors[index % barColors.length],
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            type: 'bar'
+                        })),
+                        {
+                            label: 'Early Bird Returns ($)',
+                            data: lineData,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Ticket Tiers'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Ticket Quantity'
+                            },
+                            min: 0,
+                            max: Math.max(...barData) * 1.1 // 10% headroom
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Early Bird Return ($)'
+                            },
+                            min: 0,
+                            max: earlyBirdPrice,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    }
+                }
+            });
+        }
+
+        // ... rest of the existing script ...
+    </script>
+</body>
+</html>
     <script>
         let earlyBirdReturnsChart;
 
@@ -1315,7 +1476,9 @@
                 updateElement('totalTickets', totalTickets.toLocaleString());
 
                 // Profit Calculation
-                const netProfit = totalRevenue - totalFixedCosts - totalVarCosts;
+                const totalCosts = totalFixedCosts + totalVarCosts;
+                const netProfit = totalRevenue - totalCosts;
+                updateElement('totalCosts', `$${totalCosts.toLocaleString()}`);
                 updateElement('netProfit', `$${netProfit.toLocaleString()}`);
 
                 // Early Bird Share Calculation
@@ -1393,26 +1556,46 @@
                 return;
             }
 
-            const data = [];
+            // Prepare data for Early Bird Returns line chart
+            const dataPoints = 100;
+            const step = Math.ceil(totalTickets / dataPoints);
+            const lineData = [];
             const labels = [];
-            const maxTickets = Math.max(totalTickets, earlyBirdRefundPoint, 1000); // Ensure we have enough data points
 
-            const revenuePerTicket = totalRevenue / totalTickets;
-            const variableCostPerTicket = totalVarCosts / totalTickets;
-
-            for (let i = 0; i <= maxTickets; i++) {
+            for (let i = 0; i <= totalTickets; i += step) {
                 labels.push(i);
                 if (i < earlyBirdEarnPoint) {
-                    data.push(0); // Return is always at least 0
+                    lineData.push(0);
                 } else {
-                    const revenue = revenuePerTicket * i;
-                    const totalCost = totalFixedCosts + (variableCostPerTicket * i);
-                    const profit = Math.max(0, revenue - totalCost); // Ensure profit is never negative
+                    const revenue = (totalRevenue / totalTickets) * i;
+                    const totalCost = totalFixedCosts + (totalVarCosts / totalTickets) * i;
+                    const profit = Math.max(0, revenue - totalCost);
                     const earlyBirdShare = Math.min(profit / 2, earlyBirdQty * earlyBirdPrice);
                     const returnPerTicket = earlyBirdShare / earlyBirdQty;
-                    data.push(Math.min(returnPerTicket, earlyBirdPrice));
+                    lineData.push(Math.min(returnPerTicket, earlyBirdPrice));
                 }
             }
+
+            // Prepare data for ticket tiers bar chart
+            const ticketTiers = document.querySelectorAll('.tier-row');
+            const barLabels = [];
+            const barData = [];
+            const barColors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(201, 203, 207, 0.8)'
+            ];
+
+            ticketTiers.forEach((tier, index) => {
+                const name = tier.querySelector('td:first-child').textContent.trim();
+                const qty = Number(tier.querySelector('.tier-qty').value);
+                barLabels.push(name);
+                barData.push(qty);
+            });
 
             if (earlyBirdReturnsChart) {
                 earlyBirdReturnsChart.destroy();
@@ -1421,30 +1604,74 @@
             earlyBirdReturnsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Early Bird Returns ($)',
-                        data: data,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
+                    labels: ['Ticket Tiers'],
+                    datasets: [
+                        ...barLabels.map((label, index) => ({
+                            label: label,
+                            data: [barData[index]],
+                            backgroundColor: barColors[index % barColors.length],
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            type: 'bar'
+                        })),
+                        {
+                            label: 'Early Bird Returns ($)',
+                            data: lineData,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
                     scales: {
                         x: {
+                            stacked: false,
                             title: {
                                 display: true,
-                                text: 'Total Tickets Sold'
+                                text: 'Ticket Tiers'
                             }
                         },
                         y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Ticket Quantity'
+                            },
+                            min: 0,
+                            max: Math.max(...barData) * 1.1 // 10% headroom
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
                             title: {
                                 display: true,
                                 text: 'Early Bird Return ($)'
                             },
-                            min: 0, // Ensure y-axis starts at 0
-                            max: earlyBirdPrice
+                            min: 0,
+                            max: earlyBirdPrice,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
                         }
                     }
                 }
@@ -1473,10 +1700,32 @@
             ticketTiers.innerHTML = '';
 
             // Add Early Bird tier
-            addTier('Early Bird', 100, 200);
+            const earlyBirdQty = 100;
+            const earlyBirdPrice = 200;
+            addTier('Early Bird', earlyBirdQty, earlyBirdPrice);
+
+            // Calculate Tier 1 quantity
+            const tier1Price = 225;
+            const artistCost = Number(document.getElementById('artistCost').value) || 30000;
+            const equipmentCost = Number(document.getElementById('equipmentCost').value) || 15000;
+            const miscCost = Number(document.getElementById('miscCost').value) || 10000;
+            const venueCost = Number(document.getElementById('venueCost').value) || 10;
+            const otherVarCost = Number(document.getElementById('otherVarCost').value) || 25;
+            const festivalDays = Number(document.getElementById('festivalDays').value) || 3;
+
+            const fixedCosts = artistCost + equipmentCost + miscCost;
+            const variableCostPerTicket = venueCost * festivalDays + otherVarCost;
+
+            const earlyBirdRevenue = earlyBirdQty * earlyBirdPrice;
+            const earlyBirdVariableCosts = earlyBirdQty * variableCostPerTicket;
+            const remainingCostsToBreakEven = fixedCosts + earlyBirdVariableCosts - earlyBirdRevenue;
+            const profitNeededForFullRefund = earlyBirdRevenue * 2; // This is the key change
+
+            const profitPerTier1Ticket = tier1Price - variableCostPerTicket;
+            const tier1QtyForFullRefund = Math.ceil((remainingCostsToBreakEven + profitNeededForFullRefund) / profitPerTier1Ticket);
 
             // Add Tier 1
-            addTier('Tier 1', 100, 225);
+            addTier('Tier 1', tier1QtyForFullRefund, tier1Price);
 
             // Add button row
             const buttonRow = document.createElement('tr');
@@ -1484,6 +1733,7 @@
             buttonRow.innerHTML = `
                 <td colspan="3">
                     <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
+                    <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
                 </td>
             `;
             ticketTiers.appendChild(buttonRow);
@@ -1491,8 +1741,32 @@
             updateCalculations();
         }
 
-        function addTier(name = `Tier ${document.querySelectorAll('.tier-row').length}`, qty = 100, price = 250) {
+        function addTier(name = null, qty = null, price = null) {
             const ticketTiers = document.getElementById('ticketTiers');
+            const existingTiers = ticketTiers.querySelectorAll('.tier-row');
+            const newTierIndex = existingTiers.length;
+
+            // If name is not provided, generate a default name
+            if (!name) {
+                name = `Tier ${newTierIndex}`;
+            }
+
+            // If price is not provided, calculate it based on the previous tier
+            if (price === null) {
+                const previousTier = existingTiers[newTierIndex - 1];
+                if (previousTier) {
+                    const previousPrice = Number(previousTier.querySelector('.tier-price').value);
+                    price = previousPrice + 25;
+                } else {
+                    price = 200; // Default price for the first tier
+                }
+            }
+
+            // If quantity is not provided, use a default value
+            if (qty === null) {
+                qty = 100; // Default quantity
+            }
+
             const newTier = document.createElement('tr');
             newTier.className = 'tier-row';
             newTier.innerHTML = `
@@ -1513,11 +1787,32 @@
             });
 
             updateCalculations();
+            updateEarlyBirdReturnsChart(/* pass necessary parameters */);
+        }
+
+        function removeTier() {
+            const ticketTiers = document.getElementById('ticketTiers');
+            const tiers = ticketTiers.querySelectorAll('.tier-row');
+            
+            if (tiers.length > 1) {  // Ensure we always have at least one tier
+                ticketTiers.removeChild(tiers[tiers.length - 1]);
+                updateCalculations();
+                updateEarlyBirdReturnsChart(/* pass necessary parameters */);
+            } else {
+                alert("Cannot remove the last tier.");
+            }
         }
 
         // Add event listeners to inputs
         document.querySelectorAll('input').forEach(input => {
             input.addEventListener('input', updateCalculations);
+        });
+
+        // Add event listeners to all tier inputs
+        document.querySelectorAll('.tier-qty, .tier-price').forEach(input => {
+            input.addEventListener('input', () => {
+                updateEarlyBirdReturnsChart(/* pass necessary parameters */);
+            });
         });
 
         // Make sure to call this function when the page loads
