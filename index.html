@@ -779,9 +779,30 @@
             }
         }
 
-        .tier-row td {
-            padding: 8px;
-            vertical-align: top;
+        .tier-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .tier-name {
+            flex: 1 0 100%;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .tier-inputs {
+            flex: 1 1 auto;
+            margin-right: 15px;
+        }
+
+        .tier-total {
+            flex: 0 0 auto;
+            align-self: center;
+            font-weight: bold;
         }
 
         .tier-input-group {
@@ -797,7 +818,21 @@
         .tier-input {
             width: 120px;
             padding: 4px;
-            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .tier-row {
+                flex-direction: column;
+            }
+
+            .tier-inputs {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .tier-total {
+                align-self: flex-start;
+            }
         }
 
         .financial-table td {
@@ -1865,13 +1900,11 @@
             addTier('Tier 1', tier1QtyForFullRefund, tier1Price);
 
             // Add button row
-            const buttonRow = document.createElement('tr');
+            const buttonRow = document.createElement('div');
             buttonRow.className = 'button-row';
             buttonRow.innerHTML = `
-                <td colspan="3">
-                    <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
-                    <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
-                </td>
+                <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
+                <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
             `;
             ticketTiers.appendChild(buttonRow);
 
@@ -1904,11 +1937,11 @@
                 qty = 100; // Default quantity
             }
 
-            const newTier = document.createElement('tr');
+            const newTier = document.createElement('div');
             newTier.className = 'tier-row';
             newTier.innerHTML = `
-                <td>${name}</td>
-                <td>
+                <div class="tier-name">${name}</div>
+                <div class="tier-inputs">
                     <div class="tier-input-group">
                         <label>Quantity: </label>
                         <input type="number" class="financial-input tier-input tier-qty" value="${qty}" min="0">
@@ -1917,8 +1950,8 @@
                         <label>Price: $</label>
                         <input type="number" class="financial-input tier-input tier-price" value="${price}" min="0">
                     </div>
-                </td>
-                <td class="tier-total"></td>
+                </div>
+                <div class="tier-total"></div>
             `;
             ticketTiers.insertBefore(newTier, ticketTiers.querySelector('.button-row'));
 
