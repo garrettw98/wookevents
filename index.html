@@ -795,6 +795,25 @@
             margin-bottom: 2rem;
         }
 
+        a.contact-link {
+            color: #4a90e2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a.contact-link:hover {
+            color: #2a6496;
+            text-decoration: underline;
+        }
+
+        footer a.contact-link {
+            color: #b3d4fc;
+        }
+
+        footer a.contact-link:hover {
+            color: #ffffff;
+        }
+
         @media (max-width: 768px) {
             .financial-container {
                 flex-direction: column;
@@ -1059,24 +1078,29 @@
                         <td colspan="3">Profit Distribution</td>
                     </tr>
                     <tr>
-                        <td>Company Share (50%)</td>
-                        <td id="companyShare"></td>
+                        <td>Total Net Profit</td>
+                        <td id="netProfit"></td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td>Early Bird Share (50%, capped at ticket price)</td>
+                        <td>Early Bird Share (50% of profit, capped at ticket price)</td>
                         <td id="earlyBirdShare"></td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td>Excess to Company</td>
-                        <td id="excessToCompany"></td>
+                        <td>Average Return per Early Bird Ticket</td>
+                        <td id="avgEarlyBirdReturn"></td>
                         <td></td>
                     </tr>
-                    <tr class="total-row">
-                        <td>Total Company Profit</td>
+                    <tr>
+                        <td>Percentage of Early Bird Ticket Returned</td>
+                        <td id="percentEarlyBirdReturn"></td>
                         <td></td>
-                        <td id="totalCompanyProfit"></td>
+                    </tr>
+                    <tr>
+                        <td>Company Share (Remaining profit)</td>
+                        <td id="companyShare"></td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>
@@ -1094,17 +1118,39 @@
 
         <section id="faq" class="card">
             <h2>Frequently Asked Questions</h2>
+            
+            <h3>What is an Early Bird ticket?</h3>
+            <p>An Early Bird ticket is a special ticket offered at a discounted price to a limited number of attendees. These tickets not only secure your spot at the festival but also make you part of our unique profit-sharing model.</p>
+            
+            <h3>How does the profit-sharing work for Early Bird ticket holders?</h3>
+            <p>After the event, we calculate the net profit. Early Bird ticket holders are eligible to receive up to 50% of the total profit, divided equally among all Early Bird tickets. This amount is capped at the original ticket price, potentially allowing you to attend the festival for free.</p>
+            
             <h3>What happens if the event doesn't make a profit?</h3>
-            <p>In the unlikely event that we don't make a profit, early bird members will receive a proportional share of the remaining funds after event costs are covered.</p>
-            <h3>How do I receive my share of the profits?</h3>
-            <p>Profits will be distributed electronically to the payment method you used for your early bird ticket purchase within 30 days after the event.</p>
-            <h3>Who is organizing these events?</h3>
-            <p>These events are organized by Wook Events, a company dedicated to creating unique, community-driven festival experiences.</p>
+            <p>In the unlikely event that we don't make a profit, Early Bird ticket holders will still have their festival experience. However, there would be no additional returns on the ticket price.</p>
+            
+            <h3>How and when will I receive my share of the profits?</h3>
+            <p>Profits will be distributed electronically to the payment method you used for your Early Bird ticket purchase. This process typically occurs within 30-45 days after the event, allowing time for all financial reconciliations.</p>
+            
+            <h3>Can I transfer or sell my Early Bird ticket?</h3>
+            <p>Early Bird tickets are non-transferable and non-refundable. This policy ensures that the profit-sharing benefit goes to our early supporters who took the initial risk with us.</p>
+            
+            <h3>How does buying an Early Bird ticket help the festival?</h3>
+            <p>Early Bird ticket sales provide crucial upfront capital that helps us secure venues, book artists, and plan a better overall experience. Your early support allows us to make key decisions with confidence.</p>
+            
+            <h3>What makes Wook Events different from other festival organizers?</h3>
+            <p>We believe in creating a more engaged and invested festival community. Our unique Early Bird model allows attendees to potentially benefit financially from the event's success, aligning the interests of organizers and festival-goers.</p>
+            
+            <h3>Are there any risks involved in purchasing an Early Bird ticket?</h3>
+            <p>While we strive to make every event successful, there's always a risk in event planning. Early Bird ticket holders should be prepared for the possibility of no additional returns beyond the festival experience itself.</p>
+            
+            <h3>How can I get more information or ask additional questions?</h3>
+            <p>If you have any questions that aren't answered here, please don't hesitate to reach out to us at <a href="mailto:contact@wookevents.com" class="contact-link">contact@wookevents.com</a>. We're always happy to provide more information and assist our community members.</p>
         </section>
     </main>
 
     <footer>
         <p>&copy; 2024 Wook Events. All rights reserved.</p>
+        <p>Contact us: <a href="mailto:contact@wookevents.com" class="contact-link">contact@wookevents.com</a></p>
         <p>Disclaimer: Early bird membership involves risks. Please consult with a financial advisor before making any investment decisions.</p>
     </footer>
 
@@ -1132,10 +1178,10 @@
             const totalRevenue = (earlyBirdQty * earlyBirdPrice) + (tier1Qty * tier1Price);
             const netProfit = totalRevenue - totalFixedCosts - totalVarCosts;
 
-            const companyShare = netProfit / 2;
-            const earlyBirdShare = Math.min(companyShare, earlyBirdQty * earlyBirdPrice);
-            const excessToCompany = companyShare - earlyBirdShare;
-            const totalCompanyProfit = companyShare + excessToCompany;
+            const earlyBirdShare = Math.min(netProfit / 2, earlyBirdQty * earlyBirdPrice);
+            const avgEarlyBirdReturn = earlyBirdShare / earlyBirdQty;
+            const percentEarlyBirdReturn = (avgEarlyBirdReturn / earlyBirdPrice) * 100;
+            const companyShare = netProfit - earlyBirdShare;
 
             // Early Bird earn point calculation
             let earlyBirdEarnPoint = earlyBirdQty;
@@ -1167,10 +1213,10 @@
             document.getElementById('totalVarCosts').textContent = `$${totalVarCosts.toLocaleString()}`;
             document.getElementById('totalRevenue').textContent = `$${totalRevenue.toLocaleString()}`;
             document.getElementById('netProfit').textContent = `$${netProfit.toLocaleString()}`;
-            document.getElementById('companyShare').textContent = `$${companyShare.toLocaleString()}`;
             document.getElementById('earlyBirdShare').textContent = `$${earlyBirdShare.toLocaleString()}`;
-            document.getElementById('excessToCompany').textContent = `$${excessToCompany.toLocaleString()}`;
-            document.getElementById('totalCompanyProfit').textContent = `$${totalCompanyProfit.toLocaleString()}`;
+            document.getElementById('avgEarlyBirdReturn').textContent = `$${avgEarlyBirdReturn.toFixed(2)}`;
+            document.getElementById('percentEarlyBirdReturn').textContent = `${percentEarlyBirdReturn.toFixed(2)}%`;
+            document.getElementById('companyShare').textContent = `$${companyShare.toLocaleString()}`;
             document.getElementById('earlyBirdEarnPoint').textContent = earlyBirdEarnPoint > totalTickets ? "Not reached" : earlyBirdEarnPoint;
             document.getElementById('earlyBirdRefundPoint').textContent = earlyBirdRefundPoint > totalTickets ? "Not reached" : earlyBirdRefundPoint;
         }
