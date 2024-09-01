@@ -87,7 +87,7 @@
         .chart-container {
             width: 100%;
             max-width: 800px; /* Limit maximum width on larger screens */
-            height: 300px; /* Set a reasonable fixed height */
+            height: 400px; /* Increased height for better visibility */
         }
 
         @media (max-width: 768px) {
@@ -799,6 +799,60 @@
             text-decoration: underline;
         }
 
+        .table-container {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 480px) {
+            .table-container {
+                max-width: 100vw;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .financial-table {
+                font-size: 14px;
+            }
+
+            .financial-table th, .financial-table td {
+                padding: 6px 4px;
+            }
+
+            .financial-input {
+                width: 60px !important;
+                font-size: 12px;
+            }
+
+            .tier-row td {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .tier-row td label {
+                margin-right: 0;
+                margin-bottom: 2px;
+            }
+
+            .tier-row td input {
+                margin-bottom: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .financial-table {
+                font-size: 12px;
+            }
+
+            .financial-table th, .financial-table td {
+                padding: 4px 2px;
+            }
+
+            .financial-input {
+                width: 50px !important;
+                font-size: 10px;
+            }
+        }
+
         footer a.contact-link:hover {
             color: #ffffff;
         }
@@ -823,7 +877,7 @@
         .chart-container {
             width: 100%;
             max-width: 800px; /* Limit maximum width on larger screens */
-            height: 300px; /* Set a reasonable fixed height */
+            height: 400px; /* Increased height for better visibility */
         }
 
         .ticket-section {
@@ -1112,115 +1166,117 @@
             </div>
 
             <div class="ticket-section">
-                <table class="financial-table">
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="section-header">
-                            <td colspan="3">Fixed Costs</td>
-                        </tr>
-                        <tr>
-                            <td>Artist Cost</td>
-                            <td>$<input type="number" id="artistCost" class="financial-input" value="30000" min="0"></td>
-                            <td id="artistCostTotal"></td>
-                        </tr>
-                        <tr>
-                            <td>Equipment Cost</td>
-                            <td>$<input type="number" id="equipmentCost" class="financial-input" value="15000" min="0"></td>
-                            <td id="equipmentCostTotal"></td>
-                        </tr>
-                        <tr>
-                            <td>Miscellaneous Cost</td>
-                            <td>$<input type="number" id="miscCost" class="financial-input" value="10000" min="0"></td>
-                            <td id="miscCostTotal"></td>
-                        </tr>
-                        <tr class="total-row">
-                            <td>Total Fixed Costs</td>
-                            <td></td>
-                            <td id="totalFixedCosts"></td>
-                        </tr>
-                        
-                        <tr class="section-header">
-                            <td colspan="3">Variable Costs</td>
-                        </tr>
-                        <tr>
-                            <td>Venue Cost (per day per ticket)</td>
-                            <td>$<input type="number" id="venueCost" class="financial-input" value="10" min="0"></td>
-                            <td id="venueCostTotal"></td>
-                        </tr>
-                        <tr>
-                            <td>Other Variable Costs (per ticket)</td>
-                            <td>$<input type="number" id="otherVarCost" class="financial-input" value="25" min="0"></td>
-                            <td id="otherVarCostTotal"></td>
-                        </tr>
-                        <tr>
-                            <td>Festival Duration (days)</td>
-                            <td><input type="number" id="festivalDays" class="financial-input" value="3" min="1"></td>
-                            <td></td>
-                        </tr>
-                        <tr class="total-row">
-                            <td>Total Variable Costs</td>
-                            <td></td>
-                            <td id="totalVarCosts"></td>
-                        </tr>
-                        
-                        <tr class="section-header">
-                            <td colspan="3">Ticket Information</td>
-                        </tr>
-                        <tbody id="ticketTiers">
-                            <!-- Ticket tiers will be dynamically added here -->
+                <div class="table-container">
+                    <table class="financial-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="section-header">
+                                <td colspan="3">Fixed Costs</td>
+                            </tr>
+                            <tr>
+                                <td>Artist Cost</td>
+                                <td>$<input type="number" id="artistCost" class="financial-input" value="30000" min="0"></td>
+                                <td id="artistCostTotal"></td>
+                            </tr>
+                            <tr>
+                                <td>Equipment Cost</td>
+                                <td>$<input type="number" id="equipmentCost" class="financial-input" value="15000" min="0"></td>
+                                <td id="equipmentCostTotal"></td>
+                            </tr>
+                            <tr>
+                                <td>Miscellaneous Cost</td>
+                                <td>$<input type="number" id="miscCost" class="financial-input" value="10000" min="0"></td>
+                                <td id="miscCostTotal"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Total Fixed Costs</td>
+                                <td></td>
+                                <td id="totalFixedCosts"></td>
+                            </tr>
+                            
+                            <tr class="section-header">
+                                <td colspan="3">Variable Costs</td>
+                            </tr>
+                            <tr>
+                                <td>Venue Cost (per day per ticket)</td>
+                                <td>$<input type="number" id="venueCost" class="financial-input" value="10" min="0"></td>
+                                <td id="venueCostTotal"></td>
+                            </tr>
+                            <tr>
+                                <td>Other Variable Costs (per ticket)</td>
+                                <td>$<input type="number" id="otherVarCost" class="financial-input" value="25" min="0"></td>
+                                <td id="otherVarCostTotal"></td>
+                            </tr>
+                            <tr>
+                                <td>Festival Duration (days)</td>
+                                <td><input type="number" id="festivalDays" class="financial-input" value="3" min="1"></td>
+                                <td></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Total Variable Costs</td>
+                                <td></td>
+                                <td id="totalVarCosts"></td>
+                            </tr>
+                            
+                            <tr class="section-header">
+                                <td colspan="3">Ticket Information</td>
+                            </tr>
+                            <tbody id="ticketTiers">
+                                <!-- Ticket tiers will be dynamically added here -->
+                            </tbody>
+                            <tr class="section-header">
+                                <td colspan="3">Profit Calculation and Distribution</td>
+                            </tr>
+                            <tr>
+                                <td>Total Revenue</td>
+                                <td></td>
+                                <td id="totalRevenue"></td>
+                            </tr>
+                            <tr>
+                                <td>Total Costs (Fixed + Variable)</td>
+                                <td></td>
+                                <td id="totalCosts"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Net Profit</td>
+                                <td></td>
+                                <td id="netProfit"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"><strong>Profit Distribution</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Early Bird Share (50% of profit, capped at ticket price)</td>
+                                <td id="earlyBirdShare"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Company Share (Remaining profit)</td>
+                                <td id="companyShare"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"><strong>Early Bird Return Analysis</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Average Return per Early Bird Ticket</td>
+                                <td id="avgEarlyBirdReturn"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Percentage of Early Bird Ticket Returned</td>
+                                <td id="percentEarlyBirdReturn"></td>
+                                <td></td>
+                            </tr>
                         </tbody>
-                        <tr class="section-header">
-                            <td colspan="3">Profit Calculation and Distribution</td>
-                        </tr>
-                        <tr>
-                            <td>Total Revenue</td>
-                            <td></td>
-                            <td id="totalRevenue"></td>
-                        </tr>
-                        <tr>
-                            <td>Total Costs (Fixed + Variable)</td>
-                            <td></td>
-                            <td id="totalCosts"></td>
-                        </tr>
-                        <tr class="total-row">
-                            <td>Net Profit</td>
-                            <td></td>
-                            <td id="netProfit"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="3"><strong>Profit Distribution</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Early Bird Share (50% of profit, capped at ticket price)</td>
-                            <td id="earlyBirdShare"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>Company Share (Remaining profit)</td>
-                            <td id="companyShare"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td colspan="3"><strong>Early Bird Return Analysis</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Average Return per Early Bird Ticket</td>
-                            <td id="avgEarlyBirdReturn"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>Percentage of Early Bird Ticket Returned</td>
-                            <td id="percentEarlyBirdReturn"></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
 
             <div class="key-points">
@@ -1307,27 +1363,6 @@
                 }
             }
 
-            // Prepare data for ticket tiers bar chart
-            const ticketTiers = document.querySelectorAll('.tier-row');
-            const barLabels = [];
-            const barData = [];
-            const barColors = [
-                'rgba(255, 99, 132, 0.8)',
-                'rgba(54, 162, 235, 0.8)',
-                'rgba(255, 206, 86, 0.8)',
-                'rgba(75, 192, 192, 0.8)',
-                'rgba(153, 102, 255, 0.8)',
-                'rgba(255, 159, 64, 0.8)',
-                'rgba(201, 203, 207, 0.8)'
-            ];
-
-            ticketTiers.forEach((tier, index) => {
-                const name = tier.querySelector('td:first-child').textContent.trim();
-                const qty = Number(tier.querySelector('.tier-qty').value);
-                barLabels.push(name);
-                barData.push(qty);
-            });
-
             if (earlyBirdReturnsChart) {
                 earlyBirdReturnsChart.destroy();
             }
@@ -1335,25 +1370,14 @@
             earlyBirdReturnsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Ticket Tiers'],
-                    datasets: [
-                        ...barLabels.map((label, index) => ({
-                            label: label,
-                            data: [barData[index]],
-                            backgroundColor: barColors[index % barColors.length],
-                            borderColor: 'rgba(0, 0, 0, 0.1)',
-                            borderWidth: 1,
-                            yAxisID: 'y',
-                            type: 'bar'
-                        })),
-                        {
-                            label: 'Early Bird Returns ($)',
-                            data: lineData,
-                            borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1,
-                            yAxisID: 'y1'
-                        }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        label: 'Early Bird Returns ($)',
+                        data: lineData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -1363,36 +1387,18 @@
                     },
                     scales: {
                         x: {
-                            stacked: false,
                             title: {
                                 display: true,
-                                text: 'Ticket Tiers'
+                                text: 'Tickets Sold'
                             }
                         },
                         y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Ticket Quantity'
-                            },
-                            min: 0,
-                            max: Math.max(...barData) * 1.1 // 10% headroom
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
                             title: {
                                 display: true,
                                 text: 'Early Bird Return ($)'
                             },
                             min: 0,
-                            max: earlyBirdPrice,
-                            grid: {
-                                drawOnChartArea: false
-                            }
+                            max: earlyBirdPrice
                         }
                     },
                     plugins: {
@@ -1576,27 +1582,6 @@
                 }
             }
 
-            // Prepare data for ticket tiers bar chart
-            const ticketTiers = document.querySelectorAll('.tier-row');
-            const barLabels = [];
-            const barData = [];
-            const barColors = [
-                'rgba(255, 99, 132, 0.8)',
-                'rgba(54, 162, 235, 0.8)',
-                'rgba(255, 206, 86, 0.8)',
-                'rgba(75, 192, 192, 0.8)',
-                'rgba(153, 102, 255, 0.8)',
-                'rgba(255, 159, 64, 0.8)',
-                'rgba(201, 203, 207, 0.8)'
-            ];
-
-            ticketTiers.forEach((tier, index) => {
-                const name = tier.querySelector('td:first-child').textContent.trim();
-                const qty = Number(tier.querySelector('.tier-qty').value);
-                barLabels.push(name);
-                barData.push(qty);
-            });
-
             if (earlyBirdReturnsChart) {
                 earlyBirdReturnsChart.destroy();
             }
@@ -1604,25 +1589,14 @@
             earlyBirdReturnsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Ticket Tiers'],
-                    datasets: [
-                        ...barLabels.map((label, index) => ({
-                            label: label,
-                            data: [barData[index]],
-                            backgroundColor: barColors[index % barColors.length],
-                            borderColor: 'rgba(0, 0, 0, 0.1)',
-                            borderWidth: 1,
-                            yAxisID: 'y',
-                            type: 'bar'
-                        })),
-                        {
-                            label: 'Early Bird Returns ($)',
-                            data: lineData,
-                            borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1,
-                            yAxisID: 'y1'
-                        }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        label: 'Early Bird Returns ($)',
+                        data: lineData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -1632,36 +1606,18 @@
                     },
                     scales: {
                         x: {
-                            stacked: false,
                             title: {
                                 display: true,
-                                text: 'Ticket Tiers'
+                                text: 'Tickets Sold'
                             }
                         },
                         y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Ticket Quantity'
-                            },
-                            min: 0,
-                            max: Math.max(...barData) * 1.1 // 10% headroom
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
                             title: {
                                 display: true,
                                 text: 'Early Bird Return ($)'
                             },
                             min: 0,
-                            max: earlyBirdPrice,
-                            grid: {
-                                drawOnChartArea: false
-                            }
+                            max: earlyBirdPrice
                         }
                     },
                     plugins: {
