@@ -1468,18 +1468,25 @@
                             <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
                         <tr>
-                            <td colspan="3">
+                            <td>Add/Remove Tier</td>
+                            <td>
                                 <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
                                 <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
                             </td>
+                            <td></td>
                         </tr>
-                        <tr class="section-header">
-                            <td colspan="3">Profit Calculation and Distribution</td>
+                        <tr class="total-row">
+                            <td>Total Tickets</td>
+                            <td></td>
+                            <td id="totalTickets"></td>
                         </tr>
-                        <tr>
+                        <tr class="total-row">
                             <td>Total Revenue</td>
                             <td></td>
                             <td id="totalRevenue"></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="3">Profit Calculation and Distribution</td>
                         </tr>
                         <tr>
                             <td>Total Costs (Fixed + Variable)</td>
@@ -1986,46 +1993,36 @@
             const existingTiers = ticketTiers.querySelectorAll('.tier-row');
             const newTierIndex = existingTiers.length;
 
-            // If name is not provided, generate a default name
             if (!name) {
-                name = `Tier ${newTierIndex}`;
+                name = `Tier ${newTierIndex + 1}`;
             }
 
-            // If price is not provided, calculate it based on the previous tier
             if (price === null) {
                 const previousTier = existingTiers[newTierIndex - 1];
                 if (previousTier) {
                     const previousPrice = Number(previousTier.querySelector('.tier-price').value);
                     price = previousPrice + 25;
                 } else {
-                    price = 200; // Default price for the first tier
+                    price = 200;
                 }
             }
 
-            // If quantity is not provided, use a default value
             if (qty === null) {
-                qty = 100; // Default quantity
+                qty = 100;
             }
 
             const newTier = document.createElement('tr');
             newTier.className = 'tier-row';
             newTier.innerHTML = `
-                <td class="tier-name">${name}</td>
-                <td class="tier-inputs">
-                    <div class="tier-input-group">
-                        <label>Quantity: </label>
-                        <input type="number" class="financial-input tier-input tier-qty" value="${qty}" min="0">
-                    </div>
-                    <div class="tier-input-group">
-                        <label>Price: $</label>
-                        <input type="number" class="financial-input tier-input tier-price" value="${price}" min="0">
-                    </div>
+                <td>${name}</td>
+                <td>
+                    <input type="number" class="financial-input tier-qty" value="${qty}" min="0">
+                    $<input type="number" class="financial-input tier-price" value="${price}" min="0">
                 </td>
                 <td class="tier-total"></td>
             `;
             ticketTiers.appendChild(newTier);
 
-            // Add event listeners to new inputs
             newTier.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', updateCalculations);
             });
