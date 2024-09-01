@@ -714,8 +714,16 @@
             box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
         }
 
+        .financial-table-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            overflow-x: auto;
+        }
+
         .financial-table {
             width: 100%;
+            max-width: 800px;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
@@ -724,34 +732,156 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            word-wrap: break-word;
+            max-width: 150px;
         }
 
-        .financial-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
+        .financial-input {
+            width: 100%;
+            max-width: 100px;
+            box-sizing: border-box;
         }
 
-        .financial-table .section-header {
-            background-color: #e6e6e6;
-            font-weight: bold;
+        .chart-container {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
         }
 
-        .financial-table .total-row {
-            font-weight: bold;
-            background-color: #f9f9f9;
+        @media (max-width: 768px) {
+            .financial-table th, .financial-table td {
+                padding: 6px;
+                font-size: 14px;
+            }
+
+            .financial-input {
+                font-size: 14px;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .financial-table th, .financial-table td {
+                padding: 4px;
+                font-size: 12px;
+            }
+
+            .financial-input {
+                font-size: 12px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
         }
 
         .tier-row td {
-            padding: 4px 8px;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .tier-input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 5px;
+        }
+
+        .tier-input-group label {
+            margin-bottom: 2px;
         }
 
         .tier-input {
-            width: 120px !important;
-            max-width: 120px;
+            width: 120px;
+            padding: 4px;
+            margin-bottom: 5px;
         }
 
-        .button-row td {
-            padding: 4px 8px;
+        .financial-table td {
+            vertical-align: top;
+            word-wrap: break-word;
+            max-width: 200px;
+        }
+
+        .tier-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 5px;
+            padding: 0; /* Remove any default padding */
+            line-height: 1; /* Ensure consistent vertical alignment of the +/- symbols */
+        }
+
+        .add-tier-btn {
+            background-color: #4a90e2;
+        }
+
+        .remove-tier-btn {
+            background-color: #dc3545;
+            margin-left: 5px;
+        }
+
+        .tier-btn:hover {
+            opacity: 0.8;
+        }
+
+        .tier-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .financial-table {
+                font-size: 14px;
+            }
+
+            .financial-table th, .financial-table td {
+                padding: 6px 4px;
+            }
+
+            .financial-input {
+                width: 60px !important;
+                font-size: 12px;
+            }
+
+            .tier-row td {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .tier-row td label {
+                margin-right: 0;
+                margin-bottom: 2px;
+            }
+
+            .tier-row td input {
+                margin-bottom: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .financial-table {
+                font-size: 12px;
+            }
+
+            .financial-table th, .financial-table td {
+                padding: 4px 2px;
+            }
+
+            .financial-input {
+                width: 50px !important;
+                font-size: 10px;
+            }
         }
 
         .tier-btn {
@@ -955,7 +1085,30 @@
         }
 
         .tier-row td {
-            padding: 4px 8px;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .tier-input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 5px;
+        }
+
+        .tier-input-group label {
+            margin-bottom: 2px;
+        }
+
+        .tier-input {
+            width: 120px;
+            padding: 4px;
+            margin-bottom: 5px;
+        }
+
+        .financial-table td {
+            vertical-align: top;
+            word-wrap: break-word;
+            max-width: 200px;
         }
 
         .financial-input {
@@ -1165,118 +1318,116 @@
                 <p><strong>Note:</strong> The default values shown are our financial goals for Among Wooks 2025. These targets are based on our current projections and may be subject to change as we continue planning.</p>
             </div>
 
-            <div class="ticket-section">
-                <div class="table-container">
-                    <table class="financial-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="section-header">
-                                <td colspan="3">Fixed Costs</td>
-                            </tr>
-                            <tr>
-                                <td>Artist Cost</td>
-                                <td>$<input type="number" id="artistCost" class="financial-input" value="30000" min="0"></td>
-                                <td id="artistCostTotal"></td>
-                            </tr>
-                            <tr>
-                                <td>Equipment Cost</td>
-                                <td>$<input type="number" id="equipmentCost" class="financial-input" value="15000" min="0"></td>
-                                <td id="equipmentCostTotal"></td>
-                            </tr>
-                            <tr>
-                                <td>Miscellaneous Cost</td>
-                                <td>$<input type="number" id="miscCost" class="financial-input" value="10000" min="0"></td>
-                                <td id="miscCostTotal"></td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>Total Fixed Costs</td>
-                                <td></td>
-                                <td id="totalFixedCosts"></td>
-                            </tr>
-                            
-                            <tr class="section-header">
-                                <td colspan="3">Variable Costs</td>
-                            </tr>
-                            <tr>
-                                <td>Venue Cost (per day per ticket)</td>
-                                <td>$<input type="number" id="venueCost" class="financial-input" value="10" min="0"></td>
-                                <td id="venueCostTotal"></td>
-                            </tr>
-                            <tr>
-                                <td>Other Variable Costs (per ticket)</td>
-                                <td>$<input type="number" id="otherVarCost" class="financial-input" value="25" min="0"></td>
-                                <td id="otherVarCostTotal"></td>
-                            </tr>
-                            <tr>
-                                <td>Festival Duration (days)</td>
-                                <td><input type="number" id="festivalDays" class="financial-input" value="3" min="1"></td>
-                                <td></td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>Total Variable Costs</td>
-                                <td></td>
-                                <td id="totalVarCosts"></td>
-                            </tr>
-                            
-                            <tr class="section-header">
-                                <td colspan="3">Ticket Information</td>
-                            </tr>
-                            <tbody id="ticketTiers">
-                                <!-- Ticket tiers will be dynamically added here -->
-                            </tbody>
-                            <tr class="section-header">
-                                <td colspan="3">Profit Calculation and Distribution</td>
-                            </tr>
-                            <tr>
-                                <td>Total Revenue</td>
-                                <td></td>
-                                <td id="totalRevenue"></td>
-                            </tr>
-                            <tr>
-                                <td>Total Costs (Fixed + Variable)</td>
-                                <td></td>
-                                <td id="totalCosts"></td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>Net Profit</td>
-                                <td></td>
-                                <td id="netProfit"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"><strong>Profit Distribution</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Early Bird Share (50% of profit, capped at ticket price)</td>
-                                <td id="earlyBirdShare"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Company Share (Remaining profit)</td>
-                                <td id="companyShare"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"><strong>Early Bird Return Analysis</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Average Return per Early Bird Ticket</td>
-                                <td id="avgEarlyBirdReturn"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Percentage of Early Bird Ticket Returned</td>
-                                <td id="percentEarlyBirdReturn"></td>
-                                <td></td>
-                            </tr>
+            <div class="financial-table-container">
+                <table class="financial-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="section-header">
+                            <td colspan="3">Fixed Costs</td>
+                        </tr>
+                        <tr>
+                            <td>Artist Cost</td>
+                            <td>$<input type="number" id="artistCost" class="financial-input" value="30000" min="0"></td>
+                            <td id="artistCostTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Equipment Cost</td>
+                            <td>$<input type="number" id="equipmentCost" class="financial-input" value="15000" min="0"></td>
+                            <td id="equipmentCostTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Miscellaneous Cost</td>
+                            <td>$<input type="number" id="miscCost" class="financial-input" value="10000" min="0"></td>
+                            <td id="miscCostTotal"></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Fixed Costs</td>
+                            <td></td>
+                            <td id="totalFixedCosts"></td>
+                        </tr>
+                        
+                        <tr class="section-header">
+                            <td colspan="3">Variable Costs</td>
+                        </tr>
+                        <tr>
+                            <td>Venue Cost (per day per ticket)</td>
+                            <td>$<input type="number" id="venueCost" class="financial-input" value="10" min="0"></td>
+                            <td id="venueCostTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Other Variable Costs (per ticket)</td>
+                            <td>$<input type="number" id="otherVarCost" class="financial-input" value="25" min="0"></td>
+                            <td id="otherVarCostTotal"></td>
+                        </tr>
+                        <tr>
+                            <td>Festival Duration (days)</td>
+                            <td><input type="number" id="festivalDays" class="financial-input" value="3" min="1"></td>
+                            <td></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Variable Costs</td>
+                            <td></td>
+                            <td id="totalVarCosts"></td>
+                        </tr>
+                        
+                        <tr class="section-header">
+                            <td colspan="3">Ticket Information</td>
+                        </tr>
+                        <tbody id="ticketTiers">
+                            <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
-                    </table>
-                </div>
+                        <tr class="section-header">
+                            <td colspan="3">Profit Calculation and Distribution</td>
+                        </tr>
+                        <tr>
+                            <td>Total Revenue</td>
+                            <td></td>
+                            <td id="totalRevenue"></td>
+                        </tr>
+                        <tr>
+                            <td>Total Costs (Fixed + Variable)</td>
+                            <td></td>
+                            <td id="totalCosts"></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Net Profit</td>
+                            <td></td>
+                            <td id="netProfit"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>Profit Distribution</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Early Bird Share (50% of profit, capped at ticket price)</td>
+                            <td id="earlyBirdShare"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Company Share (Remaining profit)</td>
+                            <td id="companyShare"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>Early Bird Return Analysis</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Average Return per Early Bird Ticket</td>
+                            <td id="avgEarlyBirdReturn"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Percentage of Early Bird Ticket Returned</td>
+                            <td id="percentEarlyBirdReturn"></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="key-points">
@@ -1289,10 +1440,8 @@
 
             <p class="note">Note: These calculations update in real-time based on the inputs provided. Adjust the values to explore different scenarios and their potential impact on Among Wooks 2025.</p>
 
-            <div class="chart-container-wrapper">
-                <div class="chart-container">
-                    <canvas id="earlyBirdReturnsChart"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas id="earlyBirdReturnsChart"></canvas>
             </div>
         </section>
 
@@ -1390,6 +1539,11 @@
                             title: {
                                 display: true,
                                 text: 'Tickets Sold'
+                            },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10
                             }
                         },
                         y: {
@@ -1398,7 +1552,10 @@
                                 text: 'Early Bird Return ($)'
                             },
                             min: 0,
-                            max: earlyBirdPrice
+                            max: earlyBirdPrice,
+                            ticks: {
+                                maxTicksLimit: 6
+                            }
                         }
                     },
                     plugins: {
@@ -1409,6 +1566,14 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 0,
+                            bottom: 0
                         }
                     }
                 }
@@ -1609,6 +1774,11 @@
                             title: {
                                 display: true,
                                 text: 'Tickets Sold'
+                            },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10
                             }
                         },
                         y: {
@@ -1617,7 +1787,10 @@
                                 text: 'Early Bird Return ($)'
                             },
                             min: 0,
-                            max: earlyBirdPrice
+                            max: earlyBirdPrice,
+                            ticks: {
+                                maxTicksLimit: 6
+                            }
                         }
                     },
                     plugins: {
@@ -1628,6 +1801,14 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 0,
+                            bottom: 0
                         }
                     }
                 }
@@ -1728,10 +1909,14 @@
             newTier.innerHTML = `
                 <td>${name}</td>
                 <td>
-                    <label>Quantity: </label>
-                    <input type="number" class="financial-input tier-qty" value="${qty}" min="0">
-                    <label>Price: $</label>
-                    <input type="number" class="financial-input tier-price" value="${price}" min="0">
+                    <div class="tier-input-group">
+                        <label>Quantity: </label>
+                        <input type="number" class="financial-input tier-input tier-qty" value="${qty}" min="0">
+                    </div>
+                    <div class="tier-input-group">
+                        <label>Price: $</label>
+                        <input type="number" class="financial-input tier-input tier-price" value="${price}" min="0">
+                    </div>
                 </td>
                 <td class="tier-total"></td>
             `;
