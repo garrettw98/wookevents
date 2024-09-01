@@ -1459,13 +1459,20 @@
                         <tr class="section-header">
                             <td colspan="3">Ticket Information</td>
                         </tr>
+                        <tr>
+                            <td>Venue Capacity</td>
+                            <td><input type="number" id="venueCapacity" class="financial-input" value="999" min="0"></td>
+                            <td></td>
+                        </tr>
                         <tbody id="ticketTiers">
                             <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
-                        <div class="button-row">
-                            <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
-                            <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
-                        </div>
+                        <tr>
+                            <td colspan="3">
+                                <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
+                                <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
+                            </td>
+                        </tr>
                         <tr class="section-header">
                             <td colspan="3">Profit Calculation and Distribution</td>
                         </tr>
@@ -1569,7 +1576,7 @@
     <script>
         // ... existing script ...
 
-        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty) {
+        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty, venueCapacity) {
             const ctx = document.getElementById('earlyBirdReturnsChart');
             if (!ctx) {
                 console.error("Chart canvas not found");
@@ -1578,16 +1585,25 @@
 
             // Prepare data for Early Bird Returns line chart
             const dataPoints = 100;
-            const step = Math.ceil(totalTickets / dataPoints);
+            const step = Math.ceil(venueCapacity / dataPoints);
             const lineData = [];
             const labels = [];
 
-            for (let i = 0; i <= totalTickets; i += step) {
+            // Get the highest tier price
+            const tiers = document.querySelectorAll('.tier-row');
+            const highestTierPrice = Number(tiers[tiers.length - 1].querySelector('.tier-price').value) || 0;
+
+            for (let i = 0; i <= venueCapacity; i += step) {
                 labels.push(i);
                 if (i < earlyBirdEarnPoint) {
                     lineData.push(0);
                 } else {
-                    const revenue = (totalRevenue / totalTickets) * i;
+                    let revenue;
+                    if (i <= totalTickets) {
+                        revenue = (totalRevenue / totalTickets) * i;
+                    } else {
+                        revenue = totalRevenue + (i - totalTickets) * highestTierPrice;
+                    }
                     const totalCost = totalFixedCosts + (totalVarCosts / totalTickets) * i;
                     const profit = Math.max(0, revenue - totalCost);
                     const earlyBirdShare = Math.min(profit / 2, earlyBirdQty * earlyBirdPrice);
@@ -1628,7 +1644,8 @@
                                 maxRotation: 0,
                                 autoSkip: true,
                                 maxTicksLimit: 10
-                            }
+                            },
+                            max: venueCapacity
                         },
                         y: {
                             title: {
@@ -1795,8 +1812,11 @@
                 updateElement('earlyBirdEarnPoint', earlyBirdEarnPoint.toLocaleString());
                 updateElement('earlyBirdRefundPoint', earlyBirdRefundPoint.toLocaleString());
 
+                // Venue Capacity
+                const venueCapacity = Number(document.getElementById('venueCapacity')?.value) || 999;
+
                 // Update the chart
-                updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty);
+                updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty, venueCapacity);
 
                 console.log("All calculations complete");
             } catch (error) {
@@ -1804,7 +1824,7 @@
             }
         }
 
-        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty) {
+        function updateEarlyBirdReturnsChart(earlyBirdPrice, earlyBirdEarnPoint, earlyBirdRefundPoint, totalTickets, totalRevenue, totalFixedCosts, totalVarCosts, earlyBirdQty, venueCapacity) {
             const ctx = document.getElementById('earlyBirdReturnsChart');
             if (!ctx) {
                 console.error("Chart canvas not found");
@@ -1813,16 +1833,25 @@
 
             // Prepare data for Early Bird Returns line chart
             const dataPoints = 100;
-            const step = Math.ceil(totalTickets / dataPoints);
+            const step = Math.ceil(venueCapacity / dataPoints);
             const lineData = [];
             const labels = [];
 
-            for (let i = 0; i <= totalTickets; i += step) {
+            // Get the highest tier price
+            const tiers = document.querySelectorAll('.tier-row');
+            const highestTierPrice = Number(tiers[tiers.length - 1].querySelector('.tier-price').value) || 0;
+
+            for (let i = 0; i <= venueCapacity; i += step) {
                 labels.push(i);
                 if (i < earlyBirdEarnPoint) {
                     lineData.push(0);
                 } else {
-                    const revenue = (totalRevenue / totalTickets) * i;
+                    let revenue;
+                    if (i <= totalTickets) {
+                        revenue = (totalRevenue / totalTickets) * i;
+                    } else {
+                        revenue = totalRevenue + (i - totalTickets) * highestTierPrice;
+                    }
                     const totalCost = totalFixedCosts + (totalVarCosts / totalTickets) * i;
                     const profit = Math.max(0, revenue - totalCost);
                     const earlyBirdShare = Math.min(profit / 2, earlyBirdQty * earlyBirdPrice);
@@ -1863,7 +1892,8 @@
                                 maxRotation: 0,
                                 autoSkip: true,
                                 maxTicksLimit: 10
-                            }
+                            },
+                            max: venueCapacity
                         },
                         y: {
                             title: {
@@ -1977,11 +2007,11 @@
                 qty = 100; // Default quantity
             }
 
-            const newTier = document.createElement('div');
+            const newTier = document.createElement('tr');
             newTier.className = 'tier-row';
             newTier.innerHTML = `
-                <div class="tier-name">${name}</div>
-                <div class="tier-inputs">
+                <td class="tier-name">${name}</td>
+                <td class="tier-inputs">
                     <div class="tier-input-group">
                         <label>Quantity: </label>
                         <input type="number" class="financial-input tier-input tier-qty" value="${qty}" min="0">
@@ -1990,10 +2020,10 @@
                         <label>Price: $</label>
                         <input type="number" class="financial-input tier-input tier-price" value="${price}" min="0">
                     </div>
-                </div>
-                <div class="tier-total"></div>
+                </td>
+                <td class="tier-total"></td>
             `;
-            ticketTiers.insertBefore(newTier, ticketTiers.querySelector('.button-row'));
+            ticketTiers.appendChild(newTier);
 
             // Add event listeners to new inputs
             newTier.querySelectorAll('input').forEach(input => {
@@ -2028,6 +2058,9 @@
                 updateEarlyBirdReturnsChart(/* pass necessary parameters */);
             });
         });
+
+        // Add event listener for venue capacity input
+        document.getElementById('venueCapacity').addEventListener('input', updateCalculations);
 
         // Make sure to call this function when the page loads
         document.addEventListener('DOMContentLoaded', function() {
