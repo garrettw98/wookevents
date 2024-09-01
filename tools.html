@@ -857,7 +857,7 @@
             const earlyBirdReturnData = [];
             const companyRevenueData = [];
 
-            for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 10))) {
+            for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
                 labels.push(i);
                 const revenue = calculateRevenue(ticketTiers, i, highestTierPrice);
                 const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
@@ -910,18 +910,7 @@
             const earlyBirdFullReturn = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, false);
 
             const totalTicketSales = Math.min(ticketTiers.reduce((sum, tier) => sum + tier.quantity, 0), venueCapacity);
-            let totalRevenue = 0;
-            let remainingCapacity = venueCapacity;
-
-            for (let i = 0; i < ticketTiers.length; i++) {
-                const tier = ticketTiers[i];
-                const nextTier = ticketTiers[i + 1];
-                const tierSales = nextTier ? tier.quantity : Math.min(tier.quantity, remainingCapacity);
-                totalRevenue += tierSales * tier.price;
-                remainingCapacity -= tierSales;
-                if (remainingCapacity <= 0) break;
-            }
-
+            const totalRevenue = calculateRevenue(ticketTiers, totalTicketSales, ticketTiers[ticketTiers.length - 1].price);
             const totalFluidCost = fluidCost * totalTicketSales;
             const totalVenueCost = venueCostPerDay * eventLength * totalTicketSales;
             const eventCosts = fixedCosts.total + totalFluidCost + totalVenueCost;
