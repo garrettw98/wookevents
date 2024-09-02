@@ -741,6 +741,7 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
+            min-height: 50px; /* Ensure a minimum height for cells */
         }
 
         .tier-inputs {
@@ -753,12 +754,13 @@
             display: flex;
             flex-direction: column;
             flex: 1 1 auto;
-            min-width: 80px;
+            min-width: 60px;
         }
 
         .tier-input-group label {
             font-size: 12px;
             margin-bottom: 2px;
+            word-wrap: break-word;
         }
 
         .financial-input {
@@ -801,15 +803,27 @@
             }
 
             .tier-input-group {
-                min-width: 60px;
+                min-width: 50px;
             }
         }
 
-        @media (max-width: 768px) {
-            .tier-inputs {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
+        @media (max-width: 480px) {
+            .financial-table {
+                font-size: 12px;
+            }
+
+            .financial-table th,
+            .financial-table td {
+                padding: 6px;
+            }
+
+            .financial-input {
+                max-width: 60px;
+                font-size: 11px;
+            }
+
+            .tier-input-group {
+                min-width: 50px;
             }
         }
 
@@ -1326,7 +1340,7 @@
                 <li><strong>Collaborative Planning:</strong> As ticket sales progress, we work together to secure ideal venues, curate talented artists, and enhance the overall experience.</li>
                 <li><strong>Festival Realization:</strong> We bring the community-driven festival to life, with early birds enjoying enhanced benefits.</li>
                 <li><strong>Potential Cost Recovery:</strong> Post-event, we analyze the financials and distribute a portion among our early bird community, potentially allowing them to recover up to their ticket cost.</li>
-            </ol>
+                </ol>
 
             <p>By participating in our early bird initiative, you're not just purchasing a ticket – you're becoming part of a unique festival creation process. This approach offers the potential for ticket cost recovery, exclusive experiences, and a deeper connection to the festival community. Join us as we innovate the live event space and create a more conscious festival experience.</p>
         </section>
@@ -1339,8 +1353,8 @@
                         <img src="BMEC-Photo.webp" alt="Blue Mountain Event Center" class="event-image">
                         <div class="event-overlay">
                             <h2 class="event-title">Among Wooks 2025</h2>
-                        </div>
-                    </div>
+            </div>
+        </div>
                     <div class="event-details">
                         <div class="event-info">
                             <div class="info-item">
