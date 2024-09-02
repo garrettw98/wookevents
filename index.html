@@ -1431,13 +1431,25 @@
             const newTierIndex = existingTiers.length;
 
             if (name === null) {
-                name = `Tier ${newTierIndex + 1}`;
+                if (newTierIndex === 0) {
+                    name = "Early Bird";
+                } else if (newTierIndex === 1) {
+                    name = "Tier 1";
+                } else {
+                    name = `Tier ${newTierIndex}`;
+                }
             }
             if (qty === null) {
                 qty = 100;
             }
             if (price === null) {
-                price = newTierIndex === 0 ? 200 : Number(existingTiers[newTierIndex - 1].querySelector('.tier-price').value) + 25;
+                if (newTierIndex === 0) {
+                    price = 200;
+                } else {
+                    const previousTier = existingTiers[newTierIndex - 1];
+                    const previousPrice = Number(previousTier.querySelector('.tier-price').value);
+                    price = previousPrice + 25;
+                }
             }
 
             const newTier = document.createElement('tr');
@@ -1479,6 +1491,15 @@
             }
         }
 
+        // Use a single function to handle button clicks
+        function handleButtonClick(action) {
+            if (action === 'add') {
+                addTier();
+            } else if (action === 'remove') {
+                removeTier();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             console.log("DOM content loaded.");
             
@@ -1493,8 +1514,8 @@
                 });
 
                 // Add event listeners for add and remove tier buttons
-                document.querySelector('.add-tier-btn').addEventListener('click', () => addTier());
-                document.querySelector('.remove-tier-btn').addEventListener('click', removeTier);
+                document.querySelector('.add-tier-btn').onclick = () => handleButtonClick('add');
+                document.querySelector('.remove-tier-btn').onclick = () => handleButtonClick('remove');
                 
                 console.log("Initialization complete.");
             }, 0);
