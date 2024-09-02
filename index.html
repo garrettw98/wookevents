@@ -800,6 +800,26 @@
             }
         }
 
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            header, main, footer {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .header-content {
+                padding: 0;
+            }
+
+            .card {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
         @media (max-width: 480px) {
             .financial-table {
                 font-size: 12px;
@@ -1793,6 +1813,61 @@
 
         // Call the function when the window is resized
         window.addEventListener('resize', checkMobile);
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.event-carousel .event-card');
+        const totalSlides = slides.length;
+        let slideInterval;
+
+        function showSlide(index) {
+            if (index < 0) {
+                currentSlide = totalSlides - 1;
+            } else if (index >= totalSlides) {
+                currentSlide = 0;
+            } else {
+                currentSlide = index;
+            }
+
+            const offset = -currentSlide * 100;
+            document.querySelector('.event-carousel').style.transform = `translateX(${offset}%)`;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function startSlideShow() {
+            slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+        }
+
+        function stopSlideShow() {
+            clearInterval(slideInterval);
+        }
+
+        document.querySelector('.prev-btn').addEventListener('click', () => {
+            prevSlide();
+            stopSlideShow();
+            startSlideShow();
+        });
+
+        document.querySelector('.next-btn').addEventListener('click', () => {
+            nextSlide();
+            stopSlideShow();
+            startSlideShow();
+        });
+
+        document.querySelector('.event-carousel-container').addEventListener('mouseenter', stopSlideShow);
+        document.querySelector('.event-carousel-container').addEventListener('mouseleave', startSlideShow);
+
+        // Initialize the carousel
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+            startSlideShow();
+        });
     </script>
 </body>
 </html>
