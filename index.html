@@ -727,73 +727,82 @@
         }
 
         .financial-table {
-            table-layout: fixed;
             width: 100%;
-            font-size: 14px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .financial-table th,
         .financial-table td {
-            padding: 6px 8px;
+            padding: 10px;
             border: 1px solid #ddd;
             text-align: left;
             vertical-align: top;
             word-wrap: break-word;
             overflow-wrap: break-word;
-        }
-
-        .financial-input {
-            width: 80px;
-            padding: 2px 4px;
-            font-size: 14px;
-        }
-
-        .tier-name {
-            width: 30%;
-        }
-
-        .tier-amount,
-        .tier-total {
-            width: 35%;
+            hyphens: auto;
         }
 
         .tier-inputs {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 5px;
         }
 
-        .tier-inputs label {
+        .tier-input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-width: 80px;
+        }
+
+        .tier-input-group label {
             font-size: 12px;
-            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .financial-input {
+            width: 100%;
+            max-width: 120px;
+            padding: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
         }
 
         @media (max-width: 768px) {
             .financial-table {
-                font-size: 12px;
+                font-size: 14px;
+            }
+
+            .financial-table th,
+            .financial-table td {
+                padding: 8px;
             }
 
             .financial-input {
-                width: 70px;
+                max-width: 80px;
                 font-size: 12px;
             }
         }
 
         @media (max-width: 480px) {
             .financial-table {
-                font-size: 11px;
+                font-size: 12px;
+            }
+
+            .financial-table th,
+            .financial-table td {
+                padding: 6px;
             }
 
             .financial-input {
-                width: 60px;
+                max-width: 60px;
                 font-size: 11px;
             }
-        }
 
-        .financial-input {
-            width: 100px;
-            padding: 5px;
-            font-size: 16px;
+            .tier-input-group {
+                min-width: 60px;
+            }
         }
 
         @media (max-width: 768px) {
