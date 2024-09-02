@@ -1202,7 +1202,7 @@
                 <p><strong>Note:</strong> The default values shown are our financial goals for Among Wooks 2025. These targets are based on our current projections and may be subject to change as we continue planning.</p>
             </div>
 
-            <p style="color: red; font-weight: bold; margin-bottom: 10px;">For optimal viewing, please rotate your device to landscape mode.</p>
+            <p id="mobileNote" style="display: none; color: red; font-weight: bold; margin-bottom: 10px;">For optimal viewing, please rotate your device to landscape mode.</p>
 
             <div class="financial-table-container">
                 <table class="financial-table">
@@ -1755,6 +1755,21 @@
             
             return revenue;
         }
+
+        function checkMobile() {
+            const mobileNote = document.getElementById('mobileNote');
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                mobileNote.style.display = 'block';
+            } else {
+                mobileNote.style.display = 'none';
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', checkMobile);
+
+        // Optionally, call the function when the window is resized
+        window.addEventListener('resize', checkMobile);
     </script>
 </body>
 </html>
