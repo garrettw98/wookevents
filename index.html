@@ -92,7 +92,7 @@
 
         @media (max-width: 768px) {
             .chart-container {
-                height: 250px; /* Slightly smaller height for mobile devices */
+                height: 300px; /* Slightly smaller height for mobile devices */
             }
         }
 
@@ -1060,6 +1060,12 @@
             height: 400px; /* Increased height for better visibility */
         }
 
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px; /* Slightly smaller height for mobile devices */
+            }
+        }
+
         .ticket-section {
             display: flex;
             align-items: flex-start;
@@ -1578,8 +1584,10 @@
 
             <p class="note">Note: These calculations update in real-time based on the inputs provided. Adjust the values to explore different scenarios and their potential impact on Among Wooks 2025.</p>
 
-            <div class="chart-container">
-                <canvas id="earlyBirdReturnsChart"></canvas>
+            <div class="chart-container-wrapper">
+                <div class="chart-container">
+                    <canvas id="earlyBirdReturnsChart"></canvas>
+                </div>
             </div>
         </section>
 
@@ -1620,6 +1628,7 @@
         <p>Contact us: <a href="mailto:contact@wookevents.com" class="contact-link">contact@wookevents.com</a></p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function initializeTiers() {
             console.log("Initializing tiers...");
@@ -1868,8 +1877,16 @@
             const labels = [];
 
             // Get the highest tier price
-            const tiers = document.querySelectorAll('.tier-row');
-            const highestTierPrice = Number(tiers[tiers.length - 1].querySelector('.tier-price').value) || 0;
+            const tiers = document.querySelectorAll('#ticketTiers tr');
+            let highestTierPrice = earlyBirdPrice; // Default to early bird price if no tiers found
+
+            if (tiers.length > 0) {
+                const lastTier = tiers[tiers.length - 1];
+                const priceInput = lastTier.querySelector('.tier-price');
+                if (priceInput) {
+                    highestTierPrice = Number(priceInput.value) || highestTierPrice;
+                }
+            }
 
             for (let i = 0; i <= venueCapacity; i += step) {
                 labels.push(i);
@@ -1885,11 +1902,12 @@
                 }
             }
 
-            if (earlyBirdReturnsChart) {
-                earlyBirdReturnsChart.destroy();
+            // Check if the chart instance exists and is a Chart object before destroying
+            if (window.earlyBirdReturnsChart instanceof Chart) {
+                window.earlyBirdReturnsChart.destroy();
             }
 
-            earlyBirdReturnsChart = new Chart(ctx, {
+            window.earlyBirdReturnsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -1958,13 +1976,24 @@
             let revenue = 0;
             let remainingTickets = ticketCount;
             const tierRows = document.querySelectorAll('#ticketTiers tr');
+            
+            if (tierRows.length === 0) {
+                // If no tiers are found, use a default price
+                return ticketCount * 200; // Assuming a default price of $200
+            }
+
             const lastTierIndex = tierRows.length - 1;
-            const highestTierPrice = Number(tierRows[lastTierIndex].querySelector('.tier-price').value);
+            const highestTierPrice = Number(tierRows[lastTierIndex].querySelector('.tier-price').value) || 200; // Default to 200 if value is invalid
             
             for (let i = 0; i < tierRows.length && remainingTickets > 0; i++) {
                 const row = tierRows[i];
-                const qty = Number(row.querySelector('.tier-qty').value);
-                const price = Number(row.querySelector('.tier-price').value);
+                const qtyInput = row.querySelector('.tier-qty');
+                const priceInput = row.querySelector('.tier-price');
+                
+                if (!qtyInput || !priceInput) continue; // Skip this iteration if inputs are not found
+
+                const qty = Number(qtyInput.value) || 0;
+                const price = Number(priceInput.value) || 0;
                 
                 const soldInThisTier = Math.min(remainingTickets, qty);
                 revenue += soldInThisTier * price;
