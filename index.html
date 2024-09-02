@@ -1318,6 +1318,33 @@
             height: 30px;
             margin-right: 5px;
         }
+
+        .financial-table td {
+            padding: 10px;
+            vertical-align: top;
+            border: 1px solid #ddd;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 200px; /* Adjust this value as needed */
+        }
+
+        @media (max-width: 768px) {
+            .financial-table td {
+                font-size: 14px;
+                padding: 8px;
+                max-width: 150px; /* Adjust for smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .financial-table td {
+                font-size: 12px;
+                padding: 6px;
+                max-width: 100px; /* Further adjust for very small screens */
+            }
+        }
     </style>
 </head>
 <body>
