@@ -1236,6 +1236,35 @@
         /* .total-row td {
             border-top: 2px solid #000;
         } */
+
+        .financial-table td {
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        .financial-table input[type="number"] {
+            width: 100px;
+            padding: 5px;
+            margin-right: 5px;
+        }
+
+        .tier-row td {
+            padding: 15px 10px;
+        }
+
+        .tier-row input[type="number"] {
+            width: 80px;
+            margin-right: 10px;
+        }
+
+        .tier-total {
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .add-tier-btn, .remove-tier-btn {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -1464,26 +1493,27 @@
                             <td><input type="number" id="venueCapacity" class="financial-input" value="999" min="0"></td>
                             <td></td>
                         </tr>
+                        <tr class="section-header">
+                            <td>Tier</td>
+                            <td>Quantity & Price</td>
+                            <td>Total</td>
+                        </tr>
                         <tbody id="ticketTiers">
                             <!-- Ticket tiers will be dynamically added here -->
                         </tbody>
                         <tr>
-                            <td>Add/Remove Tier</td>
-                            <td>
+                            <td colspan="3">
                                 <button class="tier-btn add-tier-btn" onclick="addTier()">+</button>
                                 <button class="tier-btn remove-tier-btn" onclick="removeTier()">-</button>
                             </td>
-                            <td></td>
                         </tr>
                         <tr class="total-row">
                             <td>Total Tickets</td>
-                            <td></td>
-                            <td id="totalTickets"></td>
+                            <td id="totalTickets" colspan="2"></td>
                         </tr>
                         <tr class="total-row">
                             <td>Total Revenue</td>
-                            <td></td>
-                            <td id="totalRevenue"></td>
+                            <td id="totalRevenue" colspan="2"></td>
                         </tr>
                         <tr class="section-header">
                             <td colspan="3">Profit Calculation and Distribution</td>
@@ -1502,7 +1532,7 @@
                             <td colspan="3"><strong>Profit Distribution</strong></td>
                         </tr>
                         <tr>
-                            <td>Early Bird Share (50% of profit, capped at ticket price)</td>
+                            <td>Early Bird Share<br>(50% of profit, capped at ticket price)</td>
                             <td id="earlyBirdShare"></td>
                             <td></td>
                         </tr>
@@ -1958,32 +1988,10 @@
             ticketTiers.innerHTML = '';
 
             // Add Early Bird tier
-            const earlyBirdQty = 100;
-            const earlyBirdPrice = 200;
-            addTier('Early Bird', earlyBirdQty, earlyBirdPrice);
-
-            // Calculate Tier 1 quantity
-            const tier1Price = 225;
-            const artistCost = Number(document.getElementById('artistCost').value) || 30000;
-            const equipmentCost = Number(document.getElementById('equipmentCost').value) || 15000;
-            const miscCost = Number(document.getElementById('miscCost').value) || 10000;
-            const venueCost = Number(document.getElementById('venueCost').value) || 10;
-            const otherVarCost = Number(document.getElementById('otherVarCost').value) || 25;
-            const festivalDays = Number(document.getElementById('festivalDays').value) || 3;
-
-            const fixedCosts = artistCost + equipmentCost + miscCost;
-            const variableCostPerTicket = venueCost * festivalDays + otherVarCost;
-
-            const earlyBirdRevenue = earlyBirdQty * earlyBirdPrice;
-            const earlyBirdVariableCosts = earlyBirdQty * variableCostPerTicket;
-            const remainingCostsToBreakEven = fixedCosts + earlyBirdVariableCosts - earlyBirdRevenue;
-            const profitNeededForFullRefund = earlyBirdRevenue * 2; // This is the key change
-
-            const profitPerTier1Ticket = tier1Price - variableCostPerTicket;
-            const tier1QtyForFullRefund = Math.ceil((remainingCostsToBreakEven + profitNeededForFullRefund) / profitPerTier1Ticket);
+            addTier('Early Bird', 100, 200);
 
             // Add Tier 1
-            addTier('Tier 1', tier1QtyForFullRefund, tier1Price);
+            addTier('Tier 1', 200, 225);
 
             updateCalculations();
         }
@@ -2028,7 +2036,6 @@
             });
 
             updateCalculations();
-            updateEarlyBirdReturnsChart(/* pass necessary parameters */);
         }
 
         function removeTier() {
@@ -2038,7 +2045,6 @@
             if (tiers.length > 1) {  // Ensure we always have at least one tier
                 ticketTiers.removeChild(tiers[tiers.length - 1]);
                 updateCalculations();
-                updateEarlyBirdReturnsChart(/* pass necessary parameters */);
             } else {
                 alert("Cannot remove the last tier.");
             }
