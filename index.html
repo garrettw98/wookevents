@@ -1244,7 +1244,7 @@
         }
 
         .financial-table .tier-row td {
-            padding: 10px;
+            padding: 15px 10px; /* Increased vertical padding */
         }
 
         .financial-table .tier-row input[type="number"] {
@@ -1260,6 +1260,30 @@
 
         .add-tier-btn, .remove-tier-btn {
             margin-right: 10px;
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+
+        .financial-input {
+            width: 100px;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        #ticketTiers .tier-row {
+            border-bottom: 1px solid #ddd; /* Add bottom border to each tier row */
+        }
+
+        #ticketTiers .tier-row:last-child {
+            border-bottom: none; /* Remove bottom border from last tier row */
+        }
+
+        #ticketTiers .tier-row td {
+            padding: 15px 10px; /* Consistent padding for all cells in tier rows */
+        }
+
+        #ticketTiers .tier-row input[type="number"] {
+            margin-bottom: 5px; /* Add some space between inputs when they wrap */
         }
     </style>
 </head>
@@ -1489,7 +1513,7 @@
                             <td><input type="number" id="venueCapacity" class="financial-input" value="999" min="0"></td>
                             <td></td>
                         </tr>
-                        <tr class="section-header">
+                        <tr>
                             <td>Tier</td>
                             <td>Quantity & Price</td>
                             <td>Total</td>
@@ -1505,11 +1529,13 @@
                         </tr>
                         <tr class="total-row">
                             <td>Total Tickets</td>
-                            <td id="totalTickets" colspan="2"></td>
+                            <td></td>
+                            <td id="totalTickets"></td>
                         </tr>
                         <tr class="total-row">
                             <td>Total Revenue</td>
-                            <td id="totalRevenue" colspan="2"></td>
+                            <td></td>
+                            <td id="totalRevenue"></td>
                         </tr>
                         <tr class="section-header">
                             <td colspan="3">Profit Calculation and Distribution</td>
