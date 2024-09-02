@@ -1424,31 +1424,8 @@
             console.log("Tiers initialized.");
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM content loaded.");
-            
-            // Use a timeout to ensure this runs after any other scripts
-            setTimeout(() => {
-                console.log("Running initializeTiers...");
-                initializeTiers();
-
-                // Add event listeners to all inputs
-                document.querySelectorAll('input').forEach(input => {
-                    input.addEventListener('input', updateCalculations);
-                });
-
-                // Add event listener for the add tier button
-                document.querySelector('.add-tier-btn').addEventListener('click', () => addTier());
-
-                // Add event listener for the remove tier button
-                document.querySelector('.remove-tier-btn').addEventListener('click', removeTier);
-                
-                console.log("Initialization complete.");
-            }, 0);
-        });
-
         function addTier(name = null, qty = null, price = null) {
-            console.log(`Adding tier: ${name}, ${qty}, ${price}`);
+            console.log("Adding tier...");
             const ticketTiers = document.getElementById('ticketTiers');
             const existingTiers = ticketTiers.querySelectorAll('tr');
             const newTierIndex = existingTiers.length;
@@ -1456,19 +1433,11 @@
             if (name === null) {
                 name = `Tier ${newTierIndex + 1}`;
             }
-
-            if (price === null) {
-                if (newTierIndex === 0) {
-                    price = 200;
-                } else {
-                    const previousTier = existingTiers[newTierIndex - 1];
-                    const previousPrice = Number(previousTier.querySelector('.tier-price').value);
-                    price = previousPrice + 25;
-                }
-            }
-
             if (qty === null) {
                 qty = 100;
+            }
+            if (price === null) {
+                price = newTierIndex === 0 ? 200 : Number(existingTiers[newTierIndex - 1].querySelector('.tier-price').value) + 25;
             }
 
             const newTier = document.createElement('tr');
@@ -1499,13 +1468,37 @@
         }
 
         function removeTier() {
+            console.log("Removing tier...");
             const ticketTiers = document.getElementById('ticketTiers');
             const existingTiers = ticketTiers.querySelectorAll('tr');
-            if (existingTiers.length > 1) {  // Ensure at least one tier remains
+            if (existingTiers.length > 2) {  // Ensure at least two tiers remain (Early Bird and Tier 1)
                 ticketTiers.removeChild(existingTiers[existingTiers.length - 1]);
                 updateCalculations();
+            } else {
+                console.log("Cannot remove default tiers.");
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM content loaded.");
+            
+            // Use a timeout to ensure this runs after any other scripts
+            setTimeout(() => {
+                console.log("Running initializeTiers...");
+                initializeTiers();
+
+                // Add event listeners to all inputs
+                document.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', updateCalculations);
+                });
+
+                // Add event listeners for add and remove tier buttons
+                document.querySelector('.add-tier-btn').addEventListener('click', () => addTier());
+                document.querySelector('.remove-tier-btn').addEventListener('click', removeTier);
+                
+                console.log("Initialization complete.");
+            }, 0);
+        });
 
         function updateCalculations() {
             const artistCost = Number(document.getElementById('artistCost').value);
