@@ -1447,11 +1447,11 @@
                 <td>
                     <div class="tier-inputs">
                         <div>
-                            <label for="tier-qty-${newTierIndex}">Quantity:</label>
+                            <label for="tier-qty-${newTierIndex}" class="tier-label">Quantity:</label>
                             <input type="number" id="tier-qty-${newTierIndex}" class="financial-input tier-qty" value="${qty}" min="0">
                         </div>
                         <div>
-                            <label for="tier-price-${newTierIndex}">Price ($):</label>
+                            <label for="tier-price-${newTierIndex}" class="tier-label">Price ($):</label>
                             <input type="number" id="tier-price-${newTierIndex}" class="financial-input tier-price" value="${price}" min="0">
                         </div>
                     </div>
@@ -1758,17 +1758,40 @@
 
         function checkMobile() {
             const mobileNote = document.getElementById('mobileNote');
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
                 mobileNote.style.display = 'block';
+                
+                // Update labels for mobile
+                document.querySelectorAll('.tier-label').forEach(label => {
+                    if (label.textContent.includes('Quantity')) {
+                        label.textContent = '#:';
+                    } else if (label.textContent.includes('Price')) {
+                        label.textContent = '$:';
+                    }
+                });
             } else {
                 mobileNote.style.display = 'none';
+                
+                // Restore original labels for desktop
+                document.querySelectorAll('.tier-label').forEach(label => {
+                    if (label.textContent === '#:') {
+                        label.textContent = 'Quantity:';
+                    } else if (label.textContent === '$:') {
+                        label.textContent = 'Price ($):';
+                    }
+                });
             }
         }
 
         // Call the function when the page loads
-        document.addEventListener('DOMContentLoaded', checkMobile);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkMobile();
+            initializeTiers();
+        });
 
-        // Optionally, call the function when the window is resized
+        // Call the function when the window is resized
         window.addEventListener('resize', checkMobile);
     </script>
 </body>
