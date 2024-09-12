@@ -955,7 +955,7 @@
             const totalRevenue = calculateRevenue(ticketTiers, totalTicketSales, ticketTiers[ticketTiers.length - 1].price);
             const totalFluidCost = fluidCost * totalTicketSales;
             const totalVenueCost = venueCostPerDay * eventLength * totalTicketSales;
-            const stripeFeePercentage = 0.0029;
+            const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
             const totalStripeFee = totalTicketSales * stripeFeeFixed + totalRevenue * stripeFeePercentage;
             const eventCosts = fixedCosts.total + totalFluidCost + totalVenueCost + totalStripeFee;
@@ -1045,7 +1045,7 @@
                     </tr>
                     <tr>
                         <td></td>
-                        <td>Stripe Fees (0.29% + $0.30/ticket)</td>
+                        <td>Stripe Fees (2.9% + $0.30/ticket)</td>
                         <td>$${totalStripeFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     </tr>
                     <tr class="total-row">
@@ -1096,7 +1096,7 @@
             let earlyBirdQuantity = ticketTiers[0].quantity;
             let earlyBirdPrice = ticketTiers[0].price;
             let earlyBirdMaxProfit = earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity;
-            const stripeFeePercentage = 0.0029;
+            const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
             const totalVariableCost = fluidCost + (venueCostPerDay * eventLength) + stripeFeeFixed;
 
