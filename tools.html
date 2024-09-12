@@ -1098,13 +1098,13 @@
             let earlyBirdMaxProfit = earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity;
             const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
-            const totalVariableCost = fluidCost + (venueCostPerDay * eventLength) + stripeFeeFixed;
 
             // Sell all tickets from existing tiers
             for (let i = 0; i < ticketTiers.length - 1; i++) {
                 const tier = ticketTiers[i];
                 totalRevenue += tier.quantity * tier.price;
-                totalCost += totalVariableCost * tier.quantity;
+                totalCost += (fluidCost + venueCostPerDay * eventLength + stripeFeeFixed) * tier.quantity;
+                totalCost += tier.quantity * tier.price * stripeFeePercentage; // Add Stripe percentage fee
                 ticketsSold += tier.quantity;
             }
 
@@ -1113,7 +1113,8 @@
 
             while (true) {
                 totalRevenue += newTierPrice;
-                totalCost += totalVariableCost + (newTierPrice * stripeFeePercentage);
+                totalCost += fluidCost + venueCostPerDay * eventLength + stripeFeeFixed;
+                totalCost += newTierPrice * stripeFeePercentage; // Add Stripe percentage fee
                 ticketsSold++;
 
                 let totalProfit = totalRevenue - totalCost;
