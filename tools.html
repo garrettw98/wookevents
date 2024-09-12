@@ -1155,7 +1155,7 @@
             document.getElementById(`${tabName}-calculator`).classList.add('active');
             document.getElementById(`${tabName}-calculator`).style.display = 'block';
             document.getElementById(`${tabName}-results`).classList.add('active');
-            document.getElementById(`${tabName}-results`).style.display = 'block';
+            document.getElementById(`${tabName}-results`).style.display = 'flex';
             
             if (tabName === 'lineup') {
                 updateControls();
@@ -1171,13 +1171,15 @@
         window.addEventListener('load', function() {
             console.log('Page loaded, initializing tabs and chart');
             switchTab('lineup'); // Start with the lineup tab
-        });
-
-        // Add event listeners for all inputs
-        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Add event listeners for all inputs in the profitability calculator
             document.querySelectorAll('#profitability-calculator input').forEach(input => {
                 input.addEventListener('change', updateCharts);
             });
+            
+            // Add event listeners for the Add and Remove Tier buttons
+            document.getElementById('addTier').addEventListener('click', addTier);
+            document.getElementById('removeTier').addEventListener('click', removeTier);
         });
 
         function addTier() {
@@ -1231,7 +1233,10 @@
             document.getElementById('addTier').addEventListener('click', addTier);
             document.getElementById('removeTier').addEventListener('click', removeTier);
             
-            // ... existing event listeners ...
+            // Add event listeners for all inputs in the profitability calculator
+            document.querySelectorAll('#profitability-calculator input').forEach(input => {
+                input.addEventListener('change', updateCharts);
+            });
         });
     </script>
 </body>
