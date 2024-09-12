@@ -861,29 +861,19 @@
             }
 
             const venueCapacity = parseInt(document.getElementById('venueCapacity').value) || 1000;
-            const ticketTiers = [];
-            for (let i = 0; i < tierCount; i++) {
-                const tierName = i === 0 ? 'earlyBird' : `tier${i}`;
-                const quantityElement = document.getElementById(`${tierName}Quantity`);
-                const priceElement = document.getElementById(`${tierName}Price`);
-                if (quantityElement && priceElement) {
-                    const quantity = parseInt(quantityElement.value);
-                    const price = parseFloat(priceElement.value);
-                    ticketTiers.push({ quantity: isNaN(quantity) ? 0 : quantity, price: isNaN(price) ? 0 : price });
-                }
-            }
-
-            const earlyBirdPrice = ticketTiers[0].price;
-            const earlyBirdQuantity = ticketTiers[0].quantity;
-            const highestTierPrice = ticketTiers[ticketTiers.length - 1].price;
+            const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
             const artistCost = parseFloat(document.getElementById('artistCost').value);
             const equipmentCost = parseFloat(document.getElementById('equipmentCost').value);
             const miscCost = parseFloat(document.getElementById('miscCost').value);
             const fluidCost = parseFloat(document.getElementById('fluidCost').value);
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
-            const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
             const earlyBirdProfitShare = parseFloat(document.getElementById('earlyBirdProfitShare').value) / 100;
             const earlyBirdMaxReturn = parseFloat(document.getElementById('earlyBirdMaxReturn').value) / 100;
+
+            const stripeFeePercentage = 0.029; // 2.9%
+            const stripeFeeFixed = 0.30;
+
+            const fixedCosts = artistCost + equipmentCost + miscCost;
 
             const labels = [];
             const earlyBirdReturnData = [];
@@ -892,13 +882,10 @@
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
                 labels.push(i);
                 const revenue = calculateRevenue(ticketTiers, i, highestTierPrice);
-                const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
                 const totalVariableCost = (fluidCost + venueCostPerDay * eventLength) * i;
-                const stripeFeePercentage = 0.029; // 2.9%
-                const stripeFeeFixed = 0.30;
-                const totalStripeFee = i * (stripeFeeFixed + (revenue * stripeFeePercentage));
-                const costs = fixedCosts.total + totalVariableCost + totalStripeFee;
-                const totalProfit = Math.max(0, revenue - costs);
+                const totalStripeFee = i * stripeFeeFixed + revenue * stripeFeePercentage;
+                const totalCost = fixedCosts + totalVariableCost + totalStripeFee;
+                const totalProfit = Math.max(0, revenue - totalCost);
                 
                 const earlyBirdMaxProfit = earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity;
                 let earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
@@ -948,21 +935,21 @@
             const earlyBirdProfitShare = parseFloat(document.getElementById('earlyBirdProfitShare').value) / 100;
             const earlyBirdMaxReturn = parseFloat(document.getElementById('earlyBirdMaxReturn').value) / 100;
 
-            const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
-            
+            const fixedCosts = artistCost + equipmentCost + miscCost;
+            const stripeFeePercentage = 0.029; // 2.9%
+            const stripeFeeFixed = 0.30;
+
             // Calculate breakeven points
-            const companyBreakeven = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, 'company');
-            const earlyBirdStartProfit = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, 'earlyBirdStart');
-            const earlyBirdFullReturn = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, 'earlyBirdFull');
+            const companyBreakeven = calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, 'company');
+            const earlyBirdStartProfit = calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, 'earlyBirdStart');
+            const earlyBirdFullReturn = calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, 'earlyBirdFull');
 
             const totalTicketSales = Math.min(ticketTiers.reduce((sum, tier) => sum + tier.quantity, 0), venueCapacity);
             const totalRevenue = calculateRevenue(ticketTiers, totalTicketSales, ticketTiers[ticketTiers.length - 1].price);
             const totalFluidCost = fluidCost * totalTicketSales;
             const totalVenueCost = venueCostPerDay * eventLength * totalTicketSales;
-            const stripeFeePercentage = 0.029; // 2.9%
-            const stripeFeeFixed = 0.30;
             const totalStripeFee = totalTicketSales * stripeFeeFixed + totalRevenue * stripeFeePercentage;
-            const eventCosts = fixedCosts.total + totalFluidCost + totalVenueCost + totalStripeFee;
+            const eventCosts = fixedCosts + totalFluidCost + totalVenueCost + totalStripeFee;
             let totalProfit = Math.max(0, totalRevenue - eventCosts);
 
             const earlyBirdQuantity = ticketTiers[0].quantity;
@@ -1029,17 +1016,17 @@
                     <tr>
                         <td>Fixed Costs</td>
                         <td>Artist Cost</td>
-                        <td>$${fixedCosts.artistCost.toLocaleString()}</td>
+                        <td>$${artistCost.toLocaleString()}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td>Equipment Cost</td>
-                        <td>$${fixedCosts.equipmentCost.toLocaleString()}</td>
+                        <td>$${equipmentCost.toLocaleString()}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td>Miscellaneous Cost</td>
-                        <td>$${fixedCosts.miscCost.toLocaleString()}</td>
+                        <td>$${miscCost.toLocaleString()}</td>
                     </tr>
                     <tr>
                         <td>Variable Costs</td>
@@ -1088,64 +1075,38 @@
             console.log('Profit breakdown updated:', profitBreakdownElement.innerHTML.substring(0, 100) + '...');
         }
 
-        function calculateFixedCosts(artistCost, equipmentCost, miscCost) {
-            return {
-                artistCost,
-                equipmentCost,
-                miscCost,
-                total: artistCost + equipmentCost + miscCost
-            };
-        }
-
         function calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, breakEvenType) {
             let totalRevenue = 0;
             let totalCost = fixedCosts;
             let ticketsSold = 0;
             let earlyBirdQuantity = ticketTiers[0].quantity;
-            let earlyBirdPrice = ticketTiers[0].price;
             const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
 
-            // Sell all tickets from existing tiers
             for (let i = 0; i < ticketTiers.length; i++) {
                 const tier = ticketTiers[i];
                 const tierSales = Math.min(tier.quantity || Infinity, earlyBirdQuantity - ticketsSold);
-                totalRevenue += tierSales * tier.price;
-                totalCost += (fluidCost + venueCostPerDay * eventLength + stripeFeeFixed) * tierSales;
-                totalCost += tierSales * tier.price * stripeFeePercentage; // Add Stripe percentage fee
-                ticketsSold += tierSales;
+                
+                for (let j = 0; j < tierSales; j++) {
+                    totalRevenue += tier.price;
+                    totalCost += fluidCost + venueCostPerDay * eventLength + stripeFeeFixed + (tier.price * stripeFeePercentage);
+                    ticketsSold++;
 
-                let totalProfit = totalRevenue - totalCost;
+                    let totalProfit = totalRevenue - totalCost;
 
-                if (breakEvenType === 'company' && totalProfit > 0) {
-                    return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
-                    return ticketsSold;
-                }
+                    if (breakEvenType === 'company' && totalProfit > 0) {
+                        return ticketsSold;
+                    } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
+                        return ticketsSold;
+                    }
 
-                if (ticketsSold >= earlyBirdQuantity) {
-                    break;
-                }
-            }
-
-            // Continue selling tickets at the highest tier price if needed
-            const highestTierPrice = ticketTiers[ticketTiers.length - 1].price;
-            while (ticketsSold < earlyBirdQuantity) {
-                totalRevenue += highestTierPrice;
-                totalCost += fluidCost + venueCostPerDay * eventLength + stripeFeeFixed;
-                totalCost += highestTierPrice * stripeFeePercentage; // Add Stripe percentage fee
-                ticketsSold++;
-
-                let totalProfit = totalRevenue - totalCost;
-
-                if (breakEvenType === 'company' && totalProfit > 0) {
-                    return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
-                    return ticketsSold;
+                    if (ticketsSold >= earlyBirdQuantity && breakEvenType === 'earlyBirdFull') {
+                        return ticketsSold;
+                    }
                 }
             }
 
-            return ticketsSold; // This should never be reached for 'company' or 'earlyBirdStart'
+            return ticketsSold; // This should only be reached for 'earlyBirdFull' if early bird quantity exceeds total tickets
         }
 
         function formatBreakevenDisplay(ticketTiers, breakeven) {
