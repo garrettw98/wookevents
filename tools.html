@@ -846,19 +846,19 @@
                 const quantityElement = document.getElementById(`${tierName}Quantity`);
                 const priceElement = document.getElementById(`${tierName}Price`);
                 if (quantityElement && priceElement) {
-                    const quantity = parseInt(quantityElement.value) || 0;
-                    const price = parseFloat(priceElement.value) || 0;
-                    ticketTiers.push({ quantity, price });
+                    const quantity = parseInt(quantityElement.value);
+                    const price = parseFloat(priceElement.value);
+                    ticketTiers.push({ quantity: isNaN(quantity) ? 0 : quantity, price: isNaN(price) ? 0 : price });
                 }
             }
 
             const earlyBirdPrice = ticketTiers[0].price;
             const highestTierPrice = ticketTiers[ticketTiers.length - 1].price;
-            const artistCost = parseFloat(document.getElementById('artistCost').value) || 0;
-            const equipmentCost = parseFloat(document.getElementById('equipmentCost').value) || 0;
-            const miscCost = parseFloat(document.getElementById('miscCost').value) || 0;
-            const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 25;
-            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 10;
+            const artistCost = parseFloat(document.getElementById('artistCost').value);
+            const equipmentCost = parseFloat(document.getElementById('equipmentCost').value);
+            const miscCost = parseFloat(document.getElementById('miscCost').value);
+            const fluidCost = parseFloat(document.getElementById('fluidCost').value);
+            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
 
             const labels = [];
@@ -908,8 +908,8 @@
             console.log('Updating profit breakdown');
 
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
-            const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 25;
-            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 10;
+            const fluidCost = parseFloat(document.getElementById('fluidCost').value);
+            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
 
             const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
             
