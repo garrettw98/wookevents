@@ -1105,47 +1105,47 @@
             let earlyBirdPrice = ticketTiers[0].price;
             const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
+            const earlyBirdProfitShare = parseFloat(document.getElementById('earlyBirdProfitShare').value) / 100;
+            const earlyBirdMaxReturn = parseFloat(document.getElementById('earlyBirdMaxReturn').value) / 100;
 
-            // Sell all tickets from existing tiers
-            for (let i = 0; i < ticketTiers.length; i++) {
-                const tier = ticketTiers[i];
-                const tierSales = Math.min(tier.quantity || Infinity, earlyBirdQuantity - ticketsSold);
-                totalRevenue += tierSales * tier.price;
-                totalCost += (fluidCost + venueCostPerDay * eventLength) * tierSales;
-                totalCost += tierSales * stripeFeeFixed + (tierSales * tier.price * stripeFeePercentage); // Corrected Stripe fee calculation
-                ticketsSold += tierSales;
-
-                let totalProfit = totalRevenue - totalCost;
-
-                if (breakEvenType === 'company' && totalProfit > 0) {
-                    return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
-                    return ticketsSold;
+            while (true) {
+                // Determine which tier we're currently selling
+                let currentTierIndex = 0;
+                let currentTierSold = 0;
+                for (let i = 0; i < ticketTiers.length; i++) {
+                    if (ticketsSold < (ticketTiers[i].quantity || Infinity)) {
+                        currentTierIndex = i;
+                        currentTierSold = ticketsSold - (i > 0 ? ticketTiers[i-1].quantity : 0);
+                        break;
+                    }
                 }
 
-                if (ticketsSold >= earlyBirdQuantity) {
-                    break;
-                }
-            }
+                const currentTierPrice = ticketTiers[currentTierIndex].price;
 
-            // Continue selling tickets at the highest tier price if needed
-            const highestTierPrice = ticketTiers[ticketTiers.length - 1].price;
-            while (ticketsSold < earlyBirdQuantity) {
-                totalRevenue += highestTierPrice;
+                // Sell one more ticket
+                totalRevenue += currentTierPrice;
                 totalCost += fluidCost + venueCostPerDay * eventLength;
-                totalCost += stripeFeeFixed + (highestTierPrice * stripeFeePercentage); // Corrected Stripe fee calculation
+                totalCost += stripeFeeFixed + (currentTierPrice * stripeFeePercentage);
                 ticketsSold++;
 
                 let totalProfit = totalRevenue - totalCost;
+                let earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity);
+                let companyProfit = totalProfit - earlyBirdProfit;
 
-                if (breakEvenType === 'company' && totalProfit > 0) {
+                if (breakEvenType === 'company' && companyProfit > 0) {
                     return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
+                } else if (breakEvenType === 'earlyBirdStart' && earlyBirdProfit > 0) {
+                    return ticketsSold;
+                } else if (breakEvenType === 'earlyBirdFull' && earlyBirdProfit >= earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity) {
                     return ticketsSold;
                 }
-            }
 
-            return ticketsSold; // This should never be reached for 'company' or 'earlyBirdStart'
+                // Safety check to prevent infinite loop
+                if (ticketsSold > 1000000) {
+                    console.error('Breakeven calculation exceeded 1,000,000 tickets');
+                    return Infinity;
+                }
+            }
         }
 
         function formatBreakevenDisplay(ticketTiers, breakeven) {
