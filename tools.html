@@ -889,14 +889,15 @@
             const earlyBirdReturnData = [];
             const companyRevenueData = [];
 
+            const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
+
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
                 labels.push(i);
                 const revenue = calculateRevenue(ticketTiers, i, highestTierPrice);
-                const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
                 const totalVariableCost = (fluidCost + venueCostPerDay * eventLength) * i;
                 const stripeFeePercentage = 0.029; // 2.9%
                 const stripeFeeFixed = 0.30;
-                const totalStripeFee = i * (stripeFeeFixed + (revenue * stripeFeePercentage));
+                const totalStripeFee = i * stripeFeeFixed + revenue * stripeFeePercentage;
                 const costs = fixedCosts.total + totalVariableCost + totalStripeFee;
                 const totalProfit = Math.max(0, revenue - costs);
                 
@@ -904,7 +905,7 @@
                 let earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
                 let companyProfit = totalProfit - earlyBirdProfit;
 
-                earlyBirdReturnData.push(earlyBirdProfit / earlyBirdQuantity);
+                earlyBirdReturnData.push(earlyBirdQuantity > 0 ? earlyBirdProfit / earlyBirdQuantity : 0);
                 companyRevenueData.push(companyProfit);
             }
 
