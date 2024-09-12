@@ -774,8 +774,16 @@
         let tierCount = 2; // Start with Early Bird and Tier 1
 
         function createCharts() {
+            console.log('Creating charts');
             const earlyBirdCtx = document.getElementById('earlyBirdReturnChart').getContext('2d');
             const companyRevenueCtx = document.getElementById('companyRevenueChart').getContext('2d');
+
+            if (earlyBirdReturnChart) {
+                earlyBirdReturnChart.destroy();
+            }
+            if (companyRevenueChart) {
+                companyRevenueChart.destroy();
+            }
 
             earlyBirdReturnChart = new Chart(earlyBirdCtx, {
                 type: 'line',
@@ -846,6 +854,10 @@
 
         function updateCharts() {
             console.log('Updating charts');
+
+            if (!earlyBirdReturnChart || !companyRevenueChart) {
+                createCharts();
+            }
 
             const venueCapacity = parseInt(document.getElementById('venueCapacity').value) || 1000;
             const ticketTiers = [];
@@ -1160,9 +1172,6 @@
             if (tabName === 'lineup') {
                 updateControls();
             } else if (tabName === 'profitability') {
-                if (!earlyBirdReturnChart || !companyRevenueChart) {
-                    createCharts();
-                }
                 updateCharts();
             }
         }
