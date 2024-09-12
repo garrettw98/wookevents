@@ -475,6 +475,14 @@
                         <label for="miscCost">Miscellaneous Cost</label>
                         <input type="number" id="miscCost" min="0" value="10000" step="500">
                     </div>
+                    <div class="input-group">
+                        <label for="fluidCost">Fluid Cost (per ticket)</label>
+                        <input type="number" id="fluidCost" min="0" value="25" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="venueCost">Venue Cost (per ticket per day)</label>
+                        <input type="number" id="venueCost" min="0" value="10" step="1">
+                    </div>
                     <div id="ticketTiers">
                         <div class="ticket-tier">
                             <h4>Early Bird</h4>
@@ -849,8 +857,8 @@
             const artistCost = parseFloat(document.getElementById('artistCost').value) || 0;
             const equipmentCost = parseFloat(document.getElementById('equipmentCost').value) || 0;
             const miscCost = parseFloat(document.getElementById('miscCost').value) || 0;
-            const fluidCost = 25; // Assuming this is a fixed value
-            const venueCostPerDay = 10; // Venue cost per ticket per day
+            const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 25;
+            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 10;
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
 
             const labels = [];
@@ -900,8 +908,8 @@
             console.log('Updating profit breakdown');
 
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
-            const fluidCost = 25; // Fluid costs per ticket
-            const venueCostPerDay = 10; // Venue cost per ticket per day
+            const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 25;
+            const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 10;
 
             const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
             
