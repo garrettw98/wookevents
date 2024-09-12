@@ -1111,8 +1111,8 @@
                 const tier = ticketTiers[i];
                 const tierSales = Math.min(tier.quantity || Infinity, earlyBirdQuantity - ticketsSold);
                 totalRevenue += tierSales * tier.price;
-                totalCost += (fluidCost + venueCostPerDay * eventLength + stripeFeeFixed) * tierSales;
-                totalCost += tierSales * tier.price * stripeFeePercentage; // Add Stripe percentage fee
+                totalCost += (fluidCost + venueCostPerDay * eventLength) * tierSales;
+                totalCost += tierSales * stripeFeeFixed + (tierSales * tier.price * stripeFeePercentage); // Corrected Stripe fee calculation
                 ticketsSold += tierSales;
 
                 let totalProfit = totalRevenue - totalCost;
@@ -1132,8 +1132,8 @@
             const highestTierPrice = ticketTiers[ticketTiers.length - 1].price;
             while (ticketsSold < earlyBirdQuantity) {
                 totalRevenue += highestTierPrice;
-                totalCost += fluidCost + venueCostPerDay * eventLength + stripeFeeFixed;
-                totalCost += highestTierPrice * stripeFeePercentage; // Add Stripe percentage fee
+                totalCost += fluidCost + venueCostPerDay * eventLength;
+                totalCost += stripeFeeFixed + (highestTierPrice * stripeFeePercentage); // Corrected Stripe fee calculation
                 ticketsSold++;
 
                 let totalProfit = totalRevenue - totalCost;
