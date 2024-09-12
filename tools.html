@@ -955,7 +955,10 @@
             const totalRevenue = calculateRevenue(ticketTiers, totalTicketSales, ticketTiers[ticketTiers.length - 1].price);
             const totalFluidCost = fluidCost * totalTicketSales;
             const totalVenueCost = venueCostPerDay * eventLength * totalTicketSales;
-            const eventCosts = fixedCosts.total + totalFluidCost + totalVenueCost;
+            const stripeFeePercentage = 0.0029;
+            const stripeFeeFixed = 0.30;
+            const totalStripeFee = totalTicketSales * (stripeFeeFixed + (totalRevenue * stripeFeePercentage));
+            const eventCosts = fixedCosts.total + totalFluidCost + totalVenueCost + totalStripeFee;
             let totalProfit = Math.max(0, totalRevenue - eventCosts);
 
             const earlyBirdQuantity = ticketTiers[0].quantity;
@@ -1040,6 +1043,11 @@
                         <td>Venue Costs ($${venueCostPerDay}/ticket/day × ${eventLength} days × ${totalTicketSales})</td>
                         <td>$${totalVenueCost.toLocaleString()}</td>
                     </tr>
+                    <tr>
+                        <td></td>
+                        <td>Stripe Fees (2.9% + $0.30/ticket)</td>
+                        <td>$${totalStripeFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
                     <tr class="total-row">
                         <td></td>
                         <td>Total Event Costs</td>
@@ -1088,7 +1096,9 @@
             let earlyBirdQuantity = ticketTiers[0].quantity;
             let earlyBirdPrice = ticketTiers[0].price;
             let earlyBirdMaxProfit = earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity;
-            const totalVariableCost = fluidCost + (venueCostPerDay * eventLength);
+            const stripeFeePercentage = 0.0029;
+            const stripeFeeFixed = 0.30;
+            const totalVariableCost = fluidCost + (venueCostPerDay * eventLength) + stripeFeeFixed;
 
             // Sell all tickets from existing tiers
             for (let i = 0; i < ticketTiers.length - 1; i++) {
@@ -1103,7 +1113,7 @@
 
             while (true) {
                 totalRevenue += newTierPrice;
-                totalCost += totalVariableCost;
+                totalCost += totalVariableCost + (newTierPrice * stripeFeePercentage);
                 ticketsSold++;
 
                 let totalProfit = totalRevenue - totalCost;
