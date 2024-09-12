@@ -517,6 +517,14 @@
                         <button id="addTier">Add Tier</button>
                         <button id="removeTier">Remove Tier</button>
                     </div>
+                    <div class="input-group">
+                        <label for="earlyBirdProfitShare">Early Bird Profit Share (%)</label>
+                        <input type="number" id="earlyBirdProfitShare" min="0" max="100" value="50" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="earlyBirdMaxReturn">Early Bird Max Return (%)</label>
+                        <input type="number" id="earlyBirdMaxReturn" min="0" value="100" step="1">
+                    </div>
                 </div>
             </div>
         </div>
@@ -860,6 +868,8 @@
             const fluidCost = parseFloat(document.getElementById('fluidCost').value);
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
+            const earlyBirdProfitShare = parseFloat(document.getElementById('earlyBirdProfitShare').value) / 100;
+            const earlyBirdMaxReturn = parseFloat(document.getElementById('earlyBirdMaxReturn').value) / 100;
 
             const labels = [];
             const earlyBirdReturnData = [];
@@ -872,9 +882,12 @@
                 const totalVariableCost = (fluidCost + venueCostPerDay * eventLength) * i;
                 const costs = fixedCosts.total + totalVariableCost;
                 const profit = Math.max(0, revenue - costs);
-                const earlyBirdReturn = Math.min(earlyBirdPrice, profit * 0.5 / ticketTiers[0].quantity);
+                const earlyBirdReturn = Math.min(
+                    earlyBirdPrice * earlyBirdMaxReturn,
+                    profit * earlyBirdProfitShare / ticketTiers[0].quantity
+                );
                 earlyBirdReturnData.push(earlyBirdReturn);
-                companyRevenueData.push(Math.max(0, profit * 0.5));
+                companyRevenueData.push(Math.max(0, profit * (1 - earlyBirdProfitShare)));
             }
 
             earlyBirdReturnChart.data.labels = labels;
@@ -910,12 +923,14 @@
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
             const fluidCost = parseFloat(document.getElementById('fluidCost').value);
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
+            const earlyBirdProfitShare = parseFloat(document.getElementById('earlyBirdProfitShare').value) / 100;
+            const earlyBirdMaxReturn = parseFloat(document.getElementById('earlyBirdMaxReturn').value) / 100;
 
             const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
             
             // Calculate breakeven points
-            const companyBreakeven = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, true);
-            const earlyBirdFullReturn = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, false);
+            const companyBreakeven = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, true, earlyBirdProfitShare, earlyBirdMaxReturn);
+            const earlyBirdFullReturn = calculateBreakeven(ticketTiers, fixedCosts.total, fluidCost, venueCostPerDay, eventLength, false, earlyBirdProfitShare, earlyBirdMaxReturn);
 
             const totalTicketSales = Math.min(ticketTiers.reduce((sum, tier) => sum + tier.quantity, 0), venueCapacity);
             const totalRevenue = calculateRevenue(ticketTiers, totalTicketSales, ticketTiers[ticketTiers.length - 1].price);
@@ -926,7 +941,10 @@
 
             const earlyBirdQuantity = ticketTiers[0].quantity;
             const earlyBirdPrice = ticketTiers[0].price;
-            const earlyBirdReturn = Math.min(earlyBirdPrice, totalProfit * 0.5 / earlyBirdQuantity);
+            const earlyBirdReturn = Math.min(
+                earlyBirdPrice * earlyBirdMaxReturn,
+                totalProfit * earlyBirdProfitShare / earlyBirdQuantity
+            );
             const earlyBirdTotalReturn = earlyBirdReturn * earlyBirdQuantity;
             const remainingProfit = totalProfit - earlyBirdTotalReturn;
 
@@ -1047,7 +1065,7 @@
             };
         }
 
-        function calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, calculateForCompany = true) {
+        function calculateBreakeven(ticketTiers, fixedCosts, fluidCost, venueCostPerDay, eventLength, calculateForCompany = true, earlyBirdProfitShare, earlyBirdMaxReturn) {
             let totalRevenue = 0;
             let totalCost = fixedCosts;
             let ticketsSold = 0;
@@ -1073,9 +1091,12 @@
                 ticketsSold++;
 
                 let profit = totalRevenue - totalCost;
-                let earlyBirdReturn = Math.min(earlyBirdPrice, profit * 0.5 / earlyBirdQuantity);
+                let earlyBirdReturn = Math.min(
+                    earlyBirdPrice * earlyBirdMaxReturn,
+                    profit * earlyBirdProfitShare / earlyBirdQuantity
+                );
                 let earlyBirdTotalReturn = earlyBirdReturn * earlyBirdQuantity;
-                let companyProfit = profit * 0.5;
+                let companyProfit = profit * (1 - earlyBirdProfitShare);
 
                 if (calculateForCompany) {
                     if (companyProfit > 0) {
