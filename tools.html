@@ -862,16 +862,19 @@
 
             const venueCapacity = parseInt(document.getElementById('venueCapacity').value) || 1000;
             const ticketTiers = [];
-            for (let i = 0; i < tierCount; i++) {
-                const tierName = i === 0 ? 'earlyBird' : `tier${i}`;
-                const quantityElement = document.getElementById(`${tierName}Quantity`);
-                const priceElement = document.getElementById(`${tierName}Price`);
+            
+            // Update this part to dynamically get all tiers
+            const tierElements = document.querySelectorAll('.ticket-tier');
+            tierElements.forEach((tierElement, index) => {
+                const tierName = index === 0 ? 'earlyBird' : `tier${index}`;
+                const quantityElement = tierElement.querySelector(`#${tierName}Quantity`);
+                const priceElement = tierElement.querySelector(`#${tierName}Price`);
                 if (quantityElement && priceElement) {
                     const quantity = parseInt(quantityElement.value);
                     const price = parseFloat(priceElement.value);
                     ticketTiers.push({ quantity: isNaN(quantity) ? 0 : quantity, price: isNaN(price) ? 0 : price });
                 }
-            }
+            });
 
             const earlyBirdPrice = ticketTiers[0].price;
             const earlyBirdQuantity = ticketTiers[0].quantity;
@@ -1130,15 +1133,16 @@
                 ticketsSold++;
 
                 let totalProfit = totalRevenue - totalCost;
-                let earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity);
-                let companyProfit = totalProfit - earlyBirdProfit;
 
-                if (breakEvenType === 'company' && companyProfit > 0) {
+                if (breakEvenType === 'company' && totalProfit > 0) {
                     return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdStart' && earlyBirdProfit > 0) {
+                } else if (breakEvenType === 'earlyBirdStart' && totalProfit > 0) {
                     return ticketsSold;
-                } else if (breakEvenType === 'earlyBirdFull' && earlyBirdProfit >= earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity) {
-                    return ticketsSold;
+                } else if (breakEvenType === 'earlyBirdFull') {
+                    let earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdPrice * earlyBirdMaxReturn * earlyBirdQuantity);
+                    if (earlyBirdProfit >= earlyBirdPrice * earlyBirdQuantity) {
+                        return ticketsSold;
+                    }
                 }
 
                 // Safety check to prevent infinite loop
@@ -1213,7 +1217,7 @@
             
             // Add event listeners for all inputs in the profitability calculator
             document.querySelectorAll('#profitability-calculator input').forEach(input => {
-                input.addEventListener('change', updateCharts);
+                input.addEventListener('input', updateCharts);
             });
             
             // Add event listeners for the Add and Remove Tier buttons
@@ -1259,8 +1263,10 @@
             ticketTiers.appendChild(newTier);
             
             // Add event listeners to new inputs
-            document.getElementById(`tier${tierCount - 1}Quantity`).addEventListener('change', updateCharts);
-            document.getElementById(`tier${tierCount - 1}Price`).addEventListener('change', updateCharts);
+            const newQuantityInput = document.getElementById(`tier${tierCount - 1}Quantity`);
+            const newPriceInput = document.getElementById(`tier${tierCount - 1}Price`);
+            newQuantityInput.addEventListener('input', updateCharts);
+            newPriceInput.addEventListener('input', updateCharts);
             
             updateCharts();
         }
@@ -1281,8 +1287,11 @@
             
             // Add event listeners for all inputs in the profitability calculator
             document.querySelectorAll('#profitability-calculator input').forEach(input => {
-                input.addEventListener('change', updateCharts);
+                input.addEventListener('input', updateCharts);
             });
+
+            // Initial chart update
+            updateCharts();
         });
     </script>
 </body>
