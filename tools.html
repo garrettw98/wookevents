@@ -28,16 +28,18 @@
         .graph-section {
             display: flex;
             flex-direction: column;
+            align-items: center;
             padding: 20px;
             background-color: #f0f0f0;
-            overflow-y: auto;
+            overflow-x: auto;
         }
         #weightSliderContainer {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             background-color: #fff;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            margin-bottom: 20px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .graph-container {
             display: flex;
@@ -161,15 +163,38 @@
         }
         .days-container {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: space-between;
             width: 100%;
+            margin: 0 auto;
         }
         .day {
-            margin-bottom: 20px;
+            flex: 1;
+            margin: 10px;
+            box-sizing: border-box;
+        }
+        .day, .stage-column {
+            max-width: none;
         }
         .timeline {
             display: flex;
-            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .stage-column {
+            flex: 1;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .time-slot {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            word-wrap: break-word;
         }
         .profitability-inputs {
             display: grid;
@@ -427,6 +452,164 @@
         #profitability-calculator {
             width: 100%;
         }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            /* Adjust container padding */
+            .container {
+                padding: 10px;
+            }
+
+            /* Stack inputs and graph sections */
+            .container {
+                flex-direction: column;
+            }
+
+            .inputs, .graph-section {
+                flex: none;
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            /* Adjust tabs */
+            .tab {
+                flex: 1 1 100%;
+                margin-bottom: 5px;
+            }
+
+            /* Adjust controls and input groups */
+            .control-group, .input-group {
+                width: 100%;
+            }
+
+            /* Adjust days and stages */
+            .days-container, .timeline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .day, .stage-column {
+                max-width: 100%;
+                margin: 0;
+            }
+
+            /* Adjust time slots */
+            .time-slot {
+                margin-bottom: 10px;
+            }
+
+            /* Adjust charts */
+            .chart-wrapper {
+                height: 200px;
+            }
+
+            /* Adjust tables */
+            .modern-table {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .day {
+                flex: 1 1 calc(50% - 20px);
+                max-width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .day, .stage-column {
+                flex: 1 1 100%;
+                max-width: 100%;
+                margin: 10px 0;
+            }
+            .timeline {
+                flex-direction: column;
+            }
+        }
+
+        /* Container for the entire schedule */
+        .schedule-wrapper {
+            width: 100%;
+        }
+
+        /* Days container fills the full width */
+        .days-container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Each day expands to fill available space */
+        .day {
+            flex: 1;
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Timeline within each day */
+        .timeline {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        /* Each stage column fills available space */
+        .stage-column {
+            flex: 1;
+            /* Remove margins to eliminate unnecessary spacing */
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        /* Adjust time slots to fill the stage column */
+        .time-slot {
+            width: 100%;
+            /* Adjust padding and margins as needed */
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            word-wrap: break-word;
+        }
+
+        /* Remove any maximum width constraints */
+        .day, .stage-column {
+            max-width: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .days-container, .timeline {
+                flex-wrap: wrap;
+            }
+
+            .day, .stage-column {
+                flex: 1 1 calc(50% - 20px);
+                max-width: calc(50% - 20px);
+                margin: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .day, .stage-column {
+                flex: 1 1 100%;
+                max-width: 100%;
+                margin: 10px 0;
+            }
+            .timeline {
+                flex-direction: column;
+            }
+        }
+
+        /* Optional: Adjust padding and margins for better spacing */
+        .schedule-wrapper, .days-container, .timeline, .day, .stage-column, .time-slot {
+            padding: 0;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -548,11 +731,14 @@
         </div>
         <div class="graph-section">
             <div id="lineup-results" class="tab-content active">
-                <div id="weightSliderContainer">
-                    <label for="weightSlider">Payout Weight (Left: Even, Right: Headliner Heavy):</label>
-                    <input type="range" id="weightSlider" min="0" max="100" value="50" onchange="generateBudgetAllocation()">
+                <!-- Add a wrapper for the slider and schedule -->
+                <div class="schedule-wrapper">
+                    <div id="weightSliderContainer">
+                        <label for="weightSlider">Payout Weight (Left: Even, Right: Headliner Heavy):</label>
+                        <input type="range" id="weightSlider" min="0" max="100" value="50" onchange="generateBudgetAllocation()">
+                    </div>
+                    <div id="graph"></div>
                 </div>
-                <div id="graph"></div>
             </div>
             <div id="profitability-results" class="tab-content">
                 <div id="profitBreakdown" class="financial-breakdown-wrapper"></div>
