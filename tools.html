@@ -488,13 +488,13 @@
                             <h4>Early Bird</h4>
                             <div class="input-group">
                                 <label for="earlyBirdQuantity">Quantity Sold</label>
-                                <input type="number" id="earlyBirdQuantity" min="0" value="100" step="1">
+                                <input type="number" class="tier-input" id="earlyBirdQuantity" min="0" value="100" step="1">
                             </div>
                             <div class="input-group">
                                 <label for="earlyBirdPrice">Ticket Price</label>
                                 <div class="currency-input">
                                     <span class="currency-symbol">$</span>
-                                    <input type="number" id="earlyBirdPrice" min="0" value="200" step="1">
+                                    <input type="number" class="tier-input" id="earlyBirdPrice" min="0" value="200" step="1">
                                 </div>
                             </div>
                         </div>
@@ -502,13 +502,13 @@
                             <h4>Tier 1</h4>
                             <div class="input-group">
                                 <label for="tier1Quantity">Quantity Sold</label>
-                                <input type="number" id="tier1Quantity" min="0" value="1" step="1">
+                                <input type="number" class="tier-input" id="tier1Quantity" min="0" value="1" step="1">
                             </div>
                             <div class="input-group">
                                 <label for="tier1Price">Ticket Price</label>
                                 <div class="currency-input">
                                     <span class="currency-symbol">$</span>
-                                    <input type="number" id="tier1Price" min="0" value="225" step="1">
+                                    <input type="number" class="tier-input" id="tier1Price" min="0" value="225" step="1">
                                 </div>
                             </div>
                         </div>
@@ -987,8 +987,7 @@
                     investorMaxReturn,
                     earlyBirdProfitShare,
                     earlyBirdMaxReturn,
-                    repayInvestorFirst,
-                    ticketsSold
+                    repayInvestorFirst
                 );
 
                 // Adjust totalProfit if repayInvestorFirst is checked
@@ -1006,7 +1005,7 @@
 
                 // Calculate early bird return per ticket
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
-                const earlyBirdReturnPerTicket = earlyBirdQuantity > 0 ? earlyBirdProfit / earlyBirdQuantity : 0;
+                const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
                 earlyBirdReturnData.push(earlyBirdReturnPerTicket);
                 investorProfitData.push(investorProfit);
@@ -1075,62 +1074,87 @@
             investorMaxReturn,
             earlyBirdProfitShare,
             earlyBirdMaxReturn,
-            repayInvestorFirst,
-            ticketsSold
+            repayInvestorFirst
         ) {
-            let remainingProfit = totalProfit;
-
-            // Investor repayment logic
-            let investorRepayment = 0;
-            if (repayInvestorFirst) {
-                if (remainingProfit >= investorFunds) {
-                    investorRepayment = investorFunds;
-                    remainingProfit -= investorRepayment;
-                } else if (remainingProfit > 0) {
-                    investorRepayment = remainingProfit;
-                    remainingProfit = 0;
-                } else {
-                    investorRepayment = 0;
-                }
-            }
-
             let earlyBirdProfit = 0;
+            let investorRepayment = 0;
             let investorProfit = 0;
             let companyProfit = 0;
 
-            if (remainingProfit > 0) {
-                // When there's a positive profit
-                // Allocate profits based on shares
-                let initialEarlyBirdProfit = remainingProfit * earlyBirdProfitShare;
-                let initialInvestorProfit = remainingProfit * investorProfitShare;
-                let initialCompanyProfit = remainingProfit - (initialEarlyBirdProfit + initialInvestorProfit);
+            const earlyBirdMaxProfit = earlyBirdTier.quantity * earlyBirdTier.price * earlyBirdMaxReturn;
+            const investorMaxProfit = investorFunds * investorMaxReturn;
 
-                // Cap profits at their maximum returns
-                const earlyBirdMaxProfit = earlyBirdTier.quantity * earlyBirdTier.price * earlyBirdMaxReturn;
-                const investorMaxProfit = investorFunds * investorMaxReturn;
+            const totalShares = earlyBirdProfitShare + investorProfitShare;
+            const companyProfitShare = Math.max(0, 1 - totalShares);
 
-                earlyBirdProfit = Math.min(initialEarlyBirdProfit, earlyBirdMaxProfit);
-                investorProfit = Math.min(initialInvestorProfit, investorMaxProfit);
-
-                // Adjust company profit
-                companyProfit = remainingProfit - (earlyBirdProfit + investorProfit);
-
-                // If any unallocated profit due to caps, assign to company
-                let unallocatedProfit = remainingProfit - (earlyBirdProfit + investorProfit + companyProfit);
-                if (unallocatedProfit > 0) {
-                    companyProfit += unallocatedProfit;
-                }
+            if (totalProfit <= 0) {
+                // No profit to distribute, all profits are zero
+                earlyBirdProfit = 0;
+                investorRepayment = 0;
+                investorProfit = 0;
+                companyProfit = 0;
             } else {
-                // When there's a loss (remainingProfit <= 0)
-                // Company and Early Bird profit remain zero, Investor bears the loss
-                investorProfit = remainingProfit; // Negative value
+                if (repayInvestorFirst) {
+                    // First, repay investor up to initial investment
+                    investorRepayment = Math.min(totalProfit, investorFunds);
+                    let remainingProfit = totalProfit - investorRepayment;
+
+                    // Allocate the remaining profit according to shares
+                    let earlyBirdShare = remainingProfit * earlyBirdProfitShare;
+                    earlyBirdProfit = Math.min(earlyBirdShare, earlyBirdMaxProfit);
+
+                    let investorProfitShareAmount = remainingProfit * investorProfitShare;
+                    investorProfit = Math.min(investorProfitShareAmount, investorMaxProfit - investorRepayment);
+
+                    let companyShare = remainingProfit * companyProfitShare;
+                    companyProfit = Math.max(0, companyShare);
+
+                    // Adjust for any unused shares
+                    let totalAllocated = earlyBirdProfit + investorProfit + companyProfit;
+                    let unusedProfit = remainingProfit - totalAllocated;
+                    if (unusedProfit > 0) {
+                        companyProfit += unusedProfit;
+                    }
+                } else {
+                    // Allocate profit shares from totalProfit according to percentages
+                    let earlyBirdShare = totalProfit * earlyBirdProfitShare;
+                    earlyBirdProfit = Math.min(earlyBirdShare, earlyBirdMaxProfit);
+
+                    let investorShare = totalProfit * investorProfitShare;
+
+                    // Investor repayment from investorShare
+                    investorRepayment = Math.min(investorShare, investorFunds);
+                    let remainingInvestorShare = investorShare - investorRepayment;
+
+                    // Investor profit from remaining investor share
+                    investorProfit = Math.min(remainingInvestorShare, investorMaxProfit - investorRepayment);
+
+                    let companyShare = totalProfit * companyProfitShare;
+                    companyProfit = Math.max(0, companyShare);
+
+                    // Adjust for any unused shares
+                    let totalAllocated = earlyBirdProfit + investorRepayment + investorProfit + companyProfit;
+                    let unusedProfit = totalProfit - totalAllocated;
+                    if (unusedProfit > 0) {
+                        companyProfit += unusedProfit;
+                    }
+                }
             }
+
+            // Ensure that no profit or repayment is negative
+            earlyBirdProfit = Math.max(0, earlyBirdProfit);
+            investorRepayment = Math.max(0, investorRepayment);
+            investorProfit = Math.max(0, investorProfit);
+            companyProfit = Math.max(0, companyProfit);
+
+            // Ensure investor repayment does not exceed initial investor funds
+            investorRepayment = Math.min(investorRepayment, investorFunds);
 
             return {
                 earlyBirdProfit,
+                investorRepayment,
                 investorProfit,
-                companyProfit,
-                investorRepayment
+                companyProfit
             };
         }
 
@@ -1203,17 +1227,14 @@
                 investorMaxReturn,
                 earlyBirdProfitShare,
                 earlyBirdMaxReturn,
-                repayInvestorFirst,
-                totalTicketsSold
+                repayInvestorFirst
             );
 
-            const { earlyBirdProfit, investorProfit, companyProfit, investorRepayment } = distribution;
+            const { earlyBirdProfit, investorRepayment, investorProfit, companyProfit } = distribution;
 
             // Adjust event costs and total profit if repayInvestorFirst is checked
-            let totalEventCosts = eventCosts; // Store original event costs
             if (repayInvestorFirst) {
                 eventCosts += investorRepayment;
-                totalProfit -= investorRepayment;
             }
 
             // Ensure totalProfit is updated after adjustments
@@ -1299,8 +1320,8 @@
                 </tr>
             `;
 
-            // Include investor repayment in costs if applicable
-            if (repayInvestorFirst) {
+            // Include investor repayment in costs if repayInvestorFirst is checked
+            if (repayInvestorFirst && investorRepayment > 0) {
                 breakdownHTML += `
                     <tr>
                         <td></td>
@@ -1318,37 +1339,24 @@
                 </tr>
             `;
 
-            // **New Section for Financing Activities**
+            // Financing Activities
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Financing Activities</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Investor Funds (Inflow)</td>
+                    <td>Investor Funds</td>
                     <td>$${formatNumber(investorFunds)}</td>
                 </tr>
-            `;
-
-            if (repayInvestorFirst) {
-                breakdownHTML += `
-                    <tr>
-                        <td></td>
-                        <td>Investor Repayment (Outflow)</td>
-                        <td>-$${formatNumber(investorRepayment)}</td>
-                    </tr>
-                `;
-            }
-
-            breakdownHTML += `
-                <tr class="total-row">
+                <tr>
                     <td></td>
-                    <td>Net Financing Activities</td>
-                    <td>$${formatNumber(investorFunds - investorRepayment)}</td>
+                    <td>Investor Repayment</td>
+                    <td>$${formatNumber(investorRepayment)}</td>
                 </tr>
             `;
 
-            // **Update Net Profit Calculation**
+            // Profit Distribution
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Profit Distribution</td>
@@ -1375,19 +1383,9 @@
                 </tr>
             `;
 
-            // **Calculate Net Cash Position**
-            const netCashPosition = totalProfit + investorFunds - investorRepayment;
             breakdownHTML += `
-                <tr class="total-row">
-                    <td></td>
-                    <td><strong>Net Cash Position</strong></td>
-                    <td><strong>$${formatNumber(netCashPosition)}</strong></td>
-                </tr>
-            `;
-
-            breakdownHTML += `
-            </table>
-            <p>Note: Financing activities include investor funds received and repayments made. The net cash position reflects the overall financial outcome after accounting for both operational profits and financing activities.</p>
+                </table>
+                <p>Note: Financing activities include investor funds received and repayments made.</p>
             `;
 
             const profitBreakdownElement = document.getElementById('profitBreakdown');
@@ -1801,9 +1799,9 @@
                 // Distribute profits based on totalProfit
                 const {
                     earlyBirdProfit,
+                    investorRepayment,
                     investorProfit,
-                    companyProfit,
-                    investorRepayment
+                    companyProfit
                 } = distributeProfits(
                     totalProfit,
                     ticketTiers[0],
@@ -1812,8 +1810,7 @@
                     investorMaxReturn,
                     earlyBirdProfitShare,
                     earlyBirdMaxReturn,
-                    repayInvestorFirst,
-                    ticketsSold
+                    repayInvestorFirst
                 );
 
                 // Adjust totalProfit if repayInvestorFirst is checked
@@ -1831,7 +1828,7 @@
 
                 // Calculate early bird return per ticket
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
-                const earlyBirdReturnPerTicket = earlyBirdQuantity > 0 ? earlyBirdProfit / earlyBirdQuantity : 0;
+                const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
                 earlyBirdReturnData.push(earlyBirdReturnPerTicket);
                 investorProfitData.push(investorProfit);
@@ -1921,17 +1918,14 @@
                 investorMaxReturn,
                 earlyBirdProfitShare,
                 earlyBirdMaxReturn,
-                repayInvestorFirst,
-                totalTicketsSold
+                repayInvestorFirst
             );
 
-            const { earlyBirdProfit, investorProfit, companyProfit, investorRepayment } = distribution;
+            const { earlyBirdProfit, investorRepayment, investorProfit, companyProfit } = distribution;
 
             // Adjust event costs and total profit if repayInvestorFirst is checked
-            let totalEventCosts = eventCosts; // Store original event costs
             if (repayInvestorFirst) {
                 eventCosts += investorRepayment;
-                totalProfit -= investorRepayment;
             }
 
             // Ensure totalProfit is updated after adjustments
@@ -2017,8 +2011,8 @@
                 </tr>
             `;
 
-            // Include investor repayment in costs if applicable
-            if (repayInvestorFirst) {
+            // Include investor repayment in costs if repayInvestorFirst is checked
+            if (repayInvestorFirst && investorRepayment > 0) {
                 breakdownHTML += `
                     <tr>
                         <td></td>
@@ -2036,37 +2030,24 @@
                 </tr>
             `;
 
-            // **New Section for Financing Activities**
+            // Financing Activities
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Financing Activities</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Investor Funds (Inflow)</td>
+                    <td>Investor Funds</td>
                     <td>$${formatNumber(investorFunds)}</td>
                 </tr>
-            `;
-
-            if (repayInvestorFirst) {
-                breakdownHTML += `
-                    <tr>
-                        <td></td>
-                        <td>Investor Repayment (Outflow)</td>
-                        <td>-$${formatNumber(investorRepayment)}</td>
-                    </tr>
-                `;
-            }
-
-            breakdownHTML += `
-                <tr class="total-row">
+                <tr>
                     <td></td>
-                    <td>Net Financing Activities</td>
-                    <td>$${formatNumber(investorFunds - investorRepayment)}</td>
+                    <td>Investor Repayment</td>
+                    <td>$${formatNumber(investorRepayment)}</td>
                 </tr>
             `;
 
-            // **Update Net Profit Calculation**
+            // Profit Distribution
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Profit Distribution</td>
@@ -2093,19 +2074,9 @@
                 </tr>
             `;
 
-            // **Calculate Net Cash Position**
-            const netCashPosition = totalProfit + investorFunds - investorRepayment;
             breakdownHTML += `
-                <tr class="total-row">
-                    <td></td>
-                    <td><strong>Net Cash Position</strong></td>
-                    <td><strong>$${formatNumber(netCashPosition)}</strong></td>
-                </tr>
-            `;
-
-            breakdownHTML += `
-            </table>
-            <p>Note: Financing activities include investor funds received and repayments made. The net cash position reflects the overall financial outcome after accounting for both operational profits and financing activities.</p>
+                </table>
+                <p>Note: Financing activities include investor funds received and repayments made.</p>
             `;
 
             const profitBreakdownElement = document.getElementById('profitBreakdown');
@@ -2126,7 +2097,7 @@
         });
 
         // Other existing code (addTier, removeTier, etc.)
-        // ...
+
     </script>
 </body>
 </html>
