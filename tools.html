@@ -720,12 +720,6 @@
                         <label for="investorMaxReturn">Investor Max Return (%)</label>
                         <input type="number" id="investorMaxReturn" min="0" value="200" step="1">
                     </div>
-                    <div class="input-group">
-                        <label>
-                            <input type="checkbox" id="repayInvestorFirst">
-                            Repay Investor First
-                        </label>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1116,7 +1110,6 @@
             const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 0;
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 0;
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
-            const repayInvestorFirst = document.getElementById('repayInvestorFirst').checked;
 
             // Get all ticket tiers
             const ticketTiers = [];
@@ -1132,21 +1125,12 @@
                 }
             });
 
-            // Calculate the total tickets sold based on user input
-            const totalTicketsSold = ticketTiers.reduce((sum, tier) => sum + tier.quantity, 0);
-
             const labels = [];
             const earlyBirdReturnData = [];
             const companyRevenueData = [];
             const investorProfitData = [];
 
             const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
-
-            let maxTicketsSold = 0;
-
-            // Initialize arrays to store maximum caps for Early Bird and Investor
-            const earlyBirdMaxProfit = ticketTiers[0].quantity * ticketTiers[0].price * earlyBirdMaxReturn;
-            const investorMaxProfit = investorFunds * investorMaxReturn;
 
             // Calculate data points
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
@@ -1159,20 +1143,19 @@
                     fluidCost,
                     venueCostPerDay,
                     eventLength,
-                    repayInvestorFirst,
                     investorFunds
                 );
 
-                // Adjusted total profit calculation
                 let totalProfit = revenue - costs;
 
-                // Distribute profits based on adjustedTotalProfit
-                const {
-                    earlyBirdProfit,
-                    investorProfit,
-                    companyProfit,
-                    investorRepayment
-                } = distributeProfits(
+                // Calculate investor repayment
+                let investorRepayment = Math.min(investorFunds, Math.max(0, totalProfit));
+                
+                // Adjust total profit after investor repayment
+                totalProfit -= investorRepayment;
+
+                // Distribute profits
+                const distribution = distributeProfits(
                     totalProfit,
                     ticketTiers[0],
                     investorFunds,
@@ -1180,46 +1163,42 @@
                     investorMaxReturn,
                     earlyBirdProfitShare,
                     earlyBirdMaxReturn,
-                    repayInvestorFirst
+                    false
                 );
+
+                const { earlyBirdProfit, investorProfit, companyProfit } = distribution;
 
                 // Calculate early bird return per ticket
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
                 const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
                 earlyBirdReturnData.push(earlyBirdReturnPerTicket);
-                investorProfitData.push(investorProfit);
+                investorProfitData.push(investorProfit + investorRepayment);
                 companyRevenueData.push(companyProfit);
-
-                if (ticketsSold > maxTicketsSold) {
-                    maxTicketsSold = ticketsSold;
-                }
             }
 
             // Update charts with correct labels and data
             updateChart(earlyBirdReturnChart, labels, earlyBirdReturnData, 'Early Bird Return ($ per ticket)');
             updateChart(companyRevenueChart, labels, companyRevenueData, 'Company Profit ($)');
-            updateChart(investorReturnChart, labels, investorProfitData, 'Investor Profit ($)');
+            updateChart(investorReturnChart, labels, investorProfitData, 'Investor Return ($)');
 
-            // Update the financial breakdown using totalTicketsSold from user input
-            if (totalTicketsSold > 0) {
-                updateProfitBreakdown(
-                    ticketTiers,
-                    totalTicketsSold,
-                    artistCost,
-                    equipmentCost,
-                    miscCost,
-                    investorFunds,
-                    investorProfitShare,
-                    investorMaxReturn,
-                    earlyBirdProfitShare,
-                    earlyBirdMaxReturn,
-                    repayInvestorFirst
-                );
-            }
+            // Update the financial breakdown
+            updateProfitBreakdown(
+                ticketTiers,
+                venueCapacity,
+                artistCost,
+                equipmentCost,
+                miscCost,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn,
+                false
+            );
         }
 
-        function calculateRevenueAndCosts(ticketTiers, targetTickets, fixedCosts, fluidCost, venueCostPerDay, eventLength, repayInvestorFirst, investorFunds) {
+        function calculateRevenueAndCosts(ticketTiers, targetTickets, fixedCosts, fluidCost, venueCostPerDay, eventLength, investorFunds) {
             let revenue = 0;
             let ticketsSold = 0;
             const stripeFeePercentage = 0.029; // 2.9%
@@ -1239,17 +1218,14 @@
                 ticketsSold = targetTickets;
             }
 
+            // Add investor funds to revenue
+            revenue += investorFunds;
+
             const totalVariableCost = (fluidCost + venueCostPerDay * eventLength) * ticketsSold;
-            const totalStripeFee = ticketsSold * stripeFeeFixed + revenue * stripeFeePercentage;
+            const totalStripeFee = ticketsSold * stripeFeeFixed + (revenue - investorFunds) * stripeFeePercentage;
             const costs = fixedCosts.total + totalVariableCost + totalStripeFee;
 
-            // Add investor repayment to costs if "Repay Investor First" is checked
-            let adjustedCosts = costs;
-            if (repayInvestorFirst) {
-                adjustedCosts += investorFunds;
-            }
-
-            return { revenue, costs: adjustedCosts, ticketsSold };
+            return { revenue, costs, ticketsSold };
         }
 
         function distributeProfits(
@@ -1265,7 +1241,6 @@
             let earlyBirdProfit = 0;
             let investorProfit = 0;
             let companyProfit = 0;
-            let investorRepayment = 0;
 
             const earlyBirdMaxProfit = earlyBirdTier.quantity * earlyBirdTier.price * earlyBirdMaxReturn;
             const investorMaxProfit = investorFunds * investorMaxReturn;
@@ -1275,40 +1250,17 @@
                 earlyBirdProfit = 0;
                 investorProfit = 0;
                 companyProfit = totalProfit; // Negative value representing a loss
-                investorRepayment = 0;
             } else {
-                if (repayInvestorFirst) {
-                    // Repay investor's initial investment first from profit
-                    investorRepayment = Math.min(investorFunds, totalProfit);
-                    let remainingProfit = totalProfit - investorRepayment;
-
-                    if (remainingProfit > 0) {
-                        // Distribute remaining profit
-                        earlyBirdProfit = Math.min(remainingProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
-                        investorProfit = Math.min(remainingProfit * investorProfitShare, investorMaxProfit);
-                        companyProfit = Math.max(0, remainingProfit - earlyBirdProfit - investorProfit);
-                    } else {
-                        // No remaining profit after investor repayment
-                        earlyBirdProfit = 0;
-                        investorProfit = 0;
-                        companyProfit = 0;
-                    }
-                } else {
-                    // Distribute profits without prior investor repayment
-                    earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
-                    investorProfit = Math.min(totalProfit * investorProfitShare, investorMaxProfit);
-                    companyProfit = Math.max(0, totalProfit - earlyBirdProfit - investorProfit);
-                }
+                // Distribute profits
+                earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
+                investorProfit = Math.min(totalProfit * investorProfitShare, investorMaxProfit);
+                companyProfit = Math.max(0, totalProfit - earlyBirdProfit - investorProfit);
             }
-
-            // Total investor cash flow includes repayment and profit share
-            investorProfit += investorRepayment;
 
             return {
                 earlyBirdProfit,
                 investorProfit,
-                companyProfit,
-                investorRepayment
+                companyProfit
             };
         }
 
@@ -1844,7 +1796,7 @@
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Investor Profit ($)',
+                        label: 'Investor Return ($)',
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgba(75, 192, 192, 0.1)',
                         data: [],
@@ -1865,7 +1817,7 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Investor Profit ($)'
+                                text: 'Investor Return ($)'
                             }
                         }
                     }
@@ -1892,7 +1844,6 @@
             const fluidCost = parseFloat(document.getElementById('fluidCost').value) || 0;
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value) || 0;
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
-            const repayInvestorFirst = document.getElementById('repayInvestorFirst').checked;
 
             // Get all ticket tiers
             const ticketTiers = [];
@@ -1908,21 +1859,12 @@
                 }
             });
 
-            // Calculate the total tickets sold based on user input
-            const totalTicketsSold = ticketTiers.reduce((sum, tier) => sum + tier.quantity, 0);
-
             const labels = [];
             const earlyBirdReturnData = [];
             const companyRevenueData = [];
             const investorProfitData = [];
 
             const fixedCosts = calculateFixedCosts(artistCost, equipmentCost, miscCost);
-
-            let maxTicketsSold = 0;
-
-            // Initialize arrays to store maximum caps for Early Bird and Investor
-            const earlyBirdMaxProfit = ticketTiers[0].quantity * ticketTiers[0].price * earlyBirdMaxReturn;
-            const investorMaxProfit = investorFunds * investorMaxReturn;
 
             // Calculate data points
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
@@ -1934,10 +1876,17 @@
                     fixedCosts,
                     fluidCost,
                     venueCostPerDay,
-                    eventLength
+                    eventLength,
+                    investorFunds
                 );
 
                 let totalProfit = revenue - costs;
+
+                // Calculate investor repayment
+                let investorRepayment = Math.min(investorFunds, Math.max(0, totalProfit));
+                
+                // Adjust total profit after investor repayment
+                totalProfit -= investorRepayment;
 
                 // Distribute profits
                 const distribution = distributeProfits(
@@ -1948,7 +1897,7 @@
                     investorMaxReturn,
                     earlyBirdProfitShare,
                     earlyBirdMaxReturn,
-                    false // Set to false as we've already handled investor repayment
+                    false
                 );
 
                 const { earlyBirdProfit, investorProfit, companyProfit } = distribution;
@@ -1958,35 +1907,106 @@
                 const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
                 earlyBirdReturnData.push(earlyBirdReturnPerTicket);
-                investorProfitData.push(investorProfit);
+                investorProfitData.push(investorProfit + investorRepayment);
                 companyRevenueData.push(companyProfit);
-
-                if (ticketsSold > maxTicketsSold) {
-                    maxTicketsSold = ticketsSold;
-                }
             }
 
             // Update charts with correct labels and data
             updateChart(earlyBirdReturnChart, labels, earlyBirdReturnData, 'Early Bird Return ($ per ticket)');
             updateChart(companyRevenueChart, labels, companyRevenueData, 'Company Profit ($)');
-            updateChart(investorReturnChart, labels, investorProfitData, 'Investor Profit ($)');
+            updateChart(investorReturnChart, labels, investorProfitData, 'Investor Return ($)');
 
-            // Update the financial breakdown using totalTicketsSold from user input
-            if (totalTicketsSold > 0) {
-                updateProfitBreakdown(
-                    ticketTiers,
-                    totalTicketsSold,
-                    artistCost,
-                    equipmentCost,
-                    miscCost,
-                    investorFunds,
-                    investorProfitShare,
-                    investorMaxReturn,
-                    earlyBirdProfitShare,
-                    earlyBirdMaxReturn,
-                    repayInvestorFirst
-                );
+            // Update the financial breakdown
+            updateProfitBreakdown(
+                ticketTiers,
+                venueCapacity,
+                artistCost,
+                equipmentCost,
+                miscCost,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn,
+                false
+            );
+        }
+
+        function calculateRevenueAndCosts(ticketTiers, targetTickets, fixedCosts, fluidCost, venueCostPerDay, eventLength, investorFunds) {
+            let revenue = 0;
+            let ticketsSold = 0;
+            const stripeFeePercentage = 0.029; // 2.9%
+            const stripeFeeFixed = 0.30;
+
+            for (const tier of ticketTiers) {
+                const soldInTier = Math.min(targetTickets - ticketsSold, tier.quantity);
+                revenue += soldInTier * tier.price;
+                ticketsSold += soldInTier;
+                if (ticketsSold >= targetTickets) break;
             }
+
+            // If there are still tickets to sell, use the highest tier price
+            if (ticketsSold < targetTickets) {
+                const remainingTickets = targetTickets - ticketsSold;
+                revenue += remainingTickets * ticketTiers[ticketTiers.length - 1].price;
+                ticketsSold = targetTickets;
+            }
+
+            // Add investor funds to revenue
+            revenue += investorFunds;
+
+            const totalVariableCost = (fluidCost + venueCostPerDay * eventLength) * ticketsSold;
+            const totalStripeFee = ticketsSold * stripeFeeFixed + (revenue - investorFunds) * stripeFeePercentage;
+            const costs = fixedCosts.total + totalVariableCost + totalStripeFee;
+
+            return { revenue, costs, ticketsSold };
+        }
+
+        function distributeProfits(
+            totalProfit,
+            earlyBirdTier,
+            investorFunds,
+            investorProfitShare,
+            investorMaxReturn,
+            earlyBirdProfitShare,
+            earlyBirdMaxReturn,
+            repayInvestorFirst // This parameter is no longer used but kept for compatibility
+        ) {
+            let earlyBirdProfit = 0;
+            let investorProfit = 0;
+            let companyProfit = 0;
+
+            const earlyBirdMaxProfit = earlyBirdTier.quantity * earlyBirdTier.price * earlyBirdMaxReturn;
+            const investorMaxProfit = investorFunds * investorMaxReturn;
+
+            if (totalProfit <= 0) {
+                // No profit to distribute
+                earlyBirdProfit = 0;
+                investorProfit = 0;
+                companyProfit = totalProfit; // Negative value representing a loss
+            } else {
+                // Distribute profits
+                earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
+                investorProfit = Math.min(totalProfit * investorProfitShare, investorMaxProfit);
+                companyProfit = Math.max(0, totalProfit - earlyBirdProfit - investorProfit);
+            }
+
+            return {
+                earlyBirdProfit,
+                investorProfit,
+                companyProfit
+            };
+        }
+
+        function updateChart(chart, labels, data, label) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].label = label;
+            chart.update();
+        }
+
+        function formatNumber(number) {
+            return Number.isFinite(number) ? number.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0';
         }
 
         function updateProfitBreakdown(
