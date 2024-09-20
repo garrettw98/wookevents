@@ -1152,21 +1152,26 @@
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
                 labels.push(i);
 
-                const { revenue, costs, ticketsSold } = calculateRevenueAndCosts(ticketTiers, i, fixedCosts, fluidCost, venueCostPerDay, eventLength);
+                const { revenue, costs, ticketsSold } = calculateRevenueAndCosts(
+                    ticketTiers,
+                    i,
+                    fixedCosts,
+                    fluidCost,
+                    venueCostPerDay,
+                    eventLength,
+                    repayInvestorFirst,
+                    investorFunds
+                );
 
-                // Adjust costs to include investor repayment if necessary
-                let adjustedCosts = costs;
-                if (repayInvestorFirst) {
-                    adjustedCosts += investorFunds; // Include investor repayment in costs
-                }
+                // Adjusted total profit calculation
+                let totalProfit = revenue - costs;
 
-                let totalProfit = revenue - adjustedCosts;
-
-                // Distribute profits based on totalProfit
+                // Distribute profits based on adjustedTotalProfit
                 const {
                     earlyBirdProfit,
                     investorProfit,
-                    companyProfit
+                    companyProfit,
+                    investorRepayment
                 } = distributeProfits(
                     totalProfit,
                     ticketTiers[0],
@@ -1214,7 +1219,7 @@
             }
         }
 
-        function calculateRevenueAndCosts(ticketTiers, targetTickets, fixedCosts, fluidCost, venueCostPerDay, eventLength) {
+        function calculateRevenueAndCosts(ticketTiers, targetTickets, fixedCosts, fluidCost, venueCostPerDay, eventLength, repayInvestorFirst, investorFunds) {
             let revenue = 0;
             let ticketsSold = 0;
             const stripeFeePercentage = 0.029; // 2.9%
@@ -1238,7 +1243,13 @@
             const totalStripeFee = ticketsSold * stripeFeeFixed + revenue * stripeFeePercentage;
             const costs = fixedCosts.total + totalVariableCost + totalStripeFee;
 
-            return { revenue, costs, ticketsSold };
+            // Add investor repayment to costs if "Repay Investor First" is checked
+            let adjustedCosts = costs;
+            if (repayInvestorFirst) {
+                adjustedCosts += investorFunds;
+            }
+
+            return { revenue, costs: adjustedCosts, ticketsSold };
         }
 
         function distributeProfits(
@@ -1254,6 +1265,7 @@
             let earlyBirdProfit = 0;
             let investorProfit = 0;
             let companyProfit = 0;
+            let investorRepayment = 0;
 
             const earlyBirdMaxProfit = earlyBirdTier.quantity * earlyBirdTier.price * earlyBirdMaxReturn;
             const investorMaxProfit = investorFunds * investorMaxReturn;
@@ -1262,53 +1274,41 @@
                 // No profit to distribute
                 earlyBirdProfit = 0;
                 investorProfit = 0;
-                companyProfit = totalProfit; // This will be negative, representing a loss
+                companyProfit = totalProfit; // Negative value representing a loss
+                investorRepayment = 0;
             } else {
                 if (repayInvestorFirst) {
-                    // Investor is repaid their initial investment upfront (handled in costs)
-                    // Now distribute remaining profit
-                    let remainingProfit = totalProfit;
+                    // Repay investor's initial investment first from profit
+                    investorRepayment = Math.min(investorFunds, totalProfit);
+                    let remainingProfit = totalProfit - investorRepayment;
 
-                    // Distribute profits
-                    let earlyBirdShare = remainingProfit * earlyBirdProfitShare;
-                    earlyBirdProfit = Math.min(earlyBirdShare, earlyBirdMaxProfit);
-
-                    let investorProfitShareAmount = remainingProfit * investorProfitShare;
-                    investorProfit = Math.min(investorProfitShareAmount, investorMaxProfit);
-
-                    let companyShare = remainingProfit * (1 - earlyBirdProfitShare - investorProfitShare);
-                    companyProfit = Math.max(0, companyShare);
-
-                    // Adjust for any unused profit due to max returns
-                    let totalDistributed = earlyBirdProfit + investorProfit + companyProfit;
-                    let undistributedProfit = remainingProfit - totalDistributed;
-                    if (undistributedProfit > 0) {
-                        companyProfit += undistributedProfit;
+                    if (remainingProfit > 0) {
+                        // Distribute remaining profit
+                        earlyBirdProfit = Math.min(remainingProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
+                        investorProfit = Math.min(remainingProfit * investorProfitShare, investorMaxProfit);
+                        companyProfit = Math.max(0, remainingProfit - earlyBirdProfit - investorProfit);
+                    } else {
+                        // No remaining profit after investor repayment
+                        earlyBirdProfit = 0;
+                        investorProfit = 0;
+                        companyProfit = 0;
                     }
                 } else {
                     // Distribute profits without prior investor repayment
-                    let earlyBirdShare = totalProfit * earlyBirdProfitShare;
-                    earlyBirdProfit = Math.min(earlyBirdShare, earlyBirdMaxProfit);
-
-                    let investorShare = totalProfit * investorProfitShare;
-                    investorProfit = Math.min(investorShare, investorMaxProfit);
-
-                    let companyShare = totalProfit * (1 - earlyBirdProfitShare - investorProfitShare);
-                    companyProfit = Math.max(0, companyShare);
-
-                    // Adjust for any unused profit due to max returns
-                    let totalDistributed = earlyBirdProfit + investorProfit + companyProfit;
-                    let undistributedProfit = totalProfit - totalDistributed;
-                    if (undistributedProfit > 0) {
-                        companyProfit += undistributedProfit;
-                    }
+                    earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
+                    investorProfit = Math.min(totalProfit * investorProfitShare, investorMaxProfit);
+                    companyProfit = Math.max(0, totalProfit - earlyBirdProfit - investorProfit);
                 }
             }
+
+            // Total investor cash flow includes repayment and profit share
+            investorProfit += investorRepayment;
 
             return {
                 earlyBirdProfit,
                 investorProfit,
-                companyProfit
+                companyProfit,
+                investorRepayment
             };
         }
 
@@ -1322,7 +1322,7 @@
         }
 
         function formatNumber(number) {
-            return number.toLocaleString('en-US', { maximumFractionDigits: 2 });
+            return Number.isFinite(number) ? number.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0';
         }
 
         function updateProfitBreakdown(
@@ -1375,29 +1375,30 @@
             // Calculate total costs without investor repayment
             let totalCosts = fixedCosts.total + totalFluidCost + totalVenueCost + totalStripeFee;
 
-            // Calculate preliminary profit
-            let preliminaryProfit = totalRevenue - totalCosts;
+            // Calculate initial profit before investor repayment
+            let initialProfit = totalRevenue - totalCosts;
 
-            // Distribute profits to get investorRepayment
+            // Calculate investor repayment
+            let investorRepayment = Math.min(investorFunds, Math.max(0, initialProfit));
+
+            // Add investor repayment to total costs
+            let adjustedTotalCosts = totalCosts + investorRepayment;
+
+            // Recalculate total profit after adjusting costs
+            let adjustedTotalProfit = totalRevenue - adjustedTotalCosts;
+
+            // Distribute profits based on adjustedTotalProfit
             const distribution = distributeProfits(
-                preliminaryProfit,
+                adjustedTotalProfit,
                 ticketTiers[0],
                 investorFunds,
                 investorProfitShare,
                 investorMaxReturn,
                 earlyBirdProfitShare,
                 earlyBirdMaxReturn,
-                repayInvestorFirst
+                false // Set to false as we've already handled investor repayment
             );
             const { earlyBirdProfit, investorProfit, companyProfit } = distribution;
-
-            // Adjust totalCosts and totalProfit based on repayInvestorFirst
-            let adjustedTotalCosts = totalCosts;
-            let adjustedTotalProfit = preliminaryProfit;
-            if (repayInvestorFirst) {
-                adjustedTotalCosts += investorFunds;
-                adjustedTotalProfit -= investorFunds;
-            }
 
             console.log('Total Revenue:', totalRevenue);
             console.log('Total Costs:', adjustedTotalCosts);
@@ -1482,20 +1483,11 @@
                     <td>Stripe Fees (2.9% + $0.30/ticket)</td>
                     <td>$${formatNumber(totalStripeFee)}</td>
                 </tr>
-            `;
-
-            // Include investor repayment in costs if repayInvestorFirst is checked
-            if (repayInvestorFirst) {
-                breakdownHTML += `
-                    <tr>
-                        <td></td>
-                        <td>Investor Repayment</td>
-                        <td>$${formatNumber(investorFunds)}</td>
-                    </tr>
-                `;
-            }
-
-            breakdownHTML += `
+                <tr>
+                    <td></td>
+                    <td>Investor Repayment</td>
+                    <td>$${formatNumber(investorRepayment)}</td>
+                </tr>
                 <tr class="total-row">
                     <td></td>
                     <td>Total Event Costs</td>
@@ -1503,20 +1495,20 @@
                 </tr>
             `;
 
-            // Profit Distribution
+            // Update the Profit Distribution section
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Profit Distribution</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Early Bird Profit ($${formatNumber(earlyBirdProfit / ticketTiers[0].quantity)} per ticket)</td>
+                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(earlyBirdProfit / ticketTiers[0].quantity) : '0'} per ticket)</td>
                     <td>$${formatNumber(earlyBirdProfit)}</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Investor Profit ${investorProfit < 0 ? '(Loss)' : ''}</td>
-                    <td>${investorProfit < 0 ? '-' : ''}$${formatNumber(Math.abs(investorProfit))}</td>
+                    <td>Investor Profit</td>
+                    <td>$${formatNumber(investorProfit)}</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -1936,22 +1928,19 @@
             for (let i = 0; i <= venueCapacity; i += Math.max(1, Math.floor(venueCapacity / 100))) {
                 labels.push(i);
 
-                const { revenue, costs, ticketsSold } = calculateRevenueAndCosts(ticketTiers, i, fixedCosts, fluidCost, venueCostPerDay, eventLength);
+                const { revenue, costs, ticketsSold } = calculateRevenueAndCosts(
+                    ticketTiers,
+                    i,
+                    fixedCosts,
+                    fluidCost,
+                    venueCostPerDay,
+                    eventLength
+                );
 
-                // Adjust costs to include investor repayment if necessary
-                let adjustedCosts = costs;
-                if (repayInvestorFirst) {
-                    adjustedCosts += investorFunds; // Include investor repayment in costs
-                }
+                let totalProfit = revenue - costs;
 
-                let totalProfit = revenue - adjustedCosts;
-
-                // Distribute profits based on totalProfit
-                const {
-                    earlyBirdProfit,
-                    investorProfit,
-                    companyProfit
-                } = distributeProfits(
+                // Distribute profits
+                const distribution = distributeProfits(
                     totalProfit,
                     ticketTiers[0],
                     investorFunds,
@@ -1959,8 +1948,10 @@
                     investorMaxReturn,
                     earlyBirdProfitShare,
                     earlyBirdMaxReturn,
-                    repayInvestorFirst
+                    false // Set to false as we've already handled investor repayment
                 );
+
+                const { earlyBirdProfit, investorProfit, companyProfit } = distribution;
 
                 // Calculate early bird return per ticket
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
@@ -2048,29 +2039,30 @@
             // Calculate total costs without investor repayment
             let totalCosts = fixedCosts.total + totalFluidCost + totalVenueCost + totalStripeFee;
 
-            // Calculate preliminary profit
-            let preliminaryProfit = totalRevenue - totalCosts;
+            // Calculate initial profit before investor repayment
+            let initialProfit = totalRevenue - totalCosts;
 
-            // Distribute profits to get investorRepayment
+            // Calculate investor repayment
+            let investorRepayment = Math.min(investorFunds, Math.max(0, initialProfit));
+
+            // Add investor repayment to total costs
+            let adjustedTotalCosts = totalCosts + investorRepayment;
+
+            // Recalculate total profit after adjusting costs
+            let adjustedTotalProfit = totalRevenue - adjustedTotalCosts;
+
+            // Distribute profits based on adjustedTotalProfit
             const distribution = distributeProfits(
-                preliminaryProfit,
+                adjustedTotalProfit,
                 ticketTiers[0],
                 investorFunds,
                 investorProfitShare,
                 investorMaxReturn,
                 earlyBirdProfitShare,
                 earlyBirdMaxReturn,
-                repayInvestorFirst
+                false // Set to false as we've already handled investor repayment
             );
             const { earlyBirdProfit, investorProfit, companyProfit } = distribution;
-
-            // Adjust totalCosts and totalProfit based on repayInvestorFirst
-            let adjustedTotalCosts = totalCosts;
-            let adjustedTotalProfit = preliminaryProfit;
-            if (repayInvestorFirst) {
-                adjustedTotalCosts += investorFunds;
-                adjustedTotalProfit -= investorFunds;
-            }
 
             console.log('Total Revenue:', totalRevenue);
             console.log('Total Costs:', adjustedTotalCosts);
@@ -2155,20 +2147,11 @@
                     <td>Stripe Fees (2.9% + $0.30/ticket)</td>
                     <td>$${formatNumber(totalStripeFee)}</td>
                 </tr>
-            `;
-
-            // Include investor repayment in costs if repayInvestorFirst is checked
-            if (repayInvestorFirst) {
-                breakdownHTML += `
-                    <tr>
-                        <td></td>
-                        <td>Investor Repayment</td>
-                        <td>$${formatNumber(investorFunds)}</td>
-                    </tr>
-                `;
-            }
-
-            breakdownHTML += `
+                <tr>
+                    <td></td>
+                    <td>Investor Repayment</td>
+                    <td>$${formatNumber(investorRepayment)}</td>
+                </tr>
                 <tr class="total-row">
                     <td></td>
                     <td>Total Event Costs</td>
@@ -2176,20 +2159,20 @@
                 </tr>
             `;
 
-            // Profit Distribution
+            // Update the Profit Distribution section
             breakdownHTML += `
                 <tr class="section-header">
                     <td colspan="3">Profit Distribution</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Early Bird Profit ($${formatNumber(earlyBirdProfit / ticketTiers[0].quantity)} per ticket)</td>
+                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(earlyBirdProfit / ticketTiers[0].quantity) : '0'} per ticket)</td>
                     <td>$${formatNumber(earlyBirdProfit)}</td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Investor Profit ${investorProfit < 0 ? '(Loss)' : ''}</td>
-                    <td>${investorProfit < 0 ? '-' : ''}$${formatNumber(Math.abs(investorProfit))}</td>
+                    <td>Investor Profit</td>
+                    <td>$${formatNumber(investorProfit)}</td>
                 </tr>
                 <tr>
                     <td></td>
