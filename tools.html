@@ -1148,12 +1148,6 @@
 
                 let totalProfit = revenue - costs;
 
-                // Calculate investor repayment
-                let investorRepayment = Math.min(investorFunds, Math.max(0, totalProfit));
-                
-                // Adjust total profit after investor repayment
-                totalProfit -= investorRepayment;
-
                 // Distribute profits
                 const distribution = distributeProfits(
                     totalProfit,
@@ -1172,9 +1166,9 @@
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
                 const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
-                earlyBirdReturnData.push(earlyBirdReturnPerTicket);
-                investorProfitData.push(investorProfit + investorRepayment);
-                companyRevenueData.push(companyProfit);
+                earlyBirdReturnData.push(Math.max(0, earlyBirdReturnPerTicket));
+                investorProfitData.push(investorProfit);
+                companyRevenueData.push(Math.max(0, companyProfit));
             }
 
             // Update charts with correct labels and data
@@ -1236,7 +1230,7 @@
             investorMaxReturn,
             earlyBirdProfitShare,
             earlyBirdMaxReturn,
-            repayInvestorFirst
+            repayInvestorFirst // This parameter is no longer used but kept for compatibility
         ) {
             let earlyBirdProfit = 0;
             let investorProfit = 0;
@@ -1246,10 +1240,10 @@
             const investorMaxProfit = investorFunds * investorMaxReturn;
 
             if (totalProfit <= 0) {
-                // No profit to distribute
+                // Investor absorbs all losses
+                investorProfit = totalProfit;
                 earlyBirdProfit = 0;
-                investorProfit = 0;
-                companyProfit = totalProfit; // Negative value representing a loss
+                companyProfit = 0;
             } else {
                 // Distribute profits
                 earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
@@ -1454,8 +1448,8 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(earlyBirdProfit / ticketTiers[0].quantity) : '0'} per ticket)</td>
-                    <td>$${formatNumber(earlyBirdProfit)}</td>
+                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(Math.max(0, earlyBirdProfit / ticketTiers[0].quantity)) : '0'} per ticket)</td>
+                    <td>$${formatNumber(Math.max(0, earlyBirdProfit))}</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -1465,7 +1459,7 @@
                 <tr>
                     <td></td>
                     <td>Company Profit</td>
-                    <td>$${formatNumber(companyProfit)}</td>
+                    <td>$${formatNumber(Math.max(0, companyProfit))}</td>
                 </tr>
                 <tr class="total-row">
                     <td></td>
@@ -1882,12 +1876,6 @@
 
                 let totalProfit = revenue - costs;
 
-                // Calculate investor repayment
-                let investorRepayment = Math.min(investorFunds, Math.max(0, totalProfit));
-                
-                // Adjust total profit after investor repayment
-                totalProfit -= investorRepayment;
-
                 // Distribute profits
                 const distribution = distributeProfits(
                     totalProfit,
@@ -1906,9 +1894,9 @@
                 const earlyBirdQuantity = ticketTiers[0].quantity || 1;
                 const earlyBirdReturnPerTicket = earlyBirdProfit / earlyBirdQuantity;
 
-                earlyBirdReturnData.push(earlyBirdReturnPerTicket);
-                investorProfitData.push(investorProfit + investorRepayment);
-                companyRevenueData.push(companyProfit);
+                earlyBirdReturnData.push(Math.max(0, earlyBirdReturnPerTicket));
+                investorProfitData.push(investorProfit);
+                companyRevenueData.push(Math.max(0, companyProfit));
             }
 
             // Update charts with correct labels and data
@@ -1980,10 +1968,10 @@
             const investorMaxProfit = investorFunds * investorMaxReturn;
 
             if (totalProfit <= 0) {
-                // No profit to distribute
+                // Investor absorbs all losses
+                investorProfit = totalProfit;
                 earlyBirdProfit = 0;
-                investorProfit = 0;
-                companyProfit = totalProfit; // Negative value representing a loss
+                companyProfit = 0;
             } else {
                 // Distribute profits
                 earlyBirdProfit = Math.min(totalProfit * earlyBirdProfitShare, earlyBirdMaxProfit);
@@ -2186,8 +2174,8 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(earlyBirdProfit / ticketTiers[0].quantity) : '0'} per ticket)</td>
-                    <td>$${formatNumber(earlyBirdProfit)}</td>
+                    <td>Early Bird Profit ($${ticketTiers[0].quantity > 0 ? formatNumber(Math.max(0, earlyBirdProfit / ticketTiers[0].quantity)) : '0'} per ticket)</td>
+                    <td>$${formatNumber(Math.max(0, earlyBirdProfit))}</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -2197,7 +2185,7 @@
                 <tr>
                     <td></td>
                     <td>Company Profit</td>
-                    <td>$${formatNumber(companyProfit)}</td>
+                    <td>$${formatNumber(Math.max(0, companyProfit))}</td>
                 </tr>
                 <tr class="total-row">
                     <td></td>
