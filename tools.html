@@ -1268,7 +1268,7 @@
 
         function updateProfitBreakdown(
             ticketTiers,
-            totalTicketsSold,
+            venueCapacity,
             artistCost,
             equipmentCost,
             miscCost,
@@ -1280,7 +1280,6 @@
             repayInvestorFirst
         ) {
             console.log('Updating profit breakdown');
-            const venueCapacity = parseInt(document.getElementById('venueCapacity').value) || 1000;
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
             const fluidCost = parseFloat(document.getElementById('fluidCost').value);
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
@@ -1291,23 +1290,22 @@
             let totalFluidCost = 0;
             let totalVenueCost = 0;
             let totalStripeFee = 0;
+            let totalTicketsSold = 0;
 
             const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
 
             // Calculate revenue and costs for each tier
-            let cumulativeSales = 0;
             for (let i = 0; i < ticketTiers.length; i++) {
                 const tier = ticketTiers[i];
-                const tierSales = Math.min(tier.quantity, totalTicketsSold - cumulativeSales);
-                if (tierSales <= 0) continue;
+                const tierSales = tier.quantity;
+                totalTicketsSold += tierSales;
 
                 const tierRevenue = tierSales * tier.price;
                 totalRevenue += tierRevenue;
                 totalFluidCost += tierSales * fluidCost;
                 totalVenueCost += tierSales * venueCostPerDay * eventLength;
                 totalStripeFee += tierSales * stripeFeeFixed + tierRevenue * stripeFeePercentage;
-                cumulativeSales += tierSales;
             }
 
             // Add investor funds to total revenue
@@ -1363,20 +1361,16 @@
             `;
 
             // Revenue breakdown
-            cumulativeSales = 0;
             for (let i = 0; i < ticketTiers.length; i++) {
                 const tier = ticketTiers[i];
-                const tierSales = Math.min(tier.quantity, totalTicketsSold - cumulativeSales);
-                if (tierSales <= 0) continue;
                 const tierName = i === 0 ? 'Early Bird' : `Tier ${i}`;
                 breakdownHTML += `
                     <tr>
                         <td></td>
-                        <td>${tierName} Tickets (${formatNumber(tierSales)} @ $${formatNumber(tier.price)})</td>
-                        <td>$${formatNumber(tierSales * tier.price)}</td>
+                        <td>${tierName} Tickets (${formatNumber(tier.quantity)} @ $${formatNumber(tier.price)})</td>
+                        <td>$${formatNumber(tier.quantity * tier.price)}</td>
                     </tr>
                 `;
-                cumulativeSales += tierSales;
             }
 
             // Include investor funds in revenue
@@ -1989,7 +1983,7 @@
 
         function updateProfitBreakdown(
             ticketTiers,
-            totalTicketsSold,
+            venueCapacity,
             artistCost,
             equipmentCost,
             miscCost,
@@ -2001,7 +1995,6 @@
             repayInvestorFirst
         ) {
             console.log('Updating profit breakdown');
-            const venueCapacity = parseInt(document.getElementById('venueCapacity').value) || 1000;
             const eventLength = parseInt(document.getElementById('eventLength').value) || 1;
             const fluidCost = parseFloat(document.getElementById('fluidCost').value);
             const venueCostPerDay = parseFloat(document.getElementById('venueCost').value);
@@ -2012,23 +2005,22 @@
             let totalFluidCost = 0;
             let totalVenueCost = 0;
             let totalStripeFee = 0;
+            let totalTicketsSold = 0;
 
             const stripeFeePercentage = 0.029; // 2.9%
             const stripeFeeFixed = 0.30;
 
             // Calculate revenue and costs for each tier
-            let cumulativeSales = 0;
             for (let i = 0; i < ticketTiers.length; i++) {
                 const tier = ticketTiers[i];
-                const tierSales = Math.min(tier.quantity, totalTicketsSold - cumulativeSales);
-                if (tierSales <= 0) continue;
+                const tierSales = tier.quantity;
+                totalTicketsSold += tierSales;
 
                 const tierRevenue = tierSales * tier.price;
                 totalRevenue += tierRevenue;
                 totalFluidCost += tierSales * fluidCost;
                 totalVenueCost += tierSales * venueCostPerDay * eventLength;
                 totalStripeFee += tierSales * stripeFeeFixed + tierRevenue * stripeFeePercentage;
-                cumulativeSales += tierSales;
             }
 
             // Add investor funds to total revenue
@@ -2084,20 +2076,16 @@
             `;
 
             // Revenue breakdown
-            cumulativeSales = 0;
             for (let i = 0; i < ticketTiers.length; i++) {
                 const tier = ticketTiers[i];
-                const tierSales = Math.min(tier.quantity, totalTicketsSold - cumulativeSales);
-                if (tierSales <= 0) continue;
                 const tierName = i === 0 ? 'Early Bird' : `Tier ${i}`;
                 breakdownHTML += `
                     <tr>
                         <td></td>
-                        <td>${tierName} Tickets (${formatNumber(tierSales)} @ $${formatNumber(tier.price)})</td>
-                        <td>$${formatNumber(tierSales * tier.price)}</td>
+                        <td>${tierName} Tickets (${formatNumber(tier.quantity)} @ $${formatNumber(tier.price)})</td>
+                        <td>$${formatNumber(tier.quantity * tier.price)}</td>
                     </tr>
                 `;
-                cumulativeSales += tierSales;
             }
 
             // Include investor funds in revenue
