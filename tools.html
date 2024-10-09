@@ -1457,8 +1457,42 @@
                 </tr>
             `;
 
+            // **Add Key Metrics section**
+            // Calculate the number of tickets needed for the investor to break even
+            const investorBreakEvenTickets = calculateInvestorBreakevenTickets(
+                ticketTiers,
+                fixedCosts,
+                fluidCost,
+                venueCostPerDay,
+                eventLength,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn
+            );
+
+            // Calculate the number of tickets needed for the company/investor to start making a profit
+            const companyInvestorProfitTickets = calculateCompanyInvestorProfitTickets(
+                ticketTiers,
+                fixedCosts,
+                fluidCost,
+                venueCostPerDay,
+                eventLength,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn
+            );
+
             breakdownHTML += `
                 </table>
+                <h3>Key Metrics</h3>
+                <ul>
+                    <li>Tickets needed for Investor to Break Even: ${investorBreakEvenTickets}</li>
+                    <li>Tickets needed for Company/Investor to start making profit: ${companyInvestorProfitTickets}</li>
+                </ul>
                 <p>Note: Investor funds are included in both revenue and costs to reflect the investment inflow and repayment outflow.</p>
             `;
 
@@ -1981,6 +2015,90 @@
             return Number.isFinite(number) ? number.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0';
         }
 
+        function calculateInvestorBreakevenTickets(
+            ticketTiers,
+            fixedCosts,
+            fluidCost,
+            venueCostPerDay,
+            eventLength,
+            investorFunds,
+            investorProfitShare,
+            investorMaxReturn,
+            earlyBirdProfitShare,
+            earlyBirdMaxReturn
+        ) {
+            const maxTickets = 2 * parseInt(document.getElementById('venueCapacity').value); // Extend beyond capacity if needed
+            for (let ticketsSold = 0; ticketsSold <= maxTickets; ticketsSold++) {
+                const { revenue, costs } = calculateRevenueAndCosts(
+                    ticketTiers,
+                    ticketsSold,
+                    fixedCosts,
+                    fluidCost,
+                    venueCostPerDay,
+                    eventLength,
+                    investorFunds
+                );
+                let totalProfit = revenue - costs;
+                // Distribute profits
+                const distribution = distributeProfits(
+                    totalProfit,
+                    ticketTiers[0],
+                    investorFunds,
+                    investorProfitShare,
+                    investorMaxReturn,
+                    earlyBirdProfitShare,
+                    earlyBirdMaxReturn
+                );
+                const { investorProfit } = distribution;
+                if (investorProfit >= 0) {
+                    return ticketsSold;
+                }
+            }
+            return 'N/A'; // If not found within maxTickets
+        }
+
+        function calculateCompanyInvestorProfitTickets(
+            ticketTiers,
+            fixedCosts,
+            fluidCost,
+            venueCostPerDay,
+            eventLength,
+            investorFunds,
+            investorProfitShare,
+            investorMaxReturn,
+            earlyBirdProfitShare,
+            earlyBirdMaxReturn
+        ) {
+            const maxTickets = 2 * parseInt(document.getElementById('venueCapacity').value); // Extend beyond capacity if needed
+            for (let ticketsSold = 0; ticketsSold <= maxTickets; ticketsSold++) {
+                const { revenue, costs } = calculateRevenueAndCosts(
+                    ticketTiers,
+                    ticketsSold,
+                    fixedCosts,
+                    fluidCost,
+                    venueCostPerDay,
+                    eventLength,
+                    investorFunds
+                );
+                let totalProfit = revenue - costs;
+                // Distribute profits
+                const distribution = distributeProfits(
+                    totalProfit,
+                    ticketTiers[0],
+                    investorFunds,
+                    investorProfitShare,
+                    investorMaxReturn,
+                    earlyBirdProfitShare,
+                    earlyBirdMaxReturn
+                );
+                const { investorProfit, companyProfit } = distribution;
+                if (investorProfit > 0 || companyProfit > 0) {
+                    return ticketsSold;
+                }
+            }
+            return 'N/A'; // If not found within maxTickets
+        }
+
         function updateProfitBreakdown(
             ticketTiers,
             venueCapacity,
@@ -2172,8 +2290,42 @@
                 </tr>
             `;
 
+            // **Add Key Metrics section**
+            // Calculate the number of tickets needed for the investor to break even
+            const investorBreakEvenTickets = calculateInvestorBreakevenTickets(
+                ticketTiers,
+                fixedCosts,
+                fluidCost,
+                venueCostPerDay,
+                eventLength,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn
+            );
+
+            // Calculate the number of tickets needed for the company/investor to start making a profit
+            const companyInvestorProfitTickets = calculateCompanyInvestorProfitTickets(
+                ticketTiers,
+                fixedCosts,
+                fluidCost,
+                venueCostPerDay,
+                eventLength,
+                investorFunds,
+                investorProfitShare,
+                investorMaxReturn,
+                earlyBirdProfitShare,
+                earlyBirdMaxReturn
+            );
+
             breakdownHTML += `
                 </table>
+                <h3>Key Metrics</h3>
+                <ul>
+                    <li>Tickets needed for Investor to Break Even: ${investorBreakEvenTickets}</li>
+                    <li>Tickets needed for Company/Investor to start making profit: ${companyInvestorProfitTickets}</li>
+                </ul>
                 <p>Note: Investor funds are included in both revenue and costs to reflect the investment inflow and repayment outflow.</p>
             `;
 
