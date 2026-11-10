@@ -2,76 +2,67 @@
 
 Experimental bass and dubstep campout. Three days of music at The Bowl, afters at the K Lodge and The Dome until sunrise, everyone off site Monday.
 
-The numbers in this plan come from one budget model. Open [`budget.html`](budget.html) to change any input, including every ticket tier's price and size, and see profit, break-even and the split with Kinetic Desert update.
+The numbers in this plan come from one budget model. Open [`budget.html`](budget.html) to change any input, including every ticket tier's price and size, and see profit, break-even and each partner's share update.
 
 ## The short version
 
-1. **The permit now sets the calendar.** The county's information sheet says no ticket sales or advertising may happen until 11 days after the permit is approved. The 90-day filing deadline is January 22, but filing then could leave only weeks to sell. File in December.
+1. **The permit is lighter than I first wrote.** The county told you the camp is already approved for gatherings, so you need a Temporary Use Permit for the added structures and sound. The county code backs that reading. The Temporary Use Permit sheet has no hold on ticket sales, so the December presale is back in the plan. Get the county's answer in an email first.
 2. **The full lineup needs 230 paid tickets to break even. Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $19,600, or $9,800 each for you and Kinetic Desert.
 3. **Site costs alone are covered by about 88 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds five or six tickets to break-even.
-4. **Start with the leaner lineup and upgrade as sales come in.** With the permit rule there may be no presale to test demand before artists are booked. The leaner lineup, with $2,000 headliners, breaks even at 188 tickets. Add a $3,000 name as a late announcement if sales pass about 150 by March 1.
+4. **Let the alumni presale decide how big to book.** A leaner lineup with $2,000 headliners breaks even at 188 tickets. Upgrade to $3,000 headliners if the presale sells out.
 5. **At a 290-ticket sell-out the full plan makes about $11,500**, or $5,750 each, plus Kinetic Desert's $2,000 guarantee.
-6. **500 on site is a hard ceiling this year, and the best outcome.** Above 500 a music event becomes a major event with a 180-day filing deadline, which passed on October 25. At 420 paid tickets the model shows about $33,000.
+6. **The 500 unlock only pays you once 336 tickets sell.** Project Seismic's 40 guests leave 400 tickets, and their share takes yours from 50% to 40%. At 400 sold the event makes about $27,000: $10,800 to you, $12,800 to Kinetic Desert and $7,400 to Project Seismic.
 7. **Staying under 199 on site does not work.** Only 139 tickets fit, and even the leaner lineup loses about $3,700 with all of them sold.
 8. **The crew plan is short by more than half.** Twelve ticket-only volunteers close the gap.
 9. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
 
 ## Permits
 
-The camp's own approval covers its normal use. This event adds amplified sound, temporary stages, a ticketed crowd and overnight music, so the county treats it as a temporary special event.
+### What the county told you, and what the code says
 
-### What the county's sheet says
+You were told the camp's existing approval covers the gathering itself, and that this event needs a Temporary Use Permit for the temporary structures and sound.
 
-From the San Bernardino County Temporary Special Event Permit information sheet, revised June 4, 2025:
+The county's development code supports that. Section 84.25.030 exempts "events on sites already approved for public assembly" from needing a temporary use permit. The heavier Temporary Special Event Permit, which I described in the last version of this plan, attaches to events that are not exempt.
 
-- **Your class.** A music event with 200 to 500 people a day is a Class II minor event. An event advertised online qualifies only if there is a way to hold attendance to 500 a day and it is strictly enforced. A hard ticket cap does that.
-- **Under 200 a day** the county code exempts a Class II event from the permit. That matches what you were told.
-- **Over 500 a day** a music event is a Class II major event and must be filed 180 days ahead. For April 23 that date was October 25, 2026.
-- **Filing deadline.** A first-time minor event that is not a community celebration must file at least 90 days ahead. Ninety days before April 23 is Saturday, January 23, so the last working day is **Friday, January 22**.
-- **No sales or advertising before approval.** The sheet says the approved application "is not in effect until eleven (11) days after approval" and that "no ticket sales or advertising may take place until after this period has passed". It also warns that the review time frames may leave no time for advance ticket sales, and suggests filing earlier.
-- **Other agencies come first.** The applicant has to get approval from each agency below before submitting to Planning, and attach their completed forms.
-- **Fees are charged at actual cost.** You pay a deposit, staff time is billed against it, and more can be requested. Other agencies charge their own fees. Treat your $3,000 as an estimate that can move.
-- **Next year is easier.** A recurring event that was reviewed and approved before needs only 30 days.
+### The Temporary Use Permit
 
-### Approvals to collect
+From the county's Temporary Use Permit information sheet, revised June 4, 2025:
 
-| Approval | Who | Why it applies here |
-|---|---|---|
-| Temporary Special Event Permit | County Land Use Services, Planning, through the EZOP portal | Music event, 200–500 a day |
-| Sheriff's form | Sheriff's station that covers Angelus Oaks | Security and crowd plan |
-| Emergency medical form | Inland Counties Emergency Medical Agency (ICEMA) | Medical plan. Your medical team's Friday-to-Monday cover goes here |
-| Environmental Health, land use form | County Environmental Health Services | Toilets, hand-washing, water, trash. The plot plan must show how many toilets exist and how many are added |
-| Environmental Health, food | County Environmental Health Services | Only if food is sold or served to attendees: vendors, the meal plan, a brunch for everyone. Ask whether feeding only crew and artists from the camp kitchen needs anything |
-| Fire special event permit | San Bernardino County Fire, through EZOP, at least 30 days ahead | Outdoor assembly of 200 or more. Any tent over 400 sq ft, or canopies over 700 sq ft together. Fire can bill for standby time |
-| Roads form | County Public Works, Traffic | Needed only for a road permit. Expect a sign-off that none is required |
-| CHP contact | California Highway Patrol | The camp is on State Highway 38. If CHP is not contacted in time, usually 30 days ahead, you can be made to hire officers at cost |
-| Alcohol | State ABC | Only if alcohol "will be available". Ask the planner how bring-your-own is treated. Selling it, or including it in the ticket, needs a licence and liquor liability cover |
-| Insurance certificate | Your insurer | At least $1 million, naming "The County of San Bernardino, its officers, employees, agents and volunteers" as additional insured, with the event name and date |
-| Owner documents | Long Beach Area Council | Property owner certification, signed owner permission, and a recorded grant deed or a title report issued within 60 days |
+- **What to submit:** a letter of intent describing the temporary use, a site plan, supporting material such as drawings and pictures, and bond paperwork if a bond is required.
+- **How it runs:** you apply through the county's EZOP portal and are invoiced once the application is complete. A planner reviews it and may route it to other agencies, then approves it "as quickly as possible" once the standards are met.
+- **Standards:** access, heights, parking, setbacks, signs and utilities, plus removal of everything and restoration of the site. The county can ask for a performance bond.
+- **Deadline:** the sheet states none. You were told 90 days, which makes the last working day Friday, January 22.
+- **Ticket sales:** the sheet has no hold on sales or advertising. The 11-day hold I flagged belongs to the special event permit.
+- **Fee:** the 2025–26 county fee schedule lists a Major Temporary Use Permit at a flat $2,108. I could not find the minor fee or the 2026–27 figure. Your $3,000 ballpark is a reasonable budget until the county quotes it.
 
-The application also needs a letter of intent, a one-sheet plot plan, a financially responsible party form, and copies of all flyers and website copy.
+### What this removes
 
-### Things specific to this event
+Under the special event permit you would have collected sign-offs from the Sheriff, the county emergency medical agency, Environmental Health and Public Works before filing, contacted the Highway Patrol, and held ticket sales until 11 days after approval. None of that is on the Temporary Use Permit sheet.
 
-- **The Dome needs a fire permit on its own.** A 24-foot dome covers about 452 square feet, over the fire district's 400-square-foot tent threshold. Ask the Dome's owner for its flame-resistance certificate, which fire departments in California normally ask for.
-- **Temporary stage structures.** California's fire code regulates temporary stages, stage canopies, truss and speaker towers, and other jurisdictions' handouts put the permit line at 400 square feet, with engineer-stamped plans above it. I did not find San Bernardino County's own wording. Get Kinetic Desert's stage and truss dimensions and heights, and ask County Fire and Building and Safety what they need.
-- **Sound after 10:00 PM.** The county's standard for a stationary noise source heard at a residence is 55 dB(A) from 7:00 AM to 10:00 PM and 45 dB(A) overnight. The plot plan asks for speaker locations, hours and how neighbouring land is used. The Bowl running to midnight is the part most likely to draw a condition. Moving indoors at midnight helps your case.
-- **The plot plan** must show each stage with its size, type and height, speakers and hours, the entry and ticket check, first aid and command post, toilets and hand-washing with counts, vendor and food booths, tents, trash, parking, generators, and the fire, Sheriff and CHP offices with jurisdiction.
-- **Apply for 500 from the start**, with both layouts on the plan: The Bowl as main stage for 350, and the larger main-stage area with The Bowl as Project Seismic's side stage for 500. That avoids a second application in March.
-- **Forest land.** The council's site says it owns the camp's 640 acres, so I do not expect a Forest Service permit for what happens on the property. Confirm with the camp that parking, access and every stage sit on its own land, and ask what the forest's April fire rules allow.
-- **Environmental review.** The sheet says every application is checked for whether state environmental review applies. Ask the planner early if that is likely here.
+### What may still be separate
 
-Two things outside the county process, from my general knowledge: selling merchandise needs a California seller's permit, and public performance of recorded music is licensed through ASCAP, BMI and similar bodies.
+These come from other agencies' own pages, so ask whether the Temporary Use Permit covers them.
 
-### Questions for the county planner
+- **County Fire.** Its special event page says a fire permit is needed for an outdoor public assembly of 200 or more, and for any tent over 400 square feet. A 24-foot dome is about 452 square feet. Applications go in at least 30 days ahead.
+- **A Temporary Structure Permit from Building and Safety.** The county's sheet covers temporary non-residential structures used for assembly, says it is approved only after Planning approves the Temporary Use Permit, and asks for engineered plans. Whether a stage and truss fall under it is a question for the planner. Have Kinetic Desert's dimensions and heights ready.
+- **Environmental Health.** Only if food is sold or served to attendees: vendors, the meal plan, a brunch for everyone.
+- **Noise.** The county standard for sound heard at a residence is 55 dB(A) from 7:00 AM to 10:00 PM and 45 dB(A) overnight. A permit for sound will likely come with hours. The Bowl running to midnight is the part to raise early.
 
-Call Land Use Services on 909.387.8311 before anything else.
+### Get it in one email
 
-1. **May tickets be sold now for an event capped under 200 a day, and the cap raised once the permit is in effect?** The answer decides whether there can be a presale.
-2. **Does "attendance" count crew and artists, or only attendees?** If only attendees, the 200 and 500 lines apply to tickets and there is room for about 60 more.
-3. **How long does review take once the application is complete?**
-4. **What will the deposits and agency fees total?**
-5. **What conditions should we expect for outdoor sound until midnight?**
+Ask the planner to confirm in writing (Land Use Services, 909.387.8311):
+
+1. A Temporary Use Permit is what this event needs, and the special event permit does not apply.
+2. Which type of Temporary Use Permit, and the fee.
+3. The filing deadline.
+4. Tickets can be sold and the event advertised before the permit is issued.
+5. Whether the stage, truss and Dome need a separate structure permit or engineered plans.
+6. Whether the application is routed to County Fire or you apply there yourself.
+7. Whether the permit is needed at all below 200 people.
+
+The reason to have it in writing: the special event chapter says no one may advertise or sell admission to a temporary special event without that permit. An email saying it does not apply here protects your ticket sales if someone else at the county reads it differently later.
+
+Also ask the camp for a copy of its own approval. Its limits on headcount, hours and amplified sound are the real ceiling for this event.
 
 ## What Reeguez Rocks changes
 
@@ -99,12 +90,10 @@ Profit and loss are both split 50/50 with Kinetic Desert, so your side is half o
 
 | When | Signal | Decision |
 |---|---|---|
-| Before offers go out | A private survey of Reeguez Rocks buyers and your list, since a presale may not be allowed | Strong response: book one $3,000 headliner now. Otherwise book the leaner curve |
-| Three weeks after on-sale | Under 110 sold | Close Sunday with a back-to-back from acts already on site |
-| Mar 1 | 150 or more sold | Add a $3,000 name as a late headline announcement |
-| Mar 15 | About 230 sold and still moving | Unlock 500 |
-
-Write a permit contingency into every artist contract, and time deposits to fall after approval where the artist will accept it.
+| Dec 15 | Alumni presale: 50 Fri–Sun tickets at $169, sold before any lineup | Sold out: book the full curve. Under 25: book the leaner curve |
+| Feb 1 | Three weeks after the first lineup announcement | Under 110 sold: close Sunday with a back-to-back from acts already on site |
+| Mar 1 | 150 or more sold on the leaner lineup | Add a $3,000 name as a late headline announcement |
+| Mar 15 | Sales on pace for 336 or more | Unlock 500 |
 
 ## What I assumed
 
@@ -112,14 +101,14 @@ Each of these is an input in the budget model.
 
 | Assumption | Value used | Why it matters |
 |---|---|---|
-| People on site without a paid ticket | 60, or 80 with Project Seismic | Sets how many tickets fit under each limit: 139, 290 and 420 |
-| Permits | $3,000, paid once filed | County fees are billed at actual cost, so this can move |
+| People on site without a paid ticket | 60, or 100 with Project Seismic's 40 | Sets how many tickets fit under each limit: 139, 290 and 400 |
+| Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
+| A loss at 500 | Split 40/40/20, the same as a profit | You told me you and Kinetic Desert split losses. I extended that to Project Seismic |
 | Ticketing fees | Paid by the buyer on top of the ticket price | Otherwise take about 6% off ticket income |
 | Car camping demand | One pass per five tickets | 96 of the 120 spots are for sale after 24 crew passes. Selling all 96 adds $1,900 |
 | Ticket mix | 65% Fri–Sun, 25% Sat–Sun, 10% Sunday | Drives average ticket price and the venue fee |
 | Cabins sold | 6 of 8 | Two held for artists who stay on and for staff. Selling a seventh moves break-even to 225 |
 | Porto-potties for the 500 tier | $2,500 | A guess. Get a quote early because of Stagecoach |
-| Project Seismic | No fee in the model | I do not know their deal |
 | Merch, meal plan and vendor income | $10 per ticket | Untested. At 0, break-even rises to 243 |
 
 I could not verify current booking fees for Pando!, Chmura, Huck.Jorris or Ferrofluid, so no slot below is assigned to a named artist on the basis of price.
@@ -132,14 +121,16 @@ Every limit is counted on people on site, so unticketed people come off the top.
 |---|---|---|---|
 | 199 | 139 | None | Loses money even sold out |
 | 350 | 290 | Permits | The plan |
-| 500 | 420 | Permits, porto-potties, more site supplies | Unlock if sales support it. Hard ceiling for 2027 |
+| 500 | 400 | Porto-potties, Project Seismic's guarantee, more site supplies | Unlock only if sales are on pace for 336 |
 
-**The 500 unlock.** The main stage moves to a larger area with Kinetic Desert's production, and The Bowl becomes a side stage run by Project Seismic with their own artists. I assumed their crew and artists add 20 people on site, which leaves 420 tickets. In the model the unlock adds about $3,800 and beats a 290-ticket sell-out once 310 are sold. Not in that number:
+**The 500 unlock.** The main stage moves to a larger area with Kinetic Desert's production, and The Bowl becomes a side stage run by Project Seismic with their own artists.
 
-- **Project Seismic's deal**: a fee, a share, or neither.
-- **Any change to Kinetic Desert's guarantee.**
+- **Their deal:** a $2,000 minimum, a profit share half the size of yours and Kinetic Desert's, and 40 guest-list places for crew, artists and friends. That makes the split 40% you, 40% Kinetic Desert, 20% Project Seismic.
+- **What it costs:** about $5,900 more in fixed costs, and 40 places that cannot be sold.
+- **When it pays:** the event as a whole breaks even at 248 tickets. Your own take passes what a 290-ticket sell-out of the 350 plan would give you at 336 tickets. The same number holds for Kinetic Desert.
+- **Kinetic Desert's guarantee** stays at $2,000.
 
-Afters still hold 145 people indoors (105 in the K Lodge, 40 in The Dome). At 500 on site that needs a third space.
+Afters still hold 145 people indoors (105 in the K Lodge, 40 in The Dome). At 500 on site that needs a third space, or a late slot on one of the two stages if the sound permit allows it.
 
 ## Tickets
 
@@ -155,19 +146,32 @@ Tiers sell in order. Quantities assume 290 paid tickets.
 
 - Early tickets are the cheap ones, so the average is about $155 at 90 tickets and $174 at 290.
 - The $40 gap between Fri–Sun and Sat–Sun is deliberately small. It makes Friday feel close to free, which pushes people to arrive Friday.
-- If no presale is allowed, give Reeguez Rocks buyers the $169 tier as a 48-hour head start on the first day of sales.
 - Hold Sunday-only tickets until set times are out, about a month before.
 - Each Fri–Sun ticket nets its price less the $30 venue fee. The Dome fee is capped at $2,000, so it stops costing anything after the 200th ticket.
+- Add single-day Friday or Saturday tickets only if sales are behind in March.
 
 ### Add-ons
 
 | Add-on | Price | Notes |
 |---|---|---|
 | Car camping pass | $50 | 120 spots: 24 comped to crew and volunteers, 96 for sale |
-| Whole cabin, 9 beds, three nights | $850 | About $94 a bed. Six for sale. Nights will be near freezing |
+| Whole cabin, 9 beds, three nights | $850 | About $94 a bed. Six for sale. Put them in the presale: nights will be near freezing |
 | Hoodie or shirt pre-order | $60–$65 | Pre-order only, so there is no leftover stock |
-| Meal plan | about $45 for three dinners | Cap it at 60. Needs Environmental Health's answer on food permits first |
-| Vendor spots | $200 flat | Each food vendor needs its own temporary food permit |
+| Meal plan | about $45 for three dinners | Cap it at 60. Ask Environmental Health about food permits first |
+| Vendor spots | $200 flat | One coffee and breakfast vendor matters more than the fee |
+
+### On-sale calendar
+
+| Date | What happens |
+|---|---|
+| Dec 1–15 | Reeguez Rocks alumni presale: 50 Fri–Sun at $169, plus cabins. Pays artist deposits and sets the lineup size |
+| Jan 12 | First lineup announcement. Tier 1 opens, Sat–Sun tickets open |
+| Feb 9 | Full lineup. Tier 2 opens when Tier 1 sells through |
+| Mar 15 | Decision on the 500 unlock |
+| Mar 23 | Set times out. Sunday-only tickets open |
+| Apr 9 | Final tier |
+
+The presale waits on the planner's email confirming that sales can start before the permit is issued.
 
 ## Budget
 
@@ -214,16 +218,16 @@ The 350 plan with the full lineup, at a sell-out of 290 paid tickets.
 | 261 | 90% | $5,904 | $2,952 |
 | 290 | 100% | $11,533 | $5,766 |
 
-The 139 row assumes no permit. In practice the permit is paid once it is filed, so that row would be about $3,150 worse.
+With the 500 unlock, 100 unticketed people and Project Seismic's deal:
 
-With the 500 unlock and 80 unticketed people:
+| Paid tickets | People on site | Result | You, 40% | Kinetic Desert | Project Seismic |
+|---|---|---|---|---|---|
+| 300 | 400 | $7,594 | $3,038 | $5,038 | $3,519 |
+| 350 | 450 | $17,299 | $6,920 | $8,920 | $5,460 |
+| 375 | 475 | $22,151 | $8,861 | $10,861 | $6,430 |
+| 400 | 500 | $27,004 | $10,802 | $12,802 | $7,401 |
 
-| Paid tickets | People on site | Result | Your half |
-|---|---|---|---|
-| 300 | 380 | $9,694 | $4,847 |
-| 350 | 430 | $19,399 | $9,699 |
-| 400 | 480 | $29,104 | $14,552 |
-| 420 | 500 | $32,986 | $16,493 |
+Both partners' columns include their $2,000 guarantee.
 
 ## Artists
 
@@ -297,7 +301,7 @@ The medical team is on site for the event itself. The two build days and two str
 
 **The midnight move** is the riskiest ten minutes of each night: up to 350 people leave an amphitheater on a mountainside in the dark and the cold at the same time. Light that path first. Start both afters rooms at 11:45 so there is music when people arrive.
 
-**Keeping people Sunday night.** Announce the Sunday closer as a one-off, and make Monday brunch the meal you serve everyone if the budget and the food permit allow (about $900 for 300 people). It also means fewer people drive down the mountain tired at 1:00 AM.
+**Keeping people Sunday night.** Announce the Sunday closer as a one-off, and make Monday brunch the meal you serve everyone if the budget allows (about $900 for 300 people). It also means fewer people drive down the mountain tired at 1:00 AM.
 
 ## Lodging
 
@@ -313,10 +317,11 @@ The medical team is on site for the event itself. The two build days and two str
 - The apartment shares a wall with the afters room, which runs until sunrise. Tell artists that when you offer it.
 - By Sunday night up to six acts and their guests could have moved out of the apartment and want a bed. That is why two cabins are held back.
 - The six sold cabins bring in $5,100 against $2,000 of rental for all eight. Budget firewood for all eight.
+- Project Seismic's 40 are not housed in this table. Agree with them whether they camp.
 
 ## Crew and gate
 
-**Gate.** 10:00 AM to 10:00 PM for three days is 12 three-hour shifts. Four gate crew at three shifts each is exactly 12, which means one person alone at the gate all weekend, including Friday afternoon when most cars arrive. The gate is also how the 500-a-day cap is enforced, which the permit class depends on.
+**Gate.** 10:00 AM to 10:00 PM for three days is 12 three-hour shifts. Four gate crew at three shifts each is exactly 12, which means one person alone at the gate all weekend, including Friday afternoon when most cars arrive.
 
 **General crew.** Eight people at three shifts each is 24 shifts. My estimate of what the event needs:
 
@@ -340,7 +345,7 @@ That leaves 37 shifts uncovered. Twelve volunteers on your existing trade (three
 
 One chef at $1,000 and $2,800 of groceries covers about 590 meals from Wednesday to Wednesday: roughly 16 people for the four build and strike days, about 45 a day during the event, and artists who stay past their night.
 
-The chef will need the six kitchen-help shifts above. Extras in order of value: the 60-person meal plan, then Monday brunch for everyone. Both wait on Environmental Health.
+The chef will need the six kitchen-help shifts above. Extras in order of value: the 60-person meal plan, then Monday brunch for everyone.
 
 ## Art, projection and lighting
 
@@ -362,41 +367,45 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 - **Cold.** The council lists the camp at 6,500 feet. Expect nights near freezing, and late-April snow is possible. You have October there for comparison. Tell ticket buyers plainly what to pack.
 - **Rain or snow at The Bowl.** There is no covered space for 350 people. The K Lodge holds 105. Decide the bad-weather plan and the refund terms before tickets go on sale.
 - **Medical.** $600 a day from Friday 10:00 AM to Monday 10:00 AM. The nearest hospital is a long drive down Highway 38, so agree with the team where an ambulance meets you and who calls. Add naloxone and a harm-reduction table.
-- **Insurance.** Confirm the $3M/$1M policy can name both the county and the camp, covers overnight camping, and says what it does about alcohol people bring.
+- **Insurance.** Confirm the $3M/$1M policy can name the camp and, if asked, the county, covers overnight camping, and says what it does about alcohol people bring.
+- **Fire.** Ask the camp what the forest's April fire rules allow for fire pits and fire performance.
 - **Stagecoach.** Reserve porto-potties, generators, light towers and radios on a refundable hold now.
 
 ## Between now and April
 
 | When | What |
 |---|---|
-| This week | Call the county planner with the five questions. Ask the council for the owner documents. Ask the four target artists for quotes |
-| November | Kinetic Desert and Project Seismic deals in writing. Stage and Dome dimensions from both. Contact the Sheriff, ICEMA, Environmental Health, County Fire and CHP. Draft the plot plan with both layouts |
-| By Dec 11 | Submit the complete application through EZOP |
-| Jan 22 | Last day to file. Treat it as a backstop |
-| Approval plus 11 days | Sales and advertising can start. First lineup, Fri–Sun and Sat–Sun tickets, cabins |
-| Three weeks later | Sunday decision. Full lineup |
+| This week | Email the county planner the seven questions. Ask the camp for its approval document. Ask the four target artists for quotes |
+| November | Kinetic Desert and Project Seismic deals in writing. Stage, truss and Dome dimensions. Draft the letter of intent and site plan |
+| Dec 1–15 | Alumni presale, once the planner confirms sales can start |
+| By Dec 11 | Submit the Temporary Use Permit application |
+| Mid-December | Pick the lineup size. Send offers and pay deposits |
+| Jan 12 | First lineup. Tier 1 and Sat–Sun tickets open |
+| Jan 22 | Last day to file, by the 90 days you were given. Treat it as a backstop |
+| Feb 1 | Sunday decision |
+| Feb 9 | Full lineup. Art grants and merch pre-order open |
 | Mar 1 | Headliner upgrade decision |
 | Mar 15 | 500 decision. Order porto-potties |
-| Mar 23 | Set times. Sunday-only tickets. Fire permit and CHP contact must be in by now at the latest |
+| Mar 23 | Set times. Sunday-only tickets. Fire permit application in by now at the latest |
 | Apr 9 | Final tier. Grocery order. Shift schedule |
 | Apr 21 | Load-in |
 
-If approval comes by late January, sales open in early February, about 11 weeks before the event.
-
 ## Questions that would change this plan
 
-1. **The planner's answers**, above all whether tickets can be sold before the permit is in effect.
-2. **What is Project Seismic's deal?** And how many people do they bring?
-3. **Does Kinetic Desert's guarantee change at 500?**
-4. **Does your $3,000 permit figure come from the county or from the camp?**
+1. **The planner's written answers**, above all whether sales can start before the permit is issued and whether County Fire is separate.
+2. **What does the camp's own approval allow** for headcount, hours and amplified sound?
+3. **Does Project Seismic share a loss** the way they share a profit?
 
 ## Sources
 
-- [San Bernardino County Temporary Special Event Permit information sheet, revised June 4, 2025](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Temporary-Special-Event-Permit-Information-Sheet.pdf)
-- [County EZOP page for the Temporary Special Event Permit](https://wp.sbcounty.gov/ezop/permits/temporary-special-even-permit/)
-- [County Development Code, temporary special event permit exemptions](https://codelibrary.amlegal.com/codes/sanbernardino/latest/sanberncty_ca/0-0-0-173704)
+- [San Bernardino County Temporary Use Permit information sheet, revised June 4, 2025](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Temporary-Use-Permit-Information-Sheet-1.pdf)
+- [County Development Code Chapter 84.25, temporary structures and uses](https://gocodebook.com/library/us/ca/san-bernardino-county-zoning/chapter-84.25-temporary-structures-and-uses)
+- [County Temporary Structure Permit information sheet](https://lus.sbcounty.gov/wp-content/uploads/sites/48/BandS/Handouts/Temporary-Structure-Permit-Checklist.pdf)
+- [County EZOP page for the Temporary Use Permit](https://wp.sbcounty.gov/ezop/permits/temporary-use-permit/)
+- [County Planning master fee schedule, 2025–26](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Planning-Master-Fee-Schedule-25-26.pdf)
+- [County Temporary Special Event Permit information sheet, for comparison](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Temporary-Special-Event-Permit-Information-Sheet.pdf)
+- [County Development Code, special event permit requirement and exemptions](https://codelibrary.amlegal.com/codes/sanbernardino/latest/sanberncty_ca/0-0-0-173704)
 - [San Bernardino County Fire special event permits](https://sbcfire.org/ofm/specialeventpermits/)
-- [County Environmental Health Services](https://ehs.sbcounty.gov)
 - [County noise standards, as quoted in a county-hosted noise report](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Appendix-H-Noise-Report.pdf)
 - [Long Beach Area Council on Camp Tahquitz](https://www.tahquitz.org/council)
 - [Pollstar on Stagecoach 2027 dates](https://news.pollstar.com/2026/06/16/2027-stagecoach-to-take-place-april-23-25/)

@@ -180,7 +180,7 @@ const DEFAULTS = {
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50,
+  kdShare: 50, psShare: 0, psGuarantee: 0,
 };
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
@@ -212,16 +212,17 @@ function compute(s) {
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
   const medical = s.medicalPerDay * s.medicalDays;
-  const fixedBase = artistFees + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
+  const fixedBase = artistFees + s.hospitality + s.kd + s.psGuarantee + s.insurance + s.chef + s.food + crew
     + s.art + s.marketing + s.ops + medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
-  // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
+  // Guarantees are paid on top of each partner's share. Profit and loss are both split.
   const kdShareAmt = profit * s.kdShare / 100;
+  const psShareAmt = profit * s.psShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
     onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
-    kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
+    kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: s.psGuarantee + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
 function breakEven(s) {
@@ -237,7 +238,7 @@ const DAYS = ['Fri', 'Sat', 'Sun'];
 const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
 const PRESETS = {
   plan: {},
-  unlock: { paid: 420, unticketed: 80, ops: 2000, food: 3100 },
+  unlock: { paid: 400, unticketed: 100, ops: 2000, food: 3100, kdShare: 40, psShare: 20, psGuarantee: 2000 },
   leaner: { paid: 200, artists: LEAN_FEES },
   lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000 },
 };
@@ -258,7 +259,7 @@ const GROUPS = [
     { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
   ] },
   { title: 'People on site', fields: [
-    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket. The 500 unlock adds 20 for Project Seismic.' },
+    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket. The 500 unlock adds 40 for Project Seismic.' },
   ] },
   { title: 'Fixed costs', fields: [
     { k: 'kd', label: 'Kinetic Desert guarantee' },
@@ -285,8 +286,10 @@ const GROUPS = [
     { k: 'domeCap', label: 'Dome fee cap' },
   ] },
   { title: 'Profit split', fields: [
-    { k: 'kdShare', label: 'Kinetic Desert share of profit, %' },
-  ], text: 'The $2,000 guarantee is paid on top of the share. A loss is split the same way as a profit.' },
+    { k: 'kdShare', label: 'Kinetic Desert share, %' },
+    { k: 'psShare', label: 'Project Seismic share, %', hint: 'Only at 500: half of what you and Kinetic Desert each take' },
+    { k: 'psGuarantee', label: 'Project Seismic guarantee', hint: 'Only at 500' },
+  ], text: 'Guarantees are paid on top of each share. You take what is left after both shares. A loss is split the same way as a profit.' },
 ];
 
 let s = structuredClone(DEFAULTS);
@@ -398,14 +401,14 @@ function renderVerdict(r, be, maxPaid) {
 $('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
-  $('v-you-sub').textContent = `Kinetic Desert ${money(r.kdTotal)} including the $2,000 guarantee`;
+  $('v-you-sub').textContent = (s.psShare || s.psGuarantee) ? `Kinetic Desert ${money(r.kdTotal)}, Project Seismic ${money(r.psTotal)}, guarantees included` : `Kinetic Desert ${money(r.kdTotal)} including the $2,000 guarantee`;
   $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
 }
 
 function renderPL(r) {
   const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
   const fixedLines = [
-    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
+    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd], ['Project Seismic guarantee', s.psGuarantee, s.psGuarantee ? '' : 'only at 500'],
     ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
     ['Permit', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, r.portos ? '' : 'not needed'],
     ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
@@ -425,6 +428,7 @@ function renderPL(r) {
     <tr class="head"><td colspan="3">Split</td></tr>
     ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
     ${row('Kinetic Desert', money(r.kdTotal), `${money(s.kd)} guarantee + ${money(r.kdShareAmt)} share`)}
+    ${s.psShare || s.psGuarantee ? row('Project Seismic', money(r.psTotal), `${money(s.psGuarantee)} guarantee + ${money(r.psShareAmt)} share`) : ''}
     ${row('You', money(r.yours))}
   </tbody>`;
 }

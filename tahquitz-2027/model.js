@@ -19,7 +19,7 @@ const DEFAULTS = {
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50,
+  kdShare: 50, psShare: 0, psGuarantee: 0,
 };
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
@@ -51,16 +51,17 @@ function compute(s) {
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
   const medical = s.medicalPerDay * s.medicalDays;
-  const fixedBase = artistFees + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
+  const fixedBase = artistFees + s.hospitality + s.kd + s.psGuarantee + s.insurance + s.chef + s.food + crew
     + s.art + s.marketing + s.ops + medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
-  // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
+  // Guarantees are paid on top of each partner's share. Profit and loss are both split.
   const kdShareAmt = profit * s.kdShare / 100;
+  const psShareAmt = profit * s.psShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
     onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
-    kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
+    kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: s.psGuarantee + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
 function breakEven(s) {
