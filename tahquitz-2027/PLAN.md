@@ -2,19 +2,79 @@
 
 Experimental bass and dubstep campout. Three days of music at The Bowl, afters at the K Lodge and The Dome until sunrise, everyone off site Monday.
 
-The numbers in this plan come from one budget model. Open [`budget.html`](budget.html) to change any input, including every ticket tier's price and size, and see profit, break-even and each partner's share update.
+The numbers in this plan come from one budget model. Open [`budget.html`](budget.html) to change any input, including the artist budget and every ticket tier, and see profit, break-even and each partner's share update.
 
 ## The short version
 
-1. **The permit is lighter than I first wrote.** The county told you the camp is already approved for gatherings, so you need a Temporary Use Permit for the added structures and sound. The county code backs that reading. It puts no hold on ticket sales, which the county confirmed to you last year, so the December presale stands.
-2. **The full lineup needs 230 paid tickets to break even. Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $19,600, or $9,800 each for you and Kinetic Desert.
-3. **Site costs alone are covered by about 88 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds five or six tickets to break-even.
-4. **Let the alumni presale decide how big to book.** A leaner lineup with $2,000 headliners breaks even at 188 tickets. Upgrade to $3,000 headliners if the presale sells out.
-5. **At a 290-ticket sell-out the full plan makes about $11,500**, or $5,750 each, plus Kinetic Desert's $2,000 guarantee.
-6. **The 500 unlock only pays you once 336 tickets sell.** Project Seismic's 40 guests leave 400 tickets, and their share takes yours from 50% to 40%. At 400 sold the event makes about $27,000: $10,800 to you, $12,800 to Kinetic Desert and $7,400 to Project Seismic.
-7. **Staying under 199 on site does not work.** Only 139 tickets fit, and even the leaner lineup loses about $3,700 with all of them sold.
-8. **The crew plan is short by more than half.** Twelve ticket-only volunteers close the gap.
-9. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
+1. **The 350 plan now sells out at 275 tickets, and the full lineup breaks even at 238.** That is 87% sold before anyone makes a dollar, with about $6,900 of profit at a sell-out. Two things moved it: Kinetic Desert's 15 extra guests take 15 sellable places, and card fees are now your cost.
+2. **Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $20,200, or $10,100 each for you and Kinetic Desert.
+3. **Site costs alone are covered by about 92 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds about six tickets to break-even.
+4. **Let the alumni presale set the artist budget.** A leaner lineup at $11,300 breaks even at 195 tickets and makes about $14,300 at a sell-out.
+5. **Stay on Stripe for the ticket site.** Card fees come to about $1,700 at a sell-out, 3% of online sales. The cheaper options save a few hundred dollars at most. Pay-by-bank is worth offering on cabins.
+6. **California requires all-in prices.** The listed ticket price has to include every mandatory fee, so a processing fee cannot be added at checkout.
+7. **The 500 unlock pays you once 316 tickets sell.** With 115 people on guest lists and crew, 385 tickets fit. At 385 sold the event makes about $21,700: $8,700 to you, $10,700 to Kinetic Desert and $6,300 to Project Seismic.
+8. **Staying under 199 on site does not work.** Only 139 tickets fit, and even the leaner lineup loses about $4,500 with all of them sold.
+9. **The crew plan is short by more than half.** Twelve ticket-only volunteers close the gap.
+10. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
+
+## Ticket site and payments
+
+You are building your own site on AWS with Stripe, as you did for Reeguez Rocks, with QR tickets scanned at the gate for a wristband.
+
+### What each way of paying costs
+
+| Method | Fee | On a $195 ticket | On an $850 cabin |
+|---|---|---|---|
+| Card through Stripe, including Apple Pay, Google Pay and Link | 2.9% + 30¢ | $5.96 | $24.95 |
+| Bank debit through Stripe (ACH) | 0.8%, capped at $5 | $1.56 | $5.00 |
+| Stripe instant bank payment | 2.6% + 30¢ | $5.37 | $22.40 |
+| Card through an interchange-plus processor such as Helcim | Card network cost + 0.5% + 25¢. Helcim says online averages under 2.5% | about $4.90 or less | about $21 or less |
+| Card in person, Stripe Tap to Pay on a phone | 2.7% + 15¢ | $5.42 | |
+| Klarna through Stripe | 5.99% + 30¢ | $11.98 | $51.22 |
+| Cash at the gate | none | $0 | |
+
+Stripe figures are from its pricing page. Stripe's hosted Checkout adds no fee.
+
+### Recommendation
+
+**Stay on Stripe.** You have a working integration and an account with payment history. Total fees at a sell-out are about $1,700. Moving to an interchange-plus processor would save roughly $300 on this event and means rebuilding the checkout on a new account. Revisit it when you are running at 500 or several events a year.
+
+**Spend the effort on a smooth checkout.** One abandoned sale loses $195. The fee on a completed one is $6. Turn on Apple Pay, Google Pay and Link, and keep the purchase to one screen.
+
+**Offer pay-by-bank on cabins and big orders.** It saves about $20 on a cabin and about $4 on a single ticket. The trade-offs:
+
+- The money takes about four business days to arrive, and a payment can fail after the buyer thinks they are done.
+- Third-party guides list a $4 fee for a failed payment and $1.50 for instant bank verification. Neither is on Stripe's pricing page, so check your account.
+- Stop offering it about ten days before the event.
+
+If 30% of sales went by bank, fees would drop by about $370.
+
+**List all-in prices.** California's honest pricing law covers event tickets. The Attorney General's guidance says the listed price must be the full price, and that adding a percentage or variable service fee later in the purchase is not allowed. You can show a breakdown of what is inside the price, and you can offer discounts. That makes a "save $20 paying by bank" offer on cabins fine, and a "plus 3% card fee" line not.
+
+**Things that quietly cost money:**
+
+- **Refunds.** Stripe keeps the original fee when you refund. Build ticket transfers so a buyer who cannot come passes the ticket on, and the QR is reissued.
+- **Disputes.** $15 each, plus $15 to contest one, returned if you win. A clear name on the card statement, an emailed receipt and your scan log are the evidence.
+- **Payment plans.** Build your own two-payment option. Two card charges cost one extra 30¢. Klarna costs twice the card rate.
+- **Instant payouts** cost 1.5%. Standard payouts are free.
+- **Stripe Tax** costs 0.5% per transaction. My understanding is that California does not tax admission but does tax merchandise, so ask the state tax agency or an accountant before paying for it.
+
+**At the gate.** Cash is free. Tap to Pay on a phone needs no hardware but does need signal.
+
+### Build notes
+
+- **Enforce the caps in code.** The site should stop sales at 139, 275 or 385 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
+- **Tier inventory.** Use conditional writes so two buyers cannot take the last ticket in a tier, and release held tickets when a checkout session expires.
+- **Issue tickets from Stripe's webhook**, verified and safe to receive twice. Do not issue from the browser redirect.
+- **Scanner.** Keep what worked at Reeguez Rocks. Make sure it still scans with no signal, from a list synced beforehand.
+- **Add-ons after purchase.** Car camping, cabins, merch and the meal plan should be addable to an existing order.
+
+### Financials page
+
+- **Source of truth:** Stripe's balance transactions give gross, fee and net for every charge. Sync them to your database and the page never needs hand entry for income.
+- **Show:** tickets sold by tier against the cap, money in by line, fees actually paid, costs against budget by category, progress to break-even, and each partner's share once final.
+- **Decide before launch:** whether individual artist fees are shown or only the category total. Artist contracts often expect the fee to stay private.
+- The categories in the budget model can be the budget column, so plan and actuals line up.
 
 ## Permits
 
@@ -22,7 +82,7 @@ The numbers in this plan come from one budget model. Open [`budget.html`](budget
 
 You were told the camp's existing approval covers the gathering itself, and that this event needs a Temporary Use Permit for the temporary structures and sound.
 
-The county's development code supports that. Section 84.25.030 exempts "events on sites already approved for public assembly" from needing a temporary use permit. The heavier Temporary Special Event Permit, which I described in the last version of this plan, attaches to events that are not exempt.
+The county's development code supports that. Section 84.25.030 exempts "events on sites already approved for public assembly" from needing a temporary use permit. The heavier Temporary Special Event Permit attaches to events that are not exempt.
 
 ### The Temporary Use Permit
 
@@ -32,12 +92,8 @@ From the county's Temporary Use Permit information sheet, revised June 4, 2025:
 - **How it runs:** you apply through the county's EZOP portal and are invoiced once the application is complete. A planner reviews it and may route it to other agencies, then approves it "as quickly as possible" once the standards are met.
 - **Standards:** access, heights, parking, setbacks, signs and utilities, plus removal of everything and restoration of the site. The county can ask for a performance bond.
 - **Deadline:** the sheet states none. You were told 90 days, which makes the last working day Friday, January 22.
-- **Ticket sales:** tickets can go on sale before the permit is issued. The sheet has no hold on sales or advertising, and the county confirmed that to you last year. The 11-day hold I flagged belongs to the special event permit.
+- **Ticket sales:** tickets can go on sale before the permit is issued. The sheet has no hold on sales or advertising, and the county confirmed that to you last year.
 - **Fee:** the 2025–26 county fee schedule lists a Major Temporary Use Permit at a flat $2,108. I could not find the minor fee or the 2026–27 figure. Your $3,000 ballpark is a reasonable budget until the county quotes it.
-
-### What this removes
-
-Under the special event permit you would have collected sign-offs from the Sheriff, the county emergency medical agency, Environmental Health and Public Works before filing, contacted the Highway Patrol, and held ticket sales until 11 days after approval. None of that is on the Temporary Use Permit sheet.
 
 ### What may still be separate
 
@@ -62,15 +118,15 @@ The camp itself sets no rules beyond the law and its bathroom capacity: 350 peop
 
 ## What Reeguez Rocks changes
 
-Ninety tickets proved the location. Every version of this event that pays real headliners needs at least twice that crowd. Your pricing note is taken: the ladder below is set for this lineup, not for that one.
+Ninety tickets proved the location. Every version of this event that pays real headliners needs at least twice that crowd. The ladder below is priced for this lineup, not for that one.
 
-| Lineup spend | Break-even | At 90 sold | At 150 | At 200 | At 290 |
+| Artist budget | Break-even | At 90 sold | At 150 | At 200 | At 275 |
 |---|---|---|---|---|---|
-| None | 88 | $315 | $6,405 | $14,535 | $31,404 |
-| Leaner, $11,300 | 188 | −$12,180 | −$6,090 | $2,040 | $18,909 |
-| Full, $18,325 | 230 | −$19,556 | −$13,466 | −$5,336 | $11,533 |
+| None | 92 | −$290 | $5,470 | $13,312 | $26,808 |
+| Leaner, $11,300 | 195 | −$12,785 | −$7,025 | $817 | $14,313 |
+| Full, $18,325 | 238 | −$20,161 | −$14,402 | −$6,559 | $6,937 |
 
-Profit and loss are both split 50/50 with Kinetic Desert, so your side is half of each figure.
+Profit and loss are both split 50/50 with Kinetic Desert, so your side is half of each figure. The artist budget slider on the budget page moves between these and anything in between.
 
 **The leaner lineup** keeps all 24 sets and the same shape, with smaller numbers at the top:
 
@@ -89,7 +145,7 @@ Profit and loss are both split 50/50 with Kinetic Desert, so your side is half o
 | Dec 15 | Alumni presale: 50 Fri–Sun tickets at $169, sold before any lineup | Sold out: book the full curve. Under 25: book the leaner curve |
 | Feb 1 | Three weeks after the first lineup announcement | Under 110 sold: close Sunday with a back-to-back from acts already on site |
 | Mar 1 | 150 or more sold on the leaner lineup | Add a $3,000 name as a late headline announcement |
-| Mar 15 | Sales on pace for 336 or more | Unlock 500 |
+| Mar 15 | Sales on pace for 316 or more | Unlock 500 |
 
 ## What I assumed
 
@@ -97,34 +153,35 @@ Each of these is an input in the budget model.
 
 | Assumption | Value used | Why it matters |
 |---|---|---|
-| People on site without a paid ticket | 60, or 100 with Project Seismic's 40 | Sets how many tickets fit under each limit: 139, 290 and 400 |
+| Crew, artists and their guests | 60 at every size | The base that every limit is counted from |
+| Card fees | 2.9% + 30¢, all sales by card | About $1,700 at a sell-out, and eight tickets on break-even |
 | Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
-| A loss at 500 | Split 50/50 between you and Kinetic Desert | Project Seismic shares a profit but not a loss, and still receives its $2,000 |
-| Ticketing fees | Paid by the buyer on top of the ticket price | Otherwise take about 6% off ticket income |
-| Car camping demand | One pass per five tickets | 96 of the 120 spots are for sale after 24 crew passes. Selling all 96 adds $1,900 |
+| Extra cost above 350 | $2,500 porto-potties, $1,100 supplies and groceries | Guesses. Get a porto-potty quote early because of Stagecoach |
+| Car camping demand | One pass per five tickets | 96 of the 120 spots are for sale after 24 crew passes. Selling all 96 adds about $2,000 |
 | Ticket mix | 65% Fri–Sun, 25% Sat–Sun, 10% Sunday | Drives average ticket price and the venue fee |
-| Cabins sold | 6 of 8 | Two held for artists who stay on and for staff. Selling a seventh moves break-even to 225 |
-| Porto-potties for the 500 tier | $2,500 | A guess. Get a quote early because of Stagecoach |
-| Merch, meal plan and vendor income | $10 per ticket | Untested. At 0, break-even rises to 243 |
+| Cabins sold | 6 of 8 | Two held for artists who stay on and for staff. Selling a seventh moves break-even to 233 |
+| Merch, meal plan and vendor income | $10 per ticket | Untested. At 0, break-even rises to 252 |
 
 I could not verify current booking fees for Pando!, Chmura, Huck.Jorris or Ferrofluid, so no slot below is assigned to a named artist on the basis of price.
 
 ## Capacity
 
-Every limit is counted on people on site, so unticketed people come off the top.
+Every limit is counted on people on site. Guest lists grow as the event does, so the number of tickets you can sell steps at each level.
 
-| On-site limit | Paid tickets that fit | Added cost | Verdict |
+| People on site | Without a ticket | Tickets that fit | Added cost |
 |---|---|---|---|
-| 199 | 139 | None | Loses money even sold out |
-| 350 | 290 | Permits | The plan |
-| 500 | 400 | Porto-potties, Project Seismic's guarantee, more site supplies | Unlock only if sales are on pace for 336 |
+| Up to 199 | 60 | 139 | None |
+| 200 to 350 | 75: adds 15 Kinetic Desert guests | 275 | Permits |
+| 351 to 500 | 115: adds 10 more Kinetic Desert guests and 30 for Project Seismic | 385 | Porto-potties, Project Seismic's guarantee, more supplies |
+
+Kinetic Desert's 15 guests at the 350 level take the place of 15 tickets. If the event sells out, that is about $2,800 of profit. If it does not sell out, they cost nothing.
 
 **The 500 unlock.** The main stage moves to a larger area with Kinetic Desert's production, and The Bowl becomes a side stage run by Project Seismic with their own artists.
 
-- **Their deal:** a $2,000 minimum, a profit share half the size of yours and Kinetic Desert's, and 40 guest-list places for crew, artists and friends. That makes the split 40% you, 40% Kinetic Desert, 20% Project Seismic.
-- **What it costs:** about $5,900 more in fixed costs, and 40 places that cannot be sold.
-- **When it pays:** the event as a whole breaks even at 248 tickets. Your own take passes what a 290-ticket sell-out of the 350 plan would give you at 336 tickets. The same number holds for Kinetic Desert.
-- **If it loses money:** Project Seismic does not share a loss, so it falls on you and Kinetic Desert 50/50 and their $2,000 is still owed. At 230 tickets sold under the unlock the event loses about $3,200, which is $1,600 each. They would only take on losses in exchange for a larger share.
+- **Their deal:** a $2,000 minimum, a profit share half the size of yours and Kinetic Desert's, and 30 guest-list places for crew, artists and friends. That makes the split 40% you, 40% Kinetic Desert, 20% Project Seismic.
+- **What it costs:** about $5,900 more in fixed costs, and 40 more places that cannot be sold.
+- **When it pays:** your own take passes what a 275-ticket sell-out of the 350 plan gives you at 316 tickets. The same number holds for Kinetic Desert.
+- **If it loses money:** Project Seismic does not share a loss, so it falls on you and Kinetic Desert 50/50 and their $2,000 is still owed. They would only take on losses in exchange for a larger share.
 - **Kinetic Desert's guarantee** stays at $2,000.
 
 Afters still hold 145 people indoors (105 in the K Lodge, 40 in The Dome). At 500 on site that needs a third space, or a late slot on one of the two stages if the sound permit allows it.
@@ -133,18 +190,18 @@ Afters still hold 145 people indoors (105 in the K Lodge, 40 in The Dome). At 50
 
 ### Price ladder
 
-Tiers sell in order. Quantities assume 290 paid tickets.
+Tiers sell in order. Averages are at a 275-ticket sell-out. These are the prices buyers pay, with nothing added at checkout.
 
 | Ticket | Presale | Tier 1 | Tier 2 | Final | Average at sell-out |
 |---|---|---|---|---|---|
-| Fri–Sun | $169 × 50 | $189 × 60 | $209 × 50 | $229 × the rest | $195 |
-| Sat–Sun | none | $139 × 20 | $155 × 30 | $169 × the rest | $155 |
+| Fri–Sun | $169 × 50 | $189 × 60 | $209 × 50 | $229 × the rest | $193 |
+| Sat–Sun | none | $139 × 20 | $155 × 30 | $169 × the rest | $154 |
 | Sunday only | none | none | $79 × 15 | $85 × the rest | $82 |
 
-- Early tickets are the cheap ones, so the average is about $155 at 90 tickets and $174 at 290.
+- Early tickets are the cheap ones, so the average is about $155 at 90 tickets and $172 at 275.
 - The $40 gap between Fri–Sun and Sat–Sun is deliberately small. It makes Friday feel close to free, which pushes people to arrive Friday.
 - Hold Sunday-only tickets until set times are out, about a month before.
-- Each Fri–Sun ticket nets its price less the $30 venue fee. The Dome fee is capped at $2,000, so it stops costing anything after the 200th ticket.
+- Each Fri–Sun ticket nets its price less the $30 venue fee and about $6 of card fees. The Dome fee is capped at $2,000, so it stops costing anything after the 200th ticket.
 - Add single-day Friday or Saturday tickets only if sales are behind in March.
 
 ### Add-ons
@@ -161,29 +218,31 @@ Tiers sell in order. Quantities assume 290 paid tickets.
 
 | Date | What happens |
 |---|---|
-| Dec 1–15 | Reeguez Rocks alumni presale: 50 Fri–Sun at $169, plus cabins. Pays artist deposits and sets the lineup size |
+| Dec 1–15 | Reeguez Rocks alumni presale: 50 Fri–Sun at $169, plus cabins. Pays artist deposits and sets the artist budget |
 | Jan 12 | First lineup announcement. Tier 1 opens, Sat–Sun tickets open |
 | Feb 9 | Full lineup. Tier 2 opens when Tier 1 sells through |
 | Mar 15 | Decision on the 500 unlock |
 | Mar 23 | Set times out. Sunday-only tickets open |
 | Apr 9 | Final tier |
 
+The ticket site has to be live by December 1 for the presale.
+
 ## Budget
 
-The 350 plan with the full lineup, at a sell-out of 290 paid tickets.
+The 350 plan with the full lineup, at a sell-out of 275 paid tickets.
 
 | Money in | |
 |---|---|
-| Tickets, 290 at a $174 average | $50,374 |
+| Tickets, 275 at a $172 average | $47,380 |
 | Cabins, 6 at $850 | $5,100 |
-| Car camping, 58 passes at $50 | $2,900 |
-| Merch, meal plan, vendors | $2,900 |
-| **Total in** | **$61,274** |
+| Car camping, 55 passes at $50 | $2,750 |
+| Merch, meal plan, vendors | $2,750 |
+| **Total in** | **$57,980** |
 
 | Money out | |
 |---|---|
 | Artist fees, 24 sets | $18,325 |
-| Venue fee, 740 ticket-days at $10 | $7,395 |
+| Venue fee, 701 ticket-days at $10 | $7,013 |
 | Chef $1,000 and groceries $2,800 | $3,800 |
 | Permits | $3,000 |
 | Art, projection and lighting | $3,000 |
@@ -191,36 +250,37 @@ The 350 plan with the full lineup, at a sell-out of 290 paid tickets.
 | The Dome, at its cap | $2,000 |
 | Cabin rental, 8 at $250 for the event | $2,000 |
 | Medical team, 3 days at $600 | $1,800 |
+| Payment processing | $1,684 |
 | Crew and gate pay, 12 at $100 | $1,200 |
 | Site supplies: wristbands, signage, radios, trash, firewood | $1,200 |
 | Insurance | $750 |
 | Marketing and design | $750 |
 | Artist hospitality and airport runs | $600 |
 | Contingency, 5% of fixed costs | $1,921 |
-| **Total out** | **$49,741** |
+| **Total out** | **$51,043** |
 
-**Profit: $11,533.** That is $5,766 to you and $7,766 to Kinetic Desert including the guarantee. Artists book their own flights, so there is no flight line.
+**Profit: $6,937.** That is $3,469 to you and $5,469 to Kinetic Desert including the guarantee. Artists book their own flights, so there is no flight line.
 
 ### How the result moves with sales
 
-| Paid tickets | Share of 290 | Result | Your half |
+| Paid tickets | Share of 275 | Result | Your half |
 |---|---|---|---|
-| 90 | 31% | −$19,556 | −$9,778 |
-| 139 | 48% | −$12,010 | −$6,005 |
-| 174 | 60% | −$9,694 | −$4,847 |
-| 203 | 70% | −$4,793 | −$2,396 |
-| 232 | 80% | $459 | $229 |
-| 261 | 90% | $5,904 | $2,952 |
-| 290 | 100% | $11,533 | $5,766 |
+| 90 | 33% | −$20,161 | −$10,081 |
+| 139 | 51% | −$12,885 | −$6,443 |
+| 175 | 64% | −$10,602 | −$5,301 |
+| 200 | 73% | −$6,559 | −$3,280 |
+| 225 | 82% | −$2,182 | −$1,091 |
+| 250 | 91% | $2,244 | $1,122 |
+| 275 | 100% | $6,937 | $3,469 |
 
-With the 500 unlock, 100 unticketed people and Project Seismic's deal:
+With the 500 unlock, 115 unticketed people and Project Seismic's deal:
 
 | Paid tickets | People on site | Result | You, 40% | Kinetic Desert | Project Seismic |
 |---|---|---|---|---|---|
-| 300 | 400 | $7,594 | $3,038 | $5,038 | $3,519 |
-| 350 | 450 | $17,299 | $6,920 | $8,920 | $5,460 |
-| 375 | 475 | $22,151 | $8,861 | $10,861 | $6,430 |
-| 400 | 500 | $27,004 | $10,802 | $12,802 | $7,401 |
+| 300 | 415 | $5,750 | $2,300 | $4,300 | $3,150 |
+| 325 | 440 | $10,443 | $4,177 | $6,177 | $4,089 |
+| 350 | 465 | $15,136 | $6,054 | $8,054 | $5,027 |
+| 385 | 500 | $21,706 | $8,683 | $10,683 | $6,341 |
 
 Both partners' columns include their $2,000 guarantee.
 
@@ -249,9 +309,9 @@ Total: $18,325 across 24 sets.
 
 **What each artist gets.** The fee, a room in the K Lodge apartment on the night they play one of the top three slots, a bed in a shared cabin if they stay longer, meals for their whole stay, and rides to and from Ontario or Palm Springs. They book their own flights.
 
-**Placing the four names.** Ask each for a quote, then let the quote set the slot: $2,500 and up plays 10:30, $1,500–$2,000 plays 9:00, $750–$1,000 plays 7:30. If two quote similar numbers, a back-to-back at 10:30 puts both names on the poster for one headline slot.
+**Choosing from quotes.** You are collecting quotes and picking who fits. As a guide to slots: $2,500 and up plays 10:30, $1,500–$2,000 plays 9:00, $750–$1,000 plays 7:30. Enter each quote in the fee grid on the budget page to see break-even move.
 
-**Guest list.** One guest for daytime artists and two for 7:30 and later comes to 33 guests, already inside the 60 unticketed people.
+**Guest list.** One guest for daytime artists and two for 7:30 and later comes to 33 guests, already inside the 60.
 
 ### Afters
 
@@ -312,7 +372,7 @@ The medical team is on site for the event itself. The two build days and two str
 - The apartment shares a wall with the afters room, which runs until sunrise. Tell artists that when you offer it.
 - By Sunday night up to six acts and their guests could have moved out of the apartment and want a bed. That is why two cabins are held back.
 - The six sold cabins bring in $5,100 against $2,000 of rental for all eight. Budget firewood for all eight.
-- Project Seismic's 40 are not housed in this table. Agree with them whether they camp.
+- Partner guest lists are not housed in this table. Agree with Kinetic Desert and Project Seismic that their guests camp.
 
 ## Crew and gate
 
@@ -334,7 +394,7 @@ The medical team is on site for the event itself. The two build days and two str
 | Apartment turnover between nights | 3 |
 | **Total** | **61** |
 
-That leaves 37 shifts uncovered. Twelve volunteers on your existing trade (three shifts for a full ticket, no $100) cover 36. They are already counted in the 60 unticketed people. Nine top-slot acts arriving and leaving could mean 18 airport runs, so ask artists to pick one airport and land in batches.
+That leaves 37 shifts uncovered. Twelve volunteers on your existing trade (three shifts for a full ticket, no $100) cover 36. They are already counted in the 60. Nine top-slot acts arriving and leaving could mean 18 airport runs, so ask artists to pick one airport and land in batches.
 
 ## Kitchen
 
@@ -370,9 +430,9 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 | When | What |
 |---|---|
-| This week | Put the five questions to the county planner. Ask your target artists for quotes |
+| This week | Put the five questions to the county planner. Ask your target artists for quotes. Start the ticket site |
 | November | Kinetic Desert and Project Seismic deals in writing. Stage, truss and Dome dimensions. Draft the letter of intent and site plan |
-| Dec 1–15 | Alumni presale |
+| Dec 1–15 | Alumni presale on the new site |
 | By Dec 11 | Submit the Temporary Use Permit application |
 | Mid-December | Set the artist budget from the presale result. Choose from the quotes, send offers and pay deposits |
 | Jan 12 | First lineup. Tier 1 and Sat–Sun tickets open |
@@ -388,18 +448,20 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 ## Questions that would change this plan
 
 1. **Whether County Fire and a structure permit are separate applications.** They add lead time and possibly engineered plans.
-2. **Artist quotes.** You are collecting them and choosing who fits. Enter each quote in the fee grid on the budget page to see break-even move.
+2. **Artist quotes.** Enter each one in the fee grid on the budget page.
 3. **How the alumni presale sells.** It sets the artist budget: about $18,300 if it sells out, about $11,300 if it sells under 25.
 
 ## Sources
 
+- [Stripe pricing](https://stripe.com/pricing)
+- [Helcim pricing](https://www.helcim.com/pricing/)
+- [California Attorney General, SB 478 frequently asked questions](https://oag.ca.gov/system/files/attachments/press-docs/SB%20478%20FAQ%20(B).pdf)
 - [San Bernardino County Temporary Use Permit information sheet, revised June 4, 2025](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Temporary-Use-Permit-Information-Sheet-1.pdf)
 - [County Development Code Chapter 84.25, temporary structures and uses](https://gocodebook.com/library/us/ca/san-bernardino-county-zoning/chapter-84.25-temporary-structures-and-uses)
 - [County Temporary Structure Permit information sheet](https://lus.sbcounty.gov/wp-content/uploads/sites/48/BandS/Handouts/Temporary-Structure-Permit-Checklist.pdf)
 - [County EZOP page for the Temporary Use Permit](https://wp.sbcounty.gov/ezop/permits/temporary-use-permit/)
 - [County Planning master fee schedule, 2025–26](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Planning-Master-Fee-Schedule-25-26.pdf)
 - [County Temporary Special Event Permit information sheet, for comparison](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Temporary-Special-Event-Permit-Information-Sheet.pdf)
-- [County Development Code, special event permit requirement and exemptions](https://codelibrary.amlegal.com/codes/sanbernardino/latest/sanberncty_ca/0-0-0-173704)
 - [San Bernardino County Fire special event permits](https://sbcfire.org/ofm/specialeventpermits/)
 - [County noise standards, as quoted in a county-hosted noise report](https://lus.sbcounty.gov/wp-content/uploads/sites/48/Appendix-H-Noise-Report.pdf)
 - [Long Beach Area Council on Camp Tahquitz](https://www.tahquitz.org/council)

@@ -44,7 +44,9 @@ h2 { font-size: 17px; }
 .num { font-variant-numeric: tabular-nums; }
 
 .verdict { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--surface);
-  border: 1px solid var(--rule); border-radius: 10px; }
+  border: 1px solid var(--rule); border-radius: 10px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  box-shadow: 0 6px 14px -10px var(--ink-3); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 .verdict > div { padding: 16px 18px; border-left: 1px solid var(--rule); min-width: 0; }
 .verdict > div:first-child { border-left: 0; }
 .verdict .big { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
@@ -104,13 +106,22 @@ svg { display: block; width: 100%; height: auto; }
 .split .big { font: 700 24px var(--display); font-variant-numeric: tabular-nums; }
 
 @media (max-width: 860px) {
-  .cols { grid-template-columns: minmax(0, 1fr); }
+  .cols { display: flex; flex-direction: column; gap: 18px; }
+  .stack { display: contents; }
+  .cols .panel { order: 3; }
+  .cols #panel-0 { order: 1; }
+  .cols #panel-chart { order: 2; }
+  .cols #panel-pl, .cols #panel-fees { order: 4; }
+  .verdict > div { padding: 9px 12px; }
+  .verdict .big { font-size: 21px; }
+  .verdict .sub { font-size: 12px; line-height: 1.3; }
+  .verdict .pill { margin-top: 3px; }
   .verdict { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .verdict > div:nth-child(3) { border-left: 0; }
   .verdict > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
   h1 { font-size: 25px; }
 }
-@media (max-width: 420px) { .verdict .big { font-size: 23px; } .field { grid-template-columns: minmax(0, 1fr) 92px; } }
+@media (max-width: 420px) { .verdict .big { font-size: 19px; } .field { grid-template-columns: minmax(0, 1fr) 92px; } }
 </style>
 </head>
 <body>
@@ -119,7 +130,7 @@ svg { display: block; width: 100%; height: auto; }
   <header>
     <div class="eyebrow">Camp Tahquitz · Fri Apr 23 – Mon Apr 26, 2027</div>
     <h1>Tahquitz 2027 budget model</h1>
-    <p class="lede">Move the ticket count, prices and costs to see profit, break-even and the split with Kinetic Desert. The permit and porto-potty thresholds are counted on people on site, so crew, artists and guests use up part of each limit.</p>
+    <p class="lede">Move the ticket count, the artist budget, prices and costs to see profit, break-even and each partner's share. Limits are counted on people on site, and guest lists grow at 200 and at 351 people, so the number of tickets you can sell steps at each level.</p>
   </header>
 
   <section class="verdict" aria-live="polite">
@@ -140,19 +151,19 @@ svg { display: block; width: 100%; height: auto; }
   <div class="cols">
     <div class="stack" id="controls"></div>
     <div class="stack">
-      <section class="panel">
+      <section class="panel" id="panel-chart">
         <h2>Profit by tickets sold</h2>
-        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with drops where the permit and porto-potty costs begin"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with drops where the permit and the 500-person costs begin"></svg><div class="tip" id="tip" hidden></div></div>
         <p class="note" id="chart-note"></p>
       </section>
-      <section class="panel">
+      <section class="panel" id="panel-pl">
         <h2>Profit and loss</h2>
         <div class="scroll"><table id="pl"></table></div>
       </section>
-      <section class="panel">
+      <section class="panel" id="panel-fees">
         <h2>Artist fees by slot</h2>
         <div class="scroll"><table class="fees" id="fees"></table></div>
-        <p class="note">The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight. Afters at the K Lodge and The Dome are unpaid open decks.</p>
+        <p class="note">The artist budget slider scales every slot together and keeps this shape. Edit a slot here to change the shape. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
       </section>
     </div>
   </div>
@@ -161,8 +172,9 @@ svg { display: block; width: 100%; height: auto; }
 <script>
 // Pure budget model. Shared verbatim by the page and by the node check.
 // Ticket tiers fill in order; the last tier of each type takes every ticket after the earlier tiers sell out.
+// Guest lists and some costs step up when people on site pass 199 and 350.
 const DEFAULTS = {
-  paid: 290, mixFull: 65, mixSat: 25,
+  paid: 275, mixFull: 65, mixSat: 25,
   tiers: {
     full: [{ name: 'Presale', price: 169, qty: 50 }, { name: 'Tier 1', price: 189, qty: 60 }, { name: 'Tier 2', price: 209, qty: 50 }, { name: 'Final', price: 229, qty: 0 }],
     sat: [{ name: 'Tier 1', price: 139, qty: 20 }, { name: 'Tier 2', price: 155, qty: 30 }, { name: 'Final', price: 169, qty: 0 }],
@@ -170,17 +182,18 @@ const DEFAULTS = {
   },
   carRate: 20, carSpots: 120, carComped: 24, pCar: 50,
   cabinsRented: 8, cabinCost: 250, cabinsSold: 6, pCabin: 850, otherPer: 10,
-  unticketed: 60,
+  unticketed: 60, kdGuests1: 15, kdGuests2: 10, psGuests: 30,
   venuePerDay: 10, domePer: 10, domeCap: 2000,
-  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
-  kd: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
+  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500, extra500: 1100,
+  kd: 2000, psGuarantee: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
   art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
+  procPct: 2.9, procFixed: 0.3, bankShare: 0, bankPct: 0.8,
   artists: [
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50, psShare: 0, psGuarantee: 0,
+  kdShare: 50, psShare: 20,
 };
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
@@ -190,6 +203,18 @@ function fillTiers(tiers, n) {
     return q;
   });
   return { rev, sold, avg: n ? rev / n : 0 };
+}
+// Who is on site without a paid ticket. Level 1: up to 199 on site. Level 2: 200 to 350. Level 3: 351 to 500.
+function people(s, paid) {
+  let unt = s.unticketed, level = 1;
+  if (paid + unt > s.permitOver) { unt += s.kdGuests1; level = 2; }
+  if (paid + unt > s.portoOver) { unt += s.kdGuests2 + s.psGuests; level = 3; }
+  return { unt, level, onSite: paid + unt };
+}
+function maxPaid(s, limit) {
+  const cap = limit === undefined ? s.hardCap : limit;
+  for (let n = cap; n >= 0; n--) if (people(s, n).onSite <= cap) return n;
+  return 0;
 }
 function compute(s) {
   const nFull = s.paid * s.mixFull / 100;
@@ -205,31 +230,52 @@ function compute(s) {
   const ticketDays = nFull * 3 + nSat * 2 + nSun;
   const venue = ticketDays * s.venuePerDay;
   const dome = Math.min(s.paid * s.domePer, s.domeCap);
-  const onSite = s.paid + s.unticketed;
-  const permit = onSite > s.permitOver ? s.permit : 0;
-  const portos = onSite > s.portoOver ? s.portos : 0;
+  const { unt, level, onSite } = people(s, s.paid);
+  const permit = level >= 2 ? s.permit : 0;
+  const portos = level >= 3 ? s.portos : 0;
+  const extra500 = level >= 3 ? s.extra500 : 0;
+  const psGuar = level >= 3 ? s.psGuarantee : 0;
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
   const medical = s.medicalPerDay * s.medicalDays;
-  const fixedBase = artistFees + s.hospitality + s.kd + s.psGuarantee + s.insurance + s.chef + s.food + crew
-    + s.art + s.marketing + s.ops + medical + cabins + permit + portos;
+  const fixedBase = artistFees + s.hospitality + s.kd + psGuar + s.insurance + s.chef + s.food + crew
+    + s.art + s.marketing + s.ops + medical + cabins + permit + portos + extra500;
   const contingency = fixedBase * s.contingencyPct / 100;
-  const costs = fixedBase + contingency + venue + dome;
+  // Card and bank fees on what is sold through the site. The fixed card fee is counted once per ticket.
+  const online = tickets + car + cabinRev;
+  const bank = Math.min(100, s.bankShare) / 100;
+  const processing = online * ((1 - bank) * s.procPct + bank * s.bankPct) / 100 + s.paid * (1 - bank) * s.procFixed;
+  const costs = fixedBase + contingency + venue + dome + processing;
   const profit = revenue - costs;
-  // Guarantees are paid on top of each partner's share. Project Seismic shares a profit but not a loss:
-  // a loss falls on you and Kinetic Desert in proportion to your two shares.
-  const psShareAmt = Math.max(0, profit) * s.psShare / 100;
-  const kdShareAmt = profit >= 0 ? profit * s.kdShare / 100 : profit * s.kdShare / Math.max(1, 100 - s.psShare);
+  // Guarantees are paid on top of each share. Project Seismic joins above 350 on site and shares a profit
+  // but not a loss. Kinetic Desert takes its share of whatever is left, profit or loss.
+  const psShareAmt = level >= 3 ? Math.max(0, profit) * s.psShare / 100 : 0;
+  const kdShareAmt = (profit - psShareAmt) * s.kdShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
-    onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
-    kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: s.psGuarantee + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
+    unt, level, onSite, permit, portos, extra500, psGuar, artistFees, cabins, crew, medical, contingency, processing, costs, profit,
+    kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: psGuar + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
 function breakEven(s) {
-  const max = Math.max(0, s.hardCap - s.unticketed);
+  const max = maxPaid(s);
   for (let n = 0; n <= max; n++) if (compute({ ...s, paid: n }).profit >= 0) return n;
   return null;
+}
+// Scale a fee grid to a new total, keeping its shape. Slots round to $25 and the remainder goes to the biggest slots.
+function scaleFees(shape, target) {
+  const flat = shape.flat();
+  const sum = flat.reduce((a, b) => a + b, 0);
+  if (!sum) return shape.map(d => d.slice());
+  const out = flat.map(v => Math.round(v * target / sum / 25) * 25);
+  let diff = Math.round((target - out.reduce((a, b) => a + b, 0)) / 25);
+  const order = flat.map((v, i) => i).sort((a, b) => flat[b] - flat[a]);
+  for (let i = 0; diff !== 0 && i < 10000; i++) {
+    const idx = order[i % order.length], step = diff > 0 ? 25 : -25;
+    if (out[idx] + step >= 0) { out[idx] += step; diff -= Math.sign(diff); }
+  }
+  const per = shape[0].length;
+  return shape.map((d, j) => out.slice(j * per, j * per + per));
 }
 
 </script>
@@ -239,13 +285,14 @@ const DAYS = ['Fri', 'Sat', 'Sun'];
 const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
 const PRESETS = {
   plan: {},
-  unlock: { paid: 400, unticketed: 100, ops: 2000, food: 3100, kdShare: 40, psShare: 20, psGuarantee: 2000 },
+  unlock: { paid: 385 },
   leaner: { paid: 200, artists: LEAN_FEES },
   lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000 },
 };
 const GROUPS = [
-  { title: 'Tickets sold', fields: [
-    { k: 'paid', label: 'Paid tickets', slider: true, min: 0, max: 440 },
+  { title: 'Tickets and artist budget', fields: [
+    { k: 'paid', label: 'Paid tickets', slider: true, min: 0, max: 385 },
+    { k: 'artistBudget', label: 'Artist budget, all 24 sets', slider: true, min: 0, max: 30000, step: 250, unit: '$', virtual: true },
     { k: 'mixFull', label: 'Share buying Fri–Sun', slider: true, min: 0, max: 100, unit: '%' },
     { k: 'mixSat', label: 'Share buying Sat–Sun', slider: true, min: 0, max: 100, unit: '%' },
   ], note: 'mix' },
@@ -259,15 +306,25 @@ const GROUPS = [
     { k: 'pCabin', label: 'Price per cabin' },
     { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
   ] },
-  { title: 'People on site', fields: [
-    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket. The 500 unlock adds 40 for Project Seismic.' },
-  ] },
+  { title: 'People on site without a ticket', fields: [
+    { k: 'unticketed', label: 'Crew, artists and their guests', hint: 'At every size' },
+    { k: 'kdGuests1', label: 'Kinetic Desert guests, 200 or more on site' },
+    { k: 'kdGuests2', label: 'More Kinetic Desert guests, above 350' },
+    { k: 'psGuests', label: 'Project Seismic guest list, above 350' },
+  ], note: 'people' },
+  { title: 'Payment processing', fields: [
+    { k: 'procPct', label: 'Card fee, %', step: 0.1 },
+    { k: 'procFixed', label: 'Card fee per order, $', step: 0.05, hint: 'Counted once per ticket' },
+    { k: 'bankShare', label: 'Share of sales paid by bank transfer, %' },
+    { k: 'bankPct', label: 'Bank transfer fee, %', step: 0.1 },
+  ], text: 'California requires the listed ticket price to include every mandatory fee, so these fees come out of your side.' },
   { title: 'Fixed costs', fields: [
     { k: 'kd', label: 'Kinetic Desert guarantee' },
     { k: 'hospitality', label: 'Artist hospitality and airport runs', hint: 'Artists book their own flights' },
     { k: 'insurance', label: 'Insurance' },
-    { k: 'permit', label: 'Permits', hint: 'County event permit and agency fees, at 200 or more on site' },
-    { k: 'portos', label: 'Porto-potties', hint: 'A guess. Charged above 350 on site.' },
+    { k: 'permit', label: 'Permits', hint: 'At 200 or more on site' },
+    { k: 'portos', label: 'Porto-potties', hint: 'A guess. Above 350 on site.' },
+    { k: 'extra500', label: 'Extra supplies and groceries', hint: 'Above 350 on site' },
     { k: 'chef', label: 'Chef' },
     { k: 'food', label: 'Groceries' },
     { k: 'crewCount', label: 'Paid crew and gate' },
@@ -287,45 +344,44 @@ const GROUPS = [
     { k: 'domeCap', label: 'Dome fee cap' },
   ] },
   { title: 'Profit split', fields: [
-    { k: 'kdShare', label: 'Kinetic Desert share, %' },
-    { k: 'psShare', label: 'Project Seismic share, %', hint: 'Only at 500: half of what you and Kinetic Desert each take' },
-    { k: 'psGuarantee', label: 'Project Seismic guarantee', hint: 'Only at 500' },
-  ], text: 'Guarantees are paid on top of each share. You take what is left after both shares. A loss is split between you and Kinetic Desert only. Project Seismic does not share a loss.' },
+    { k: 'psGuarantee', label: 'Project Seismic guarantee', hint: 'Above 350 on site' },
+    { k: 'psShare', label: 'Project Seismic share, %', hint: 'Above 350 on site. Profit only.' },
+    { k: 'kdShare', label: 'Kinetic Desert share, %', hint: 'Of what is left after Project Seismic' },
+  ], text: 'Guarantees are paid on top of each share. You take what is left. A loss is split between you and Kinetic Desert only.' },
 ];
 
 let s = structuredClone(DEFAULTS);
+let feeShape = structuredClone(DEFAULTS.artists);
 let active = 'plan';
 const $ = id => document.getElementById(id);
 const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
 const int = n => Math.round(n).toLocaleString('en-US');
+const feeTotal = () => s.artists.flat().reduce((a, b) => a + b, 0);
 
 function buildControls() {
   const root = $('controls');
-  root.innerHTML = GROUPS.map(g => {
+  root.innerHTML = GROUPS.map((g, gi) => {
     const rows = g.fields.map(f => f.slider
       ? `<div class="field slider"><div class="row"><label for="f-${f.k}">${f.label}</label><output id="o-${f.k}"></output></div>
-           <input type="range" id="f-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="1"></div>`
+           <input type="range" id="f-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="${f.step || 1}"></div>`
       : `<div class="field"><label for="f-${f.k}">${f.label}${f.hint ? `<small>${f.hint}</small>` : ''}</label>
-           <input type="number" id="f-${f.k}" data-k="${f.k}" min="0" step="1" inputmode="numeric"></div>`).join('');
-    const check = g.check ? `<label class="check" for="f-${g.check.k}"><input type="checkbox" id="f-${g.check.k}" data-k="${g.check.k}"><span>${g.check.label}</span></label>` : '';
-    const note = g.note ? `<p class="note" id="note-${g.note}"></p>` : g.text ? `<p class="note">${g.text}</p>` : '';
-    if (g.tiers) return `<section class="panel"><h2>${g.title}</h2><div class="tiers">${tierTables()}</div>
+           <input type="number" id="f-${f.k}" data-k="${f.k}" min="0" step="${f.step || 1}" inputmode="decimal"></div>`).join('');
+    const note = (g.note ? `<p class="note" id="note-${g.note}"></p>` : '') + (g.text ? `<p class="note">${g.text}</p>` : '');
+    if (g.tiers) return `<section class="panel" id="panel-${gi}"><h2>${g.title}</h2><div class="tiers">${tierTables()}</div>
       <p class="note">Tiers sell in order. The last tier of each type takes every ticket after the earlier ones sell out.</p></section>`;
-    return `<section class="panel"><h2>${g.title}</h2>${rows}${check}${note}</section>`;
+    return `<section class="panel" id="panel-${gi}"><h2>${g.title}</h2>${rows}${note}</section>`;
   }).join('');
   root.addEventListener('input', e => {
     const d = e.target.dataset;
     if (d.type) {
       s.tiers[d.type][+d.i][d.f] = Math.max(0, Number(e.target.value) || 0);
-      active = null;
-      render(e.target);
-      return;
-    }
-    const k = d.k;
-    if (!k) return;
-    s[k] = e.target.type === 'checkbox' ? e.target.checked : Math.max(0, Number(e.target.value) || 0);
-    if (k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
-    if (k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
+    } else if (d.k === 'artistBudget') {
+      s.artists = scaleFees(feeShape, Number(e.target.value) || 0);
+    } else if (d.k) {
+      s[d.k] = Math.max(0, Number(e.target.value) || 0);
+      if (d.k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
+      if (d.k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
+    } else return;
     active = null;
     render(e.target);
   });
@@ -359,20 +415,21 @@ function buildFees() {
     const t = e.target;
     if (t.dataset.day === undefined) return;
     s.artists[+t.dataset.day][+t.dataset.slot] = Math.max(0, Number(t.value) || 0);
+    feeShape = structuredClone(s.artists);
     active = null;
     render(t);
   });
 }
 
-function syncInputs(skip) {
-  const maxPaid = Math.max(0, s.hardCap - s.unticketed);
-  if (s.paid > maxPaid) s.paid = maxPaid;
-  $('f-paid').max = maxPaid;
+function syncInputs(skip, top) {
+  if (s.paid > top) s.paid = top;
+  $('f-paid').max = top;
   for (const g of GROUPS) {
     for (const f of g.fields) {
       const el = $('f-' + f.k);
-      if (el !== skip) el.value = s[f.k];
-      if (f.slider) $('o-' + f.k).textContent = int(s[f.k]) + (f.unit || '');
+      const v = f.virtual ? feeTotal() : s[f.k];
+      if (el !== skip) el.value = v;
+      if (f.slider) $('o-' + f.k).textContent = f.unit === '$' ? money(v) : int(v) + (f.unit || '');
     }
   }
   s.artists.forEach((day, j) => {
@@ -382,36 +439,41 @@ function syncInputs(skip) {
   document.querySelectorAll('button.preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === active)));
 }
 
-function renderVerdict(r, be, maxPaid) {
+function renderVerdict(r, be) {
   $('v-profit-label').textContent = r.profit >= 0 ? 'Profit' : 'Loss';
   $('v-profit').textContent = money(r.profit);
   $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
   $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.costs)} out`;
+  const cap350 = Math.max(1, maxPaid(s, s.portoOver));
   if (be === null) { $('v-be').textContent = 'None'; $('v-be-sub').textContent = 'No ticket count up to 500 on site covers these costs'; }
   else {
-    const cap350 = Math.max(1, s.portoOver - s.unticketed);
     $('v-be').textContent = int(be) + ' tickets';
     $('v-be-sub').textContent = be <= cap350 ? `${Math.round(be / cap350 * 100)}% of the ${int(cap350)} you can sell at 350 on site` : `Needs more than the ${int(cap350)} you can sell at 350 on site`;
   }
   $('v-site').textContent = int(r.onSite);
   const pill = $('v-site-pill');
-  if (r.onSite <= s.permitOver) { pill.textContent = 'No permit needed'; pill.className = 'pill good'; }
-  else if (r.onSite <= s.portoOver) { pill.textContent = 'Permit required'; pill.className = 'pill warn'; }
-  else if (r.onSite <= s.hardCap) { pill.textContent = 'Permit and porto-potties'; pill.className = 'pill warn'; }
-  else { pill.textContent = 'Over the 500 limit'; pill.className = 'pill bad'; }
-$('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
+  if (r.onSite > s.hardCap) { pill.textContent = 'Over the 500 limit'; pill.className = 'pill bad'; }
+  else if (r.level === 1) { pill.textContent = 'No permit needed'; pill.className = 'pill good'; }
+  else if (r.level === 2) { pill.textContent = 'Permit required'; pill.className = 'pill warn'; }
+  else { pill.textContent = 'Permit, porto-potties, second stage'; pill.className = 'pill warn'; }
+  $('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
-  $('v-you-sub').textContent = (s.psShare || s.psGuarantee) ? `Kinetic Desert ${money(r.kdTotal)}, Project Seismic ${money(r.psTotal)}, guarantees included` : `Kinetic Desert ${money(r.kdTotal)} including the $2,000 guarantee`;
+  $('v-you-sub').textContent = r.level === 3 ? `Kinetic Desert ${money(r.kdTotal)}, Project Seismic ${money(r.psTotal)}, guarantees included` : `Kinetic Desert ${money(r.kdTotal)} including the ${money(s.kd)} guarantee`;
   $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
+  $('note-people').textContent = `Right now ${int(r.unt)} people are on site without a ticket. That leaves ${int(maxPaid(s, s.permitOver))} tickets under the permit line, ${int(cap350)} at 350 on site and ${int(maxPaid(s))} at 500.`;
 }
 
 function renderPL(r) {
   const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
-  const fixedLines = [
-    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd], ['Project Seismic guarantee', s.psGuarantee, s.psGuarantee ? '' : 'only at 500'],
+  const big = r.level === 3;
+  const lines = [
+    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
+    ['Project Seismic guarantee', r.psGuar, big ? '' : 'above 350 only'],
     ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
-    ['Permit', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, r.portos ? '' : 'not needed'],
+    ['Payment processing', r.processing, `${(r.processing / Math.max(1, r.tickets + r.car + r.cabinRev) * 100).toFixed(1)}% of online sales`],
+    ['Permits', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, big ? '' : 'above 350 only'],
+    ['Extra supplies and groceries', r.extra500, big ? '' : 'above 350 only'],
     ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
     ['Art, projection, path lighting', s.art], ['Insurance', s.insurance], ['Marketing and design', s.marketing],
     ['Site supplies', s.ops], ['Medical team', r.medical, `${s.medicalDays} days`], ['Contingency', r.contingency, `${s.contingencyPct}%`],
@@ -424,12 +486,12 @@ function renderPL(r) {
     ${row('Merch, meals, vendors', money(r.other))}
     <tr class="total"><td>Total in</td><td></td><td>${money(r.revenue)}</td></tr>
     <tr class="head"><td colspan="3">Money out</td></tr>
-    ${fixedLines.map(([a, b, c]) => row(a, money(b), c || '')).join('')}
+    ${lines.map(([a, b, c]) => row(a, money(b), c || '')).join('')}
     <tr class="total"><td>Total out</td><td></td><td>${money(r.costs)}</td></tr>
     <tr class="head"><td colspan="3">Split</td></tr>
     ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
     ${row('Kinetic Desert', money(r.kdTotal), `${money(s.kd)} guarantee + ${money(r.kdShareAmt)} share`)}
-    ${s.psShare || s.psGuarantee ? row('Project Seismic', money(r.psTotal), `${money(s.psGuarantee)} guarantee + ${money(r.psShareAmt)} share`) : ''}
+    ${big ? row('Project Seismic', money(r.psTotal), `${money(r.psGuar)} guarantee + ${money(r.psShareAmt)} share`) : ''}
     ${row('You', money(r.yours))}
   </tbody>`;
 }
@@ -437,37 +499,37 @@ function renderPL(r) {
 let curve = [];
 const C = { w: 640, h: 300, l: 54, r: 16, t: 34, b: 38 };
 function niceStep(range) { const raw = range / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
-function renderChart(maxPaid) {
+function renderChart(top) {
   curve = [];
-  for (let n = 0; n <= maxPaid; n++) curve.push(compute({ ...s, paid: n }).profit);
+  for (let n = 0; n <= top; n++) curve.push(compute({ ...s, paid: n }).profit);
   const lo = Math.min(0, ...curve), hi = Math.max(0, ...curve);
   const step = niceStep((hi - lo) || 1000);
   const y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step;
-  const X = n => C.l + (maxPaid ? n / maxPaid : 0) * (C.w - C.l - C.r);
+  const X = n => C.l + (top ? n / top : 0) * (C.w - C.l - C.r);
   const Y = v => C.t + (1 - (v - y0) / ((y1 - y0) || 1)) * (C.h - C.t - C.b);
-  renderChart.X = X; renderChart.Y = Y; renderChart.max = maxPaid;
+  renderChart.X = X; renderChart.Y = Y; renderChart.max = top;
   let g = '';
   for (let v = y0; v <= y1 + 1; v += step) {
     const zero = Math.abs(v) < 1;
     g += `<line x1="${C.l}" x2="${C.w - C.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(${zero ? '--ink-3' : '--rule'})" stroke-width="${zero ? 1.25 : 1}"/>`;
     g += `<text x="${C.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${v < 0 ? '−' : ''}$${Math.abs(v) >= 1000 ? Math.abs(v) / 1000 + 'k' : Math.abs(v)}</text>`;
   }
-  const xStep = maxPaid > 300 ? 100 : 50;
-  for (let n = 0; n <= maxPaid; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
+  const xStep = top > 300 ? 100 : 50;
+  for (let n = 0; n <= top; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
   g += `<text x="${C.w - C.r}" y="${C.h - 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">paid tickets</text>`;
-  const marks = [[90, 'Reeguez Rocks sold 90', 'end'], [s.permitOver - s.unticketed + 1, 'Permit starts', 'start'], [s.portoOver - s.unticketed + 1, 'Portos start', 'middle']];
+  const marks = [[90, 'Reeguez Rocks sold 90', 'end'], [maxPaid(s, s.permitOver) + 1, 'Permit starts', 'start'], [maxPaid(s, s.portoOver) + 1, '500 setup starts', 'middle']];
   marks.forEach(([n, label, anchor]) => {
-    if (n <= 0 || n > maxPaid) return;
+    if (n <= 0 || n > top) return;
     const dx = anchor === 'end' ? 3 : anchor === 'start' ? -3 : 0;
     g += `<line x1="${X(n)}" x2="${X(n)}" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>`;
     g += `<text x="${X(n) + dx}" y="${C.t - 12}" text-anchor="${anchor}" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
   });
   g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
-  const p = Math.min(s.paid, maxPaid);
+  const p = Math.min(s.paid, top);
   g += `<circle cx="${X(p)}" cy="${Y(curve[p])}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
   g += `<g id="hover" hidden><line id="hx" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-2)" stroke-width="1"/><circle id="hd" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/></g>`;
   $('chart').innerHTML = g;
-  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(maxPaid)}, the most you can sell with ${int(s.unticketed)} unticketed people and 500 on site.`;
+  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(top)}, the most that fit under 500 on site. The line drops where the permit begins and again where the 500 setup begins.`;
 }
 function hover(e) {
   const box = $('chart').getBoundingClientRect();
@@ -481,7 +543,7 @@ function hover(e) {
   h.querySelector('#hd').setAttribute('cx', x); h.querySelector('#hd').setAttribute('cy', y);
   const tip = $('tip');
   tip.hidden = false;
-  tip.textContent = `${int(n)} tickets · ${int(n + s.unticketed)} on site · ${money(curve[n])}`;
+  tip.textContent = `${int(n)} tickets · ${int(people(s, n).onSite)} on site · ${money(curve[n])}`;
   const px = Math.max(110, Math.min(box.width - 110, x / C.w * box.width));
   tip.style.left = px + 'px';
   tip.style.top = Math.max(26, y / C.h * box.height - 12) + 'px';
@@ -489,13 +551,13 @@ function hover(e) {
 function unhover() { $('tip').hidden = true; const h = $('chart').querySelector('#hover'); if (h) h.setAttribute('hidden', ''); }
 
 function render(skip) {
-  const maxPaid = Math.max(0, s.hardCap - s.unticketed);
-  syncInputs(skip);
+  const top = maxPaid(s);
+  syncInputs(skip, top);
   const r = compute(s);
   syncTiers(r, skip);
-  renderVerdict(r, breakEven(s), maxPaid);
+  renderVerdict(r, breakEven(s));
   renderPL(r);
-  renderChart(maxPaid);
+  renderChart(top);
 }
 
 document.querySelector('.presets').addEventListener('click', e => {
@@ -503,6 +565,7 @@ document.querySelector('.presets').addEventListener('click', e => {
   if (!b) return;
   active = b.dataset.preset;
   s = { ...structuredClone(DEFAULTS), ...structuredClone(PRESETS[active]) };
+  feeShape = structuredClone(s.artists);
   render();
 });
 $('chartbox').addEventListener('pointermove', hover);
