@@ -132,11 +132,12 @@ Profit and loss are both split 50/50 with Kinetic Desert, so your side is half o
 
 | Time | Fri | Sat | Sun |
 |---|---|---|---|
-| 2:00–6:00 PM, five sets | $650 | $650 | $600 |
-| 7:30 PM | $500 | $500 | $400 |
-| 9:00 PM | $1,000 | $1,000 | $750 |
-| 10:30 PM | $2,000 | $2,000 | $1,250 |
-| **Day total** | **$4,150** | **$4,150** | **$3,000** |
+| 2:00–6:00 PM, five sets | $700 | $650 | $600 |
+| 7:30 PM | $600 | $500 | $400 |
+| 9:00 PM | $1,100 | $1,000 | $750 |
+| 10:30 PM | $2,000 | $1,750 | $1,250 |
+| **Day total** | **$4,400** | **$3,900** | **$3,000** |
+| Share of budget | 39% | 35% | 27% |
 
 **Decision points:**
 
@@ -292,20 +293,21 @@ Both partners' columns include their $2,000 guarantee.
 |---|---|---|---|---|
 | 2:00 PM | 1 hr | $75 | $75 | $75 |
 | 3:00 PM | 1 hr | $100 | $100 | $100 |
-| 4:00 PM | 1 hr | $150 | $200 | $150 |
-| 5:00 PM | 1 hr | $250 | $300 | $200 |
-| 6:00 PM | 1 hr | $400 | $500 | $300 |
+| 4:00 PM | 1 hr | $200 | $150 | $150 |
+| 5:00 PM | 1 hr | $300 | $250 | $200 |
+| 6:00 PM | 1 hr | $500 | $400 | $300 |
 | 7:00 PM | 30 min | Sunset changeover | | |
-| 7:30 PM | 1.5 hr | $750 | $1,000 | $600 |
-| 9:00 PM | 1.5 hr | $1,500 | $2,000 | $1,250 |
+| 7:30 PM | 1.5 hr | $1,000 | $750 | $600 |
+| 9:00 PM | 1.5 hr | $2,000 | $1,500 | $1,250 |
 | 10:30 PM | 1.5 hr | $3,000 | $3,000 | $2,250 |
-| **Day total** | | **$6,225** | **$7,175** | **$4,925** |
+| **Day total** | | **$7,175** | **$6,225** | **$4,925** |
+| Share of budget | | 39% | 34% | 27% |
 
 Total: $18,325 across 24 sets.
 
 **The 7:00 gap.** One-hour sets from 2:00 to 7:30 leave half an hour over. I put it at 7:00, when the sun is going down (sunset is around 7:25 PM that weekend). Use it to switch the stage to its night look and for one short shared moment each day. The alternative is to make 6:00–7:30 a single 90-minute sunset set.
 
-**Saturday carries the most money, Sunday the least.** Every ticket type includes Sunday, so the Sunday headliner sells almost no extra tickets. Its job is to keep people on site. A one-time back-to-back from two acts already there from Friday or Saturday, at $750–$1,000 extra each, does that without a new booking.
+**Friday carries the most money, then Saturday, then Sunday.** A strong Friday is what makes someone buy the Fri–Sun ticket instead of arriving Saturday, and the longer ticket is worth $40 more to you. The artist budget slider keeps these day shares at any total. Every ticket type includes Sunday, so the Sunday headliner sells almost no extra tickets. Its job is to keep people on site. A one-time back-to-back from two acts already there from Friday or Saturday, at $750–$1,000 extra each, does that without a new booking.
 
 **What each artist gets.** The fee, a room in the K Lodge apartment on the night they play one of the top three slots, a bed in a shared cabin if they stay longer, meals for their whole stay, and rides to and from Ontario or Palm Springs. They book their own flights.
 

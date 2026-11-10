@@ -17,8 +17,9 @@ const DEFAULTS = {
   art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
   procPct: 2.9, procFixed: 0.3, bankShare: 0, bankPct: 0.8,
   artists: [
-    [75, 100, 150, 250, 400, 750, 1500, 3000],
+    // Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets.
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
+    [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
   kdShare: 50, psShare: 20,

@@ -163,7 +163,7 @@ svg { display: block; width: 100%; height: auto; }
       <section class="panel" id="panel-fees">
         <h2>Artist fees by slot</h2>
         <div class="scroll"><table class="fees" id="fees"></table></div>
-        <p class="note">The artist budget slider scales every slot together and keeps this shape. Edit a slot here to change the shape. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
+        <p class="note">Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. The artist budget slider scales every slot together and keeps those shares. Edit a slot here to change the shape. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
       </section>
     </div>
   </div>
@@ -189,8 +189,9 @@ const DEFAULTS = {
   art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
   procPct: 2.9, procFixed: 0.3, bankShare: 0, bankPct: 0.8,
   artists: [
-    [75, 100, 150, 250, 400, 750, 1500, 3000],
+    // Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets.
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
+    [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
   kdShare: 50, psShare: 20,
@@ -282,7 +283,7 @@ function scaleFees(shape, target) {
 <script>
 const SLOTS = ['2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:30 PM', '9:00 PM', '10:30 PM'];
 const DAYS = ['Fri', 'Sat', 'Sun'];
-const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
+const LEAN_FEES = [[75, 75, 100, 150, 300, 600, 1100, 2000], [75, 75, 100, 150, 250, 500, 1000, 1750], [75, 75, 100, 150, 200, 400, 750, 1250]];
 const PRESETS = {
   plan: {},
   unlock: { paid: 385 },
@@ -410,7 +411,8 @@ function buildFees() {
   $('fees').innerHTML = `<thead><tr><th>Set time</th>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>` +
     SLOTS.map((t, i) => `<tr><td>${t}</td>${DAYS.map((d, j) =>
       `<td><input type="number" id="fee-${j}-${i}" data-day="${j}" data-slot="${i}" min="0" step="25" inputmode="numeric" aria-label="${d} ${t} fee"></td>`).join('')}</tr>`).join('') +
-    `</tbody><tfoot><tr class="total"><td>Day total</td>${DAYS.map((d, j) => `<td id="fee-total-${j}"></td>`).join('')}</tr></tfoot>`;
+    `</tbody><tfoot><tr class="total"><td>Day total</td>${DAYS.map((d, j) => `<td id="fee-total-${j}"></td>`).join('')}</tr>
+    <tr><td class="muted">Share of budget</td>${DAYS.map((d, j) => `<td class="muted" id="fee-share-${j}"></td>`).join('')}</tr></tfoot>`;
   $('fees').addEventListener('input', e => {
     const t = e.target;
     if (t.dataset.day === undefined) return;
@@ -434,7 +436,9 @@ function syncInputs(skip, top) {
   }
   s.artists.forEach((day, j) => {
     day.forEach((v, i) => { const el = $(`fee-${j}-${i}`); if (el !== skip) el.value = v; });
-    $('fee-total-' + j).textContent = money(day.reduce((a, b) => a + b, 0));
+    const dayTotal = day.reduce((a, b) => a + b, 0);
+    $('fee-total-' + j).textContent = money(dayTotal);
+    $('fee-share-' + j).textContent = feeTotal() ? Math.round(dayTotal / feeTotal() * 100) + '%' : '';
   });
   document.querySelectorAll('button.preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === active)));
 }
