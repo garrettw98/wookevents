@@ -174,7 +174,7 @@ const DEFAULTS = {
   venuePerDay: 10, domePer: 10, domeCap: 2000,
   permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
   kd: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
-  art: 3000, marketing: 750, ops: 1200, medical: 600, flights: 2000, hospitality: 600, contingencyPct: 5,
+  art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
   artists: [
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
@@ -211,15 +211,16 @@ function compute(s) {
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
-  const fixedBase = artistFees + s.flights + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
-    + s.art + s.marketing + s.ops + s.medical + cabins + permit + portos;
+  const medical = s.medicalPerDay * s.medicalDays;
+  const fixedBase = artistFees + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
+    + s.art + s.marketing + s.ops + medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
   // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
   const kdShareAmt = profit * s.kdShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
-    onSite, permit, portos, artistFees, cabins, crew, contingency, costs, profit,
+    onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
@@ -236,9 +237,9 @@ const DAYS = ['Fri', 'Sat', 'Sun'];
 const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
 const PRESETS = {
   plan: {},
-  unlock: { paid: 440, ops: 2000, medical: 1000, food: 3100 },
-  leaner: { paid: 200, artists: LEAN_FEES, flights: 1200 },
-  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000, flights: 1200, medical: 300 },
+  unlock: { paid: 420, unticketed: 80, ops: 2000, food: 3100 },
+  leaner: { paid: 200, artists: LEAN_FEES },
+  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000 },
 };
 const GROUPS = [
   { title: 'Tickets sold', fields: [
@@ -257,14 +258,13 @@ const GROUPS = [
     { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
   ] },
   { title: 'People on site', fields: [
-    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket' },
+    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket. The 500 unlock adds 20 for Project Seismic.' },
   ] },
   { title: 'Fixed costs', fields: [
     { k: 'kd', label: 'Kinetic Desert guarantee' },
-    { k: 'flights', label: 'Artist flights', hint: 'Fees exclude travel. Set to 0 if artists book their own.' },
-    { k: 'hospitality', label: 'Artist hospitality and airport runs' },
+    { k: 'hospitality', label: 'Artist hospitality and airport runs', hint: 'Artists book their own flights' },
     { k: 'insurance', label: 'Insurance' },
-    { k: 'permit', label: 'Permit', hint: 'Charged at 200 or more on site' },
+    { k: 'permit', label: 'Permits', hint: 'County event permit and agency fees, at 200 or more on site' },
     { k: 'portos', label: 'Porto-potties', hint: 'A guess. Charged above 350 on site.' },
     { k: 'chef', label: 'Chef' },
     { k: 'food', label: 'Groceries' },
@@ -275,7 +275,8 @@ const GROUPS = [
     { k: 'art', label: 'Art, projection, path lighting' },
     { k: 'marketing', label: 'Marketing and design' },
     { k: 'ops', label: 'Site supplies', hint: 'Wristbands, signage, radios, trash, firewood' },
-    { k: 'medical', label: 'Medic and harm reduction' },
+    { k: 'medicalPerDay', label: 'Medical team per day' },
+    { k: 'medicalDays', label: 'Days of medical cover', hint: 'Friday 10 AM to Monday 10 AM' },
     { k: 'contingencyPct', label: 'Contingency, % of fixed costs' },
   ] },
   { title: 'Per-ticket costs', fields: [
@@ -404,12 +405,12 @@ $('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the l
 function renderPL(r) {
   const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
   const fixedLines = [
-    ['Artist fees', r.artistFees, '24 sets'], ['Artist flights', s.flights], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
+    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
     ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
     ['Permit', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, r.portos ? '' : 'not needed'],
     ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
     ['Art, projection, path lighting', s.art], ['Insurance', s.insurance], ['Marketing and design', s.marketing],
-    ['Site supplies', s.ops], ['Medic and harm reduction', s.medical], ['Contingency', r.contingency, `${s.contingencyPct}%`],
+    ['Site supplies', s.ops], ['Medical team', r.medical, `${s.medicalDays} days`], ['Contingency', r.contingency, `${s.contingencyPct}%`],
   ];
   $('pl').innerHTML = `<tbody>
     <tr class="head"><td colspan="3">Money in</td></tr>

@@ -13,7 +13,7 @@ const DEFAULTS = {
   venuePerDay: 10, domePer: 10, domeCap: 2000,
   permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
   kd: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
-  art: 3000, marketing: 750, ops: 1200, medical: 600, flights: 2000, hospitality: 600, contingencyPct: 5,
+  art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
   artists: [
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
@@ -50,15 +50,16 @@ function compute(s) {
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
-  const fixedBase = artistFees + s.flights + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
-    + s.art + s.marketing + s.ops + s.medical + cabins + permit + portos;
+  const medical = s.medicalPerDay * s.medicalDays;
+  const fixedBase = artistFees + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
+    + s.art + s.marketing + s.ops + medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
   // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
   const kdShareAmt = profit * s.kdShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
-    onSite, permit, portos, artistFees, cabins, crew, contingency, costs, profit,
+    onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
