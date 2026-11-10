@@ -107,6 +107,10 @@ thead th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; c
 tr.total td { font-weight: 600; border-bottom: 0; border-top: 2px solid var(--ink-3); }
 tr.head td { font-family: var(--display); font-weight: 600; padding-top: 14px; }
 tr.off td, tr.off input, tr.off select { color: var(--ink-3); }
+tr.locked td:first-child { font-weight: 600; }
+tr.locked input[type="text"] { font-weight: 600; }
+td .pill { margin-left: 4px; }
+#slots td:first-child { white-space: nowrap; }
 table.edit td, table.edit th { padding: 5px 5px; }
 table.edit td:first-child input { min-width: 280px; }
 table.edit.compact td:first-child input { min-width: 200px; }
@@ -170,13 +174,13 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
   </header>
 
   <nav class="tabs" aria-label="Sections">
-    <a href="#overview">Overview</a><a href="#tickets">Tickets</a><a href="#artists">Artists</a><a href="#production">Production</a>
-    <a href="#crew">Crew</a><a href="#costs">Costs</a><a href="#timeline">Timeline</a>
+    <a href="#overview">Overview</a><a href="#tickets">Tickets</a><a href="#budgets">Budgets</a><a href="#artists">Artists</a>
+    <a href="#production">Production</a><a href="#crew">Crew</a><a href="#hardcosts">Hard costs</a><a href="#timeline">Timeline</a>
   </nav>
 
   <section class="verdict" aria-live="polite">
     <div><div class="eyebrow" id="v-profit-label">Profit</div><div class="big" id="v-profit"></div><div class="sub" id="v-profit-sub"></div></div>
-    <div><div class="eyebrow">Break-even</div><div class="big" id="v-be"></div><div class="sub" id="v-be-sub"></div></div>
+    <div><div class="eyebrow">Commitments covered at</div><div class="big" id="v-cov"></div><div class="sub" id="v-cov-sub"></div><div class="pill" id="v-cov-pill"></div></div>
     <div><div class="eyebrow">People on site</div><div class="big" id="v-site"></div><div class="pill" id="v-site-pill"></div></div>
     <div><div class="eyebrow" id="v-you-label">Your take</div><div class="big" id="v-you"></div><div class="sub" id="v-you-sub"></div></div>
   </section>
@@ -185,27 +189,40 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
     <div class="cols">
       <div class="stack">
         <div class="panel">
-          <h2>Tickets and artist budget</h2>
-          <div class="field slider"><div class="row"><label for="f-paid">Paid tickets</label><output id="o-paid"></output></div><input type="range" id="f-paid" min="0" max="384" step="1"></div>
-          <div class="field slider"><div class="row"><label for="f-artist">Artist budget, all 24 sets</label><output id="o-artist"></output></div><input type="range" id="f-artist" class="artist-slider" min="0" max="30000" step="250"></div>
+          <h2>Sales</h2>
+          <div class="field"><label for="f-sold">Tickets sold so far<small>Update this as sales come in</small></label><input type="number" id="f-sold" data-k="sold" min="0" step="1" inputmode="numeric"></div>
+          <div class="field slider"><div class="row"><label for="f-paid">Plan on this many tickets</label><output id="o-paid"></output></div><input type="range" id="f-paid" min="0" max="384" step="1"></div>
           <div class="jump" id="jump"></div>
+          <div class="field slider"><div class="row"><label for="f-ashare">Artists' share of the surplus</label><output id="o-ashare"></output></div><input type="range" id="f-ashare" min="0" max="90" step="0.5"></div>
+          <p class="note">Mandatory hard costs come off the top. Every other budget is a share of what sales leave over, so it grows with each ticket until you lock a price in.</p>
         </div>
         <div class="panel">
-          <h2>What moves break-even</h2>
-          <ul class="plain" id="sens"></ul>
+          <h2>Where the next ticket's money goes</h2>
+          <ul class="plain" id="next-ticket"></ul>
         </div>
       </div>
-      <div class="panel">
-        <h2>Profit by tickets sold</h2>
-        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with a drop at the start of each stage"></svg><div class="tip" id="tip" hidden></div></div>
-        <p class="note" id="chart-note"></p>
+      <div class="stack">
+        <div class="panel">
+          <h2>Artist budget by tickets sold</h2>
+          <div class="chartbox" id="box-artists"><svg id="chart-artists" viewBox="0 0 640 250" role="img" aria-label="Artist budget as paid tickets rise"></svg><div class="tip" id="tip-artists" hidden></div></div>
+          <p class="note" id="note-artists-chart"></p>
+        </div>
+        <div class="panel">
+          <h2>Profit by tickets sold</h2>
+          <div class="chartbox" id="box-profit"><svg id="chart-profit" viewBox="0 0 640 250" role="img" aria-label="Profit as paid tickets rise"></svg><div class="tip" id="tip-profit" hidden></div></div>
+          <p class="note">Each line dips where a stage begins, because that stage's guest lists and hard costs switch on.</p>
+        </div>
       </div>
+    </div>
+    <div class="panel">
+      <h2>How each budget grows</h2>
+      <div class="scroll"><table id="grow"></table></div>
     </div>
     <div class="panel">
       <h2>Scale stages</h2>
       <div class="scroll"><table class="edit compact" id="stages"></table></div>
       <div class="jump"><button id="btn-add-stage">Add a stage</button><button id="btn-del-stage">Remove the last stage</button></div>
-      <p class="note">Each stage is a limit on people on site. Partners, crew and costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket.</p>
+      <p class="note">Each stage is a limit on people on site. Partners, crew and hard costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket.</p>
     </div>
     <div class="cols">
       <div class="panel">
@@ -230,15 +247,28 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
     </div>
   </section>
 
+  <section class="tab" id="tab-budgets" hidden>
+    <p class="intro">Everything that is not a mandatory hard cost lives here. Each budget takes a share of the surplus, so it grows as tickets sell. Enter what you have committed on a line and it can never fall below that.</p>
+    <div class="panel">
+      <h2>Budgets that grow with sales</h2>
+      <div class="scroll"><table class="edit" id="budgets"></table></div>
+      <button class="add" data-add="budgets">Add a budget</button>
+      <p class="note" id="note-budgets"></p>
+      <p class="note">The floor is the least the event can run on, and it counts as committed from the start. A cap of 0 means no cap. The artists' committed figure is the total of the slots you have locked on the Artists tab.</p>
+    </div>
+  </section>
+
   <section class="tab" id="tab-artists" hidden>
     <div class="cols">
-      <div class="panel">
-        <h2>Artist budget</h2>
-        <div class="field slider"><div class="row"><label for="f-artist2">All 24 sets</label><output id="o-artist2"></output></div><input type="range" id="f-artist2" class="artist-slider" min="0" max="30000" step="250"></div>
-        <p class="note">The slider scales every slot together and keeps each day's share. Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. Edit a slot to change the shape, for example when a quote comes in.</p>
-        <p class="note">The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight. Artists book their own flights. Their meals and airport rides are under Costs and Crew.</p>
+      <div class="stack">
+        <div class="panel">
+          <h2>Artist budget</h2>
+          <ul class="plain" id="artist-facts"></ul>
+          <p class="note">Every open slot gets its target fee scaled to the artist budget, so the offer you can make for a slot rises as tickets sell. When an artist agrees, type the fee and tick Locked. That fee is then fixed, and the open slots share what is left.</p>
+          <p class="note">Target fees set the shape: Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
+        </div>
       </div>
-      <div class="panel"><h2>Fees by slot</h2><div class="scroll"><table class="edit fees" id="fees"></table></div></div>
+      <div class="panel"><h2>Slots</h2><div class="scroll"><table class="edit fees" id="slots"></table></div></div>
     </div>
   </section>
 
@@ -254,12 +284,12 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
       <h2>Crew roles</h2>
       <div class="scroll"><table class="edit" id="crew"></table></div>
       <button class="add" data-add="crew">Add a crew role</button>
-      <p class="note">Everyone here is on site without a paid ticket and gets a car camping pass. Shifts needed is your estimate of the job. Coverage compares it with people times shifts each.</p>
+      <p class="note">Everyone here is on site without a paid ticket and gets a car camping pass. Crew pay is a hard cost. Shifts needed is your estimate of the job. Coverage compares it with people times shifts each.</p>
     </div>
     <div class="cols even">
       <div class="panel">
         <h2>Other people on site</h2>
-        <div class="scroll"><table class="edit" id="others"></table></div>
+        <div class="scroll"><table class="edit compact" id="others"></table></div>
         <button class="add" data-add="others">Add a group</button>
       </div>
       <div class="panel">
@@ -269,13 +299,13 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
     </div>
   </section>
 
-  <section class="tab" id="tab-costs" hidden>
+  <section class="tab" id="tab-hardcosts" hidden>
+    <p class="intro">Costs the event must pay whatever sells. They come off the top before any budget is shared out. Partner guarantees and crew pay are hard costs too, and live in their own sections.</p>
     <div class="panel">
-      <h2>Site and operating costs</h2>
+      <h2>Mandatory hard costs</h2>
       <div class="scroll"><table class="edit" id="costs"></table></div>
-      <button class="add" data-add="costs">Add a cost</button>
-      <div class="narrow" id="cont"></div>
-      <p class="note">Artist fees, partner guarantees and crew pay live in their own sections. A cost can start at one stage and stop at a later one, as the venue's medical rep does once you bring your own medical team. Contingency is added on everything that does not move ticket by ticket.</p>
+      <button class="add" data-add="costs">Add a hard cost</button>
+      <p class="note">A cost can start at one stage and stop at a later one, as the venue's medical rep does once you bring your own medical team.</p>
     </div>
   </section>
 
@@ -290,9 +320,17 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 
 <script>
 // Pure planning model, shared verbatim by the page and by the node check.
-// The event grows through stages, each a limit on people on site. Partners, crew roles, other people and
-// costs each name the stage they start at, so guest lists and costs switch on as the event scales.
-const SCHEMA = 3;
+//
+// How it scales:
+//  1. The event grows through stages, each a limit on people on site. Partners, crew roles, groups and
+//     hard costs each name the stage they start at (and optionally stop at).
+//  2. Mandatory hard costs come off the top. What sales leave over is the surplus.
+//  3. Every other budget is a share of that surplus, so it grows with each ticket sold. A budget can have
+//     a floor (the least the event can run on) and a cap, and it never drops below what is already committed.
+//  4. Artist slots share the artist budget in proportion to their target fees until a slot is locked at a price.
+//  5. Whatever share is not given to a budget is the partners' profit, split by parts.
+const SCHEMA = 4;
+const T = (target) => ({ target, name: '', locked: false, fee: 0 });
 const DEFAULTS = {
   v: SCHEMA,
   stages: [
@@ -300,7 +338,7 @@ const DEFAULTS = {
     { name: 'Camp facilities', limit: 350 },
     { name: 'With porto-potties and a second stage', limit: 500 },
   ],
-  paid: 275, mixFull: 65, mixSat: 25,
+  sold: 0, paid: 275, mixFull: 65, mixSat: 25,
   tiers: {
     full: [{ name: 'Presale', price: 169, qty: 50 }, { name: 'Tier 1', price: 189, qty: 60 }, { name: 'Tier 2', price: 209, qty: 50 }, { name: 'Final', price: 229, qty: 0 }],
     sat: [{ name: 'Tier 1', price: 139, qty: 20 }, { name: 'Tier 2', price: 155, qty: 30 }, { name: 'Final', price: 169, qty: 0 }],
@@ -308,12 +346,21 @@ const DEFAULTS = {
   },
   addons: { carRate: 20, carSpots: 120, pCar: 50, cabinsSold: 6, pCabin: 850, otherPer: 10 },
   proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
-  contingencyPct: 5,
-  // Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets.
-  artists: [
-    [75, 100, 200, 300, 500, 1000, 2000, 3000],
-    [75, 100, 150, 250, 400, 750, 1500, 3000],
-    [75, 100, 150, 200, 300, 600, 1250, 2250],
+  // Target fees set the shape of the lineup: Friday carries the most, then Saturday, then Sunday.
+  // Each open slot's budget is its target scaled to whatever the artist budget currently is.
+  slots: [
+    [75, 100, 200, 300, 500, 1000, 2000, 3000].map(T),
+    [75, 100, 150, 250, 400, 750, 1500, 3000].map(T),
+    [75, 100, 150, 200, 300, 600, 1250, 2250].map(T),
+  ],
+  // share is a percent of the surplus left after floors. committed is money already promised on that line.
+  budgets: [
+    { id: 'artists', name: 'Artists', share: 58, floor: 1800, cap: 0, committed: 0 },
+    { name: 'Art, projection and lighting', share: 9.5, floor: 500, cap: 0, committed: 0 },
+    { name: 'Drinks for everyone', share: 7.5, floor: 0, cap: 0, committed: 0 },
+    { name: 'Marketing and design', share: 2.5, floor: 250, cap: 0, committed: 0 },
+    { name: 'Artist hospitality and airport runs', share: 2, floor: 300, cap: 0, committed: 0 },
+    { name: 'Reserve for surprises', share: 5.5, floor: 0, cap: 0, committed: 0 },
   ],
   // share is in parts: 2 / 2 / 1 means 40% / 40% / 20% among the partners active at that stage.
   // people is the number on site at each stage, crew and guest list together.
@@ -340,8 +387,8 @@ const DEFAULTS = {
     { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
     { name: 'Medical team', people: 2, from: 1 },
   ],
-  // basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site)
-  // until: the last stage a row applies at; leave it out for a row that never stops
+  // Mandatory hard costs only. basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site).
+  // until is the last stage a row applies at; leave it out for a row that never stops.
   costs: [
     { name: 'Venue fee', amount: 10, basis: 'ticketday', from: 0 },
     { name: 'Cabin rental, 8 at $250', amount: 2000, basis: 'flat', from: 0 },
@@ -351,14 +398,10 @@ const DEFAULTS = {
     { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 1 },
     { name: 'Venue medical rep, required without our own medic', amount: 500, basis: 'flat', from: 0, until: 0 },
     { name: 'Our own medical kit', amount: 200, basis: 'flat', from: 0, until: 0 },
-    { name: 'Groceries', amount: 2800, basis: 'flat', from: 0 },
+    { name: 'Groceries for crew and artists', amount: 2800, basis: 'flat', from: 0 },
     { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
-    { name: 'Drinks for everyone', amount: 6, basis: 'person', from: 0 },
-    { name: 'Art, projection and lighting', amount: 3000, basis: 'flat', from: 0 },
-    { name: 'Marketing and design', amount: 750, basis: 'flat', from: 0 },
     { name: 'Site supplies', amount: 1200, basis: 'flat', from: 0 },
     { name: 'Extra site supplies', amount: 800, basis: 'flat', from: 2 },
-    { name: 'Artist hospitality and airport runs', amount: 600, basis: 'flat', from: 0 },
   ],
   timeline: [
     { date: '2026-11-13', task: 'Put the five permit questions to the county planner', owner: 'You', done: false },
@@ -366,16 +409,16 @@ const DEFAULTS = {
     { date: '2026-11-30', task: 'Kinetic Desert and Project Seismic deals in writing', owner: 'You', done: false },
     { date: '2026-12-01', task: 'Ticket site live. Alumni presale opens', owner: 'You', done: false },
     { date: '2026-12-11', task: 'Submit the Temporary Use Permit application', owner: 'You', done: false },
-    { date: '2026-12-15', task: 'Presale closes. Set the artist budget from the result', owner: 'You', done: false },
-    { date: '2026-12-20', task: 'Send artist offers and pay deposits', owner: 'You', done: false },
+    { date: '2026-12-15', task: 'Presale closes. Enter tickets sold and see what it covers', owner: 'You', done: false },
+    { date: '2026-12-20', task: 'Lock the first artists that the plan covers', owner: 'You', done: false },
     { date: '2027-01-12', task: 'First lineup. Tier 1 and Sat–Sun tickets on sale', owner: 'You', done: false },
     { date: '2027-01-22', task: 'Last day to file the permit', owner: 'You', done: false },
-    { date: '2027-02-01', task: 'Decide the Sunday closer', owner: 'You', done: false },
+    { date: '2027-02-01', task: 'Update tickets sold. Lock the next artists it covers', owner: 'You', done: false },
     { date: '2027-02-09', task: 'Full lineup. Art grants and merch pre-order open', owner: 'You', done: false },
-    { date: '2027-03-01', task: 'Decide on a headliner upgrade', owner: 'You', done: false },
+    { date: '2027-03-01', task: 'Update tickets sold. Lock remaining artists and art spend', owner: 'You', done: false },
     { date: '2027-03-15', task: 'Decide on the 500 unlock. Order porto-potties', owner: 'You and Kinetic Desert', done: false },
     { date: '2027-03-23', task: 'Set times out. Sunday tickets on sale. Fire permit application in', owner: 'You', done: false },
-    { date: '2027-04-09', task: 'Final ticket tier. Grocery order. Shift schedule out', owner: 'You', done: false },
+    { date: '2027-04-09', task: 'Final ticket tier. Grocery and drinks order from the final budgets', owner: 'You', done: false },
     { date: '2027-04-21', task: 'Load-in begins', owner: 'Kinetic Desert', done: false },
     { date: '2027-04-23', task: 'Gates open at 10:00 AM', owner: 'Gate crew', done: false },
     { date: '2027-04-28', task: 'Production out by noon. Walk-through with the camp', owner: 'You', done: false },
@@ -417,6 +460,9 @@ function maxPaid(s, level) {
 }
 // The first paid ticket at which a stage begins.
 function stageStart(s, level) { return level <= 0 ? 0 : maxPaid(s, level - 1) + 1; }
+const lockedSlots = s => s.slots.flat().filter(x => x.locked);
+const lockedTotal = s => sum(lockedSlots(s).map(x => n0(x.fee)));
+const committedOf = (s, b) => b.id === 'artists' ? lockedTotal(s) : n0(b.committed);
 function compute(s) {
   const paid = n0(s.paid);
   const nFull = paid * s.mixFull / 100, nSat = paid * s.mixSat / 100, nSun = Math.max(0, paid - nFull - nSat);
@@ -431,31 +477,45 @@ function compute(s) {
   const other = paid * n0(a.otherPer);
   const revenue = tickets + car + cabinRev + other;
   const ticketDays = nFull * 3 + nSat * 2 + nSun;
-  const artistFees = sum(s.artists.flat().map(n0));
+  // Mandatory hard costs.
   const partnerRows = s.partners.map(p => {
     const active = on(p, level);
-    const guar = active ? n0(p.guarantee) : 0;
     const raw = active ? n0(p.perTicket) * paid : 0;
-    return { active, guar, fee: n0(p.cap) > 0 ? Math.min(raw, n0(p.cap)) : raw };
+    return { active, guar: active ? n0(p.guarantee) : 0, fee: n0(p.cap) > 0 ? Math.min(raw, n0(p.cap)) : raw };
   });
   const crewRows = s.crew.map(c => ({ active: on(c, level), pay: on(c, level) ? n0(c.people) * n0(c.pay) : 0 }));
   const costRows = s.costs.map(c => {
     const active = on(c, level), amt = n0(c.amount);
-    const variable = c.basis === 'ticket' || c.basis === 'ticketday';
-    const value = !active ? 0 : c.basis === 'ticket' ? amt * paid : c.basis === 'ticketday' ? amt * ticketDays : c.basis === 'person' ? amt * onSite : amt;
-    return { active, variable, value };
+    return { active, value: !active ? 0 : c.basis === 'ticket' ? amt * paid : c.basis === 'ticketday' ? amt * ticketDays : c.basis === 'person' ? amt * onSite : amt };
   });
-  const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
-  const crewPay = sum(crewRows.map(c => c.pay));
-  const fixedCosts = sum(costRows.map(c => c.variable ? 0 : c.value)), variableCosts = sum(costRows.map(c => c.variable ? c.value : 0));
-  // Contingency covers everything that does not move ticket by ticket.
-  const fixedBase = artistFees + guarantees + crewPay + fixedCosts;
-  const contingency = fixedBase * n0(s.contingencyPct) / 100;
   const online = tickets + car + cabinRev;
   const bank = Math.min(100, n0(s.proc.bankShare)) / 100;
   const processing = online * ((1 - bank) * n0(s.proc.pct) + bank * n0(s.proc.bankPct)) / 100 + paid * (1 - bank) * n0(s.proc.fixed);
-  const costs = fixedBase + contingency + partnerFees + variableCosts + processing;
-  const profit = revenue - costs;
+  const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
+  const crewPay = sum(crewRows.map(c => c.pay)), siteCosts = sum(costRows.map(c => c.value));
+  const hard = guarantees + partnerFees + crewPay + siteCosts + processing;
+  // Budgets that grow with sales.
+  const surplus = revenue - hard;
+  const floors = sum(s.budgets.map(b => n0(b.floor)));
+  const free = surplus - floors;
+  const shareTotal = sum(s.budgets.map(b => n0(b.share)));
+  const budgetRows = s.budgets.map(b => {
+    const committed = committedOf(s, b);
+    let scaled = n0(b.floor) + Math.max(0, free) * n0(b.share) / 100;
+    if (n0(b.cap) > 0) scaled = Math.min(scaled, n0(b.cap));
+    const budget = Math.max(scaled, committed);
+    return { scaled, committed, budget, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
+  });
+  const spend = sum(budgetRows.map(b => b.budget));
+  const mustSpend = sum(budgetRows.map(b => b.must));
+  const profit = surplus - spend;
+  // Artist slots: locked slots keep their fee, open slots share what is left in proportion to their targets.
+  const ai = s.budgets.findIndex(b => b.id === 'artists');
+  const artistBudget = ai >= 0 ? budgetRows[ai].budget : 0;
+  const locked = lockedTotal(s);
+  const openTargets = sum(s.slots.flat().map(x => x.locked ? 0 : n0(x.target)));
+  const factor = openTargets ? Math.max(0, artistBudget - locked) / openTargets : 0;
+  const slotNow = s.slots.map(day => day.map(x => x.locked ? n0(x.fee) : n0(x.target) * factor));
   // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
   const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
   const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
@@ -467,14 +527,23 @@ function compute(s) {
     if (!parts && i === youIdx) r.shareAmt = profit;
     r.total = r.guar + r.fee + r.shareAmt;
   });
-  return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays,
-    level, unt, onSite, over, crewHead, artistFees, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay,
-    fixedCosts, variableCosts, contingency, processing, online, costs, profit,
+  return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
+    level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, siteCosts, processing, hard,
+    surplus, floors, free, shareTotal, profitShare: 100 - shareTotal, budgetRows, spend, mustSpend, profit,
+    artistBudget, locked, lockedCount: lockedSlots(s).length, openTargets, factor, slotNow,
     yours: youIdx >= 0 ? partnerRows[youIdx].shareAmt : profit, avgTicket: paid ? tickets / paid : 0 };
 }
-function breakEven(s) {
+// The fewest tickets at which sales cover everything that cannot be backed out of:
+// the hard costs, each budget's floor, and whatever is already committed.
+function coveredAt(s) {
   const max = maxPaid(s);
-  for (let n = 0; n <= max; n++) if (compute({ ...s, paid: n }).profit >= 0) return n;
+  for (let n = 0; n <= max; n++) { const r = compute({ ...s, paid: n }); if (r.surplus - r.mustSpend >= 0) return n; }
+  return null;
+}
+// The fewest tickets at which one budget line's own share covers what is committed on it.
+function lineCoveredAt(s, i) {
+  const max = maxPaid(s);
+  for (let n = 0; n <= max; n++) { const b = compute({ ...s, paid: n }).budgetRows[i]; if (b.scaled >= b.committed) return n; }
   return null;
 }
 // Each partner's share of a profit at a stage, in percent.
@@ -482,40 +551,25 @@ function sharePct(s, level) {
   const parts = sum(s.partners.map(p => on(p, level) ? n0(p.share) : 0));
   return s.partners.map(p => on(p, level) && parts ? n0(p.share) / parts * 100 : 0);
 }
-// Scale a fee grid to a new total, keeping its shape. Slots round to $25 and the remainder goes to the biggest slots.
-function scaleFees(shape, target) {
-  const flat = shape.flat().map(n0);
-  const total = sum(flat);
-  if (!total) return shape.map(d => d.slice());
-  const out = flat.map(v => Math.round(v * target / total / 25) * 25);
-  let diff = Math.round((target - sum(out)) / 25);
-  const order = flat.map((v, i) => i).sort((x, y) => flat[y] - flat[x]);
-  for (let i = 0; diff !== 0 && i < 10000; i++) {
-    const idx = order[i % order.length], step = diff > 0 ? 25 : -25;
-    if (out[idx] + step >= 0) { out[idx] += step; diff -= Math.sign(diff); }
-  }
-  const per = shape[0].length;
-  return shape.map((d, j) => out.slice(j * per, j * per + per));
-}
 
 </script>
 <script>
 const SLOTS = ['2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:30 PM', '9:00 PM', '10:30 PM'];
-const DAYS = ['Fri', 'Sat', 'Sun'];
+const DAYS = ['Friday', 'Saturday', 'Sunday'];
 const TYPES = [['full', 'Fri–Sun', 'tFull'], ['sat', 'Sat–Sun', 'tSat'], ['sun', 'Sunday only', 'tSun']];
-const TABS = ['overview', 'tickets', 'artists', 'production', 'crew', 'costs', 'timeline'];
+const TABS = ['overview', 'tickets', 'budgets', 'artists', 'production', 'crew', 'hardcosts', 'timeline'];
 const BASIS = [['flat', 'Flat amount'], ['ticket', 'Per paid ticket'], ['ticketday', 'Per ticket per day'], ['person', 'Per person on site']];
 const BLANK = {
   partners: () => ({ name: 'New partner', role: '', from: 0, guarantee: 0, perTicket: 0, cap: 0, share: 0, sharesLoss: false, people: s.stages.map(() => 0) }),
   crew: () => ({ name: 'New role', people: 1, pay: 0, shifts: 3, need: 3, from: 0 }),
   others: () => ({ name: 'New group', people: 1, from: 0 }),
-  costs: () => ({ name: 'New cost', amount: 0, basis: 'flat', from: 0 }),
+  costs: () => ({ name: 'New hard cost', amount: 0, basis: 'flat', from: 0 }),
+  budgets: () => ({ name: 'New budget', share: 0, floor: 0, cap: 0, committed: 0 }),
   timeline: () => ({ date: '2027-04-30', task: 'New task', owner: '', done: false }),
 };
 const STORE_KEY = 'tahquitz-2027-plan';
 
 let s = structuredClone(DEFAULTS);
-let feeShape = structuredClone(DEFAULTS.artists);
 let savedJSON = JSON.stringify(DEFAULTS);
 let remote = null, remoteNote = '', readOnly = false;
 
@@ -525,9 +579,11 @@ const num = v => Number(v) || 0;
 const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
 const int = n => Math.round(n).toLocaleString('en-US');
 const pct = n => (Math.round(n * 10) / 10).toString() + '%';
-const feeTotal = () => s.artists.flat().reduce((a, b) => a + num(b), 0);
+const r25 = n => Math.round(n / 25) * 25;
+const tix = n => int(n) + (Math.round(n) === 1 ? ' ticket' : ' tickets');
 const getPath = (o, p) => p.split('.').reduce((x, k) => x[k], o);
 const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); ks.reduce((x, k) => x[k], o)[last] = v; };
+const artistLine = () => s.budgets.find(b => b.id === 'artists');
 const stageLabel = i => i === 0 ? 'Always' : `Above ${int(s.stages[i - 1].limit)} on site`;
 const fromSelect = (list, i, val) => `<select data-list="${list}" data-i="${i}" data-f="from" data-num="1" id="${list}-${i}-from" aria-label="Starts">${s.stages.map((st, j) => `<option value="${j}"${j === num(val) ? ' selected' : ''}>${stageLabel(j)}</option>`).join('')}</select>`;
 const untilSelect = (list, i, val) => { const v = val === undefined || val === null ? -1 : Number(val); return `<select data-list="${list}" data-i="${i}" data-f="until" data-int="1" id="${list}-${i}-until" aria-label="Stops"><option value="-1"${v < 0 ? ' selected' : ''}>Never</option>${s.stages.slice(0, -1).map((st, j) => `<option value="${j}"${j === v ? ' selected' : ''}>Above ${int(st.limit)} on site</option>`).join('')}</select>`; };
@@ -541,7 +597,7 @@ function buildStages() {
     s.stages.map((st, i) => `<tr><td>${cell('stages', i, 'name', st.name, 'text', 'aria-label="Stage name"')}</td>
       <td>${cell('stages', i, 'limit', st.limit, 'number', 'min="1" step="1" aria-label="Limit on site"')}</td>
       <td id="st-unt-${i}"></td><td id="st-fit-${i}"></td><td id="st-start-${i}"></td><td class="l muted" id="st-on-${i}"></td></tr>`).join('') + '</tbody>';
-  $('jump').innerHTML = s.stages.map((st, i) => `<button data-jump="${i}">Sell out at ${int(st.limit)}</button>`).join('');
+  $('jump').innerHTML = `<button data-jump="sold">Sold so far</button>` + s.stages.map((st, i) => `<button data-jump="${i}">Sell out at ${int(st.limit)}</button>`).join('');
   $('btn-del-stage').disabled = s.stages.length < 2;
 }
 function buildTickets() {
@@ -559,12 +615,26 @@ function buildTickets() {
       <td>${i === all.length - 1 ? '<span class="muted">the rest</span>' : `<input type="number" id="t-${type}-${i}-qty" data-tier="${type}" data-i="${i}" data-f="qty" min="0" step="1" value="${esc(tier.qty)}" aria-label="${label} ${esc(tier.name)} tickets at this price">`}</td>
       <td id="ts-${type}-${i}"></td></tr>`).join('') + '</tbody></table></div>').join('');
 }
-function buildFees() {
-  $('fees').innerHTML = `<thead><tr><th>Set time</th>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>` +
-    SLOTS.map((t, i) => `<tr><td>${t}</td>${DAYS.map((d, j) =>
-      `<td><input type="number" id="fee-${j}-${i}" data-day="${j}" data-slot="${i}" min="0" step="25" value="${esc(s.artists[j][i])}" aria-label="${d} ${t} fee"></td>`).join('')}</tr>`).join('') +
-    `</tbody><tfoot><tr class="total"><td>Day total</td>${DAYS.map((d, j) => `<td id="fee-total-${j}"></td>`).join('')}</tr>
-    <tr><td class="muted">Share of budget</td>${DAYS.map((d, j) => `<td class="muted" id="fee-share-${j}"></td>`).join('')}</tr></tfoot>`;
+function buildBudgets() {
+  $('budgets').innerHTML = `<thead><tr><th>Budget</th><th>Share of surplus, %</th><th>Floor</th><th>Cap</th><th>Committed</th><th>Budget now</th><th>Left to commit</th><th class="l">Status</th><th></th></tr></thead><tbody>` +
+    s.budgets.map((b, i) => `<tr><td>${cell('budgets', i, 'name', b.name, 'text', 'aria-label="Budget"')}</td>
+      <td>${cell('budgets', i, 'share', b.share, 'number', 'min="0" max="100" step="0.5" aria-label="Share of surplus"')}</td>
+      <td>${cell('budgets', i, 'floor', b.floor, 'number', 'min="0" step="50" aria-label="Floor"')}</td>
+      <td>${cell('budgets', i, 'cap', b.cap, 'number', 'min="0" step="50" aria-label="Cap"')}</td>
+      <td>${b.id === 'artists' ? `<span id="bud-com-${i}"></span>` : cell('budgets', i, 'committed', b.committed, 'number', 'min="0" step="25" aria-label="Committed"')}</td>
+      <td id="bud-now-${i}"></td><td id="bud-left-${i}"></td><td class="l" id="bud-st-${i}"></td>
+      <td>${b.id === 'artists' ? '' : delBtn('budgets', i, b.name)}</td></tr>`).join('') +
+    `</tbody><tfoot><tr class="total"><td>All budgets</td><td id="bud-t-share"></td><td id="bud-t-floor"></td><td></td><td id="bud-t-com"></td><td id="bud-t-now"></td><td id="bud-t-left"></td><td></td><td></td></tr></tfoot>`;
+}
+function buildSlots() {
+  $('slots').innerHTML = `<thead><tr><th>Set</th><th class="l">Artist</th><th>Target fee</th><th>Budget now</th><th>Locked fee</th><th class="l">Locked</th></tr></thead><tbody>` +
+    s.slots.map((day, j) => `<tr class="head"><td colspan="3">${DAYS[j]}</td><td id="day-now-${j}"></td><td colspan="2" class="l muted" id="day-share-${j}"></td></tr>` +
+      day.map((x, i) => `<tr id="slot-row-${j}-${i}"><td>${SLOTS[i]}</td>
+        <td class="l"><input type="text" class="mid" id="slot-${j}-${i}-name" data-day="${j}" data-slot="${i}" data-f="name" value="${esc(x.name)}" placeholder="Open" aria-label="${DAYS[j]} ${SLOTS[i]} artist"></td>
+        <td><input type="number" id="slot-${j}-${i}-target" data-day="${j}" data-slot="${i}" data-f="target" min="0" step="25" value="${esc(x.target)}" aria-label="${DAYS[j]} ${SLOTS[i]} target fee"></td>
+        <td id="slot-now-${j}-${i}"></td>
+        <td><input type="number" id="slot-${j}-${i}-fee" data-day="${j}" data-slot="${i}" data-f="fee" min="0" step="25" value="${esc(x.fee || '')}" aria-label="${DAYS[j]} ${SLOTS[i]} locked fee"></td>
+        <td class="l"><input type="checkbox" id="slot-${j}-${i}-locked" data-day="${j}" data-slot="${i}" data-f="locked"${x.locked ? ' checked' : ''} aria-label="${DAYS[j]} ${SLOTS[i]} locked"></td></tr>`).join('')).join('') + '</tbody>';
 }
 function buildPartners() {
   $('partners').innerHTML = s.partners.map((p, i) => `<div class="panel">
@@ -591,21 +661,21 @@ function buildCrew() {
       <td>${cell('crew', i, 'shifts', c.shifts, 'number', 'min="0" step="1" aria-label="Shifts each"')}</td>
       <td>${cell('crew', i, 'need', c.need, 'number', 'min="0" step="1" aria-label="Shifts needed"')}</td>
       <td class="l">${fromSelect('crew', i, c.from)}</td><td class="l" id="crew-cov-${i}"></td><td>${delBtn('crew', i, c.name)}</td></tr>`).join('') +
-    `</tbody><tfoot><tr class="total"><td>At the current size</td><td id="crew-t-people"></td><td id="crew-t-pay"></td><td id="crew-t-supply"></td><td id="crew-t-need"></td><td></td><td class="l" id="crew-t-cov"></td><td></td></tr></tfoot>`;
-  $('others').className = 'edit compact';
+    `</tbody><tfoot><tr class="total"><td>At the planned size</td><td id="crew-t-people"></td><td id="crew-t-pay"></td><td id="crew-t-supply"></td><td id="crew-t-need"></td><td></td><td class="l" id="crew-t-cov"></td><td></td></tr></tfoot>`;
   $('others').innerHTML = `<thead><tr><th>Group</th><th>People</th><th class="l">Starts</th><th class="l">Stops</th><th></th></tr></thead><tbody>` +
     s.others.map((o, i) => `<tr><td>${cell('others', i, 'name', o.name, 'text', 'aria-label="Group"')}</td>
       <td>${cell('others', i, 'people', o.people, 'number', 'min="0" step="1" aria-label="People"')}</td>
       <td class="l">${fromSelect('others', i, o.from)}</td><td class="l">${untilSelect('others', i, o.until)}</td><td>${delBtn('others', i, o.name)}</td></tr>`).join('') + '</tbody>';
 }
 function buildCosts() {
-  $('costs').innerHTML = `<thead><tr><th>Cost</th><th>Amount</th><th class="l">Charged</th><th class="l">Starts</th><th class="l">Stops</th><th>At the current size</th><th></th></tr></thead><tbody>` +
-    s.costs.map((c, i) => `<tr id="cost-row-${i}"><td>${cell('costs', i, 'name', c.name, 'text', 'aria-label="Cost"')}</td>
+  $('costs').innerHTML = `<thead><tr><th>Hard cost</th><th>Amount</th><th class="l">Charged</th><th class="l">Starts</th><th class="l">Stops</th><th>At the planned size</th><th></th></tr></thead><tbody>` +
+    s.costs.map((c, i) => `<tr id="cost-row-${i}"><td>${cell('costs', i, 'name', c.name, 'text', 'aria-label="Hard cost"')}</td>
       <td>${cell('costs', i, 'amount', c.amount, 'number', 'min="0" step="any" aria-label="Amount"')}</td>
       <td class="l"><select id="costs-${i}-basis" data-list="costs" data-i="${i}" data-f="basis" aria-label="Charged">${BASIS.map(([v, l]) => `<option value="${v}"${v === c.basis ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
       <td class="l">${fromSelect('costs', i, c.from)}</td><td class="l">${untilSelect('costs', i, c.until)}</td><td id="cost-now-${i}"></td><td>${delBtn('costs', i, c.name)}</td></tr>`).join('') +
-    `</tbody><tfoot><tr class="total"><td>Total</td><td></td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr></tfoot>`;
-  $('cont').innerHTML = numField('contingencyPct', 'Contingency, %');
+    `</tbody><tfoot><tr class="total"><td>Site costs</td><td></td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr>
+    <tr><td class="muted">Plus partner guarantees and fees, crew pay and card fees</td><td></td><td></td><td></td><td></td><td class="muted" id="cost-rest"></td><td></td></tr>
+    <tr class="total"><td>All mandatory hard costs</td><td></td><td></td><td></td><td></td><td id="cost-hard"></td><td></td></tr></tfoot>`;
 }
 function buildTimeline() {
   s.timeline.sort((a, b) => String(a.date).localeCompare(String(b.date)));
@@ -616,35 +686,35 @@ function buildTimeline() {
       <td class="l"><input type="checkbox" id="timeline-${i}-done" data-list="timeline" data-i="${i}" data-f="done"${t.done ? ' checked' : ''} aria-label="Done"></td>
       <td class="l" id="tl-status-${i}"></td><td>${delBtn('timeline', i, t.task)}</td></tr>`).join('') + '</tbody>';
 }
-function buildAll() { buildStages(); buildTickets(); buildFees(); buildPartners(); buildCrew(); buildCosts(); buildTimeline(); }
+function buildAll() { buildStages(); buildTickets(); buildBudgets(); buildSlots(); buildPartners(); buildCrew(); buildCosts(); buildTimeline(); }
 
 /* ---------- derived output: runs on every change ---------- */
 function setVal(el, v, skip) { if (el && el !== skip && el.value !== String(v)) el.value = v; }
 const today = () => new Date().toISOString().slice(0, 10);
 function fmtDate(d) { const x = new Date(d + 'T12:00:00'); return isNaN(x) ? '' : x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
-function renderVerdict(r, be) {
-  $('v-profit-label').textContent = r.profit >= 0 ? 'Profit' : 'Loss';
+function renderVerdict(r, cov) {
+  $('v-profit-label').textContent = r.profit >= 0 ? `Profit at ${int(r.paid)} tickets` : `Loss at ${int(r.paid)} tickets`;
   $('v-profit').textContent = money(r.profit);
   $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
-  $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.costs)} out`;
-  if (be === null) { $('v-be').textContent = 'None'; $('v-be-sub').textContent = 'No ticket count that fits covers these costs'; }
-  else {
-    let k = 0; while (k < s.stages.length - 1 && be > maxPaid(s, k)) k++;
-    const cap = Math.max(1, maxPaid(s, k));
-    $('v-be').textContent = int(be) + ' tickets';
-    $('v-be-sub').textContent = `${Math.round(be / cap * 100)}% of the ${int(cap)} that fit at ${int(s.stages[k].limit)} on site`;
-  }
+  $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets`;
+  const must = r.hard + r.mustSpend, pill = $('v-cov-pill');
+  $('v-cov').textContent = cov === null ? 'Not covered' : tix(cov);
+  $('v-cov-sub').textContent = `Hard costs, floors and ${money(sumCommitted(r))} locked in`;
+  if (cov === null) { pill.textContent = 'No ticket count that fits covers it'; pill.className = 'pill bad'; }
+  else if (num(s.sold) >= cov) { pill.textContent = 'Covered by sales so far'; pill.className = 'pill good'; }
+  else { pill.textContent = `${tix(cov - num(s.sold))} to go`; pill.className = 'pill warn'; }
   $('v-site').textContent = int(r.onSite);
-  const pill = $('v-site-pill');
-  pill.textContent = r.over ? `Over the ${int(s.stages[s.stages.length - 1].limit)} limit` : s.stages[r.level].name;
-  pill.className = 'pill ' + (r.over ? 'bad' : r.level === 0 ? 'good' : 'warn');
+  const sp = $('v-site-pill');
+  sp.textContent = r.over ? `Over the ${int(s.stages[s.stages.length - 1].limit)} limit` : s.stages[r.level].name;
+  sp.className = 'pill ' + (r.over ? 'bad' : r.level === 0 ? 'good' : 'warn');
   $('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
   const others = s.partners.map((p, i) => [p, r.partnerRows[i]]).filter(([p, x]) => !p.you && x.active && num(p.share) > 0);
   $('v-you-sub').textContent = others.length ? others.map(([p, x]) => `${p.name} ${money(x.total)}`).join(', ') + ', guarantees included' : 'No other partner shares the result';
 }
-function renderOverview() {
+const sumCommitted = r => r.budgetRows.reduce((a, b) => a + b.committed, 0);
+function renderOverview(r) {
   s.stages.forEach((st, i) => {
     $('st-unt-' + i).textContent = int(headcount(s, i).total);
     $('st-fit-' + i).textContent = int(maxPaid(s, i));
@@ -652,23 +722,32 @@ function renderOverview() {
     const names = [...s.partners, ...s.crew, ...s.others, ...s.costs].filter(x => num(x.from) === i).map(x => x.name);
     $('st-on-' + i).textContent = i === 0 ? 'The base plan' : names.length ? names.join(', ') : 'Nothing extra yet';
   });
-  const be = breakEven(s);
-  const what = [
-    ['Artist budget up $1,000', () => ({ ...s, artists: scaleFees(s.artists, feeTotal() + 1000) })],
-    ['Every ticket price up $10', () => ({ ...s, tiers: Object.fromEntries(Object.entries(s.tiers).map(([k, ts]) => [k, ts.map(t => ({ ...t, price: num(t.price) + 10 }))])) })],
-    ['Ten more people on guest lists', () => ({ ...s, others: [...s.others, { name: '', people: 10, from: 0 }] })],
-    ['No merch, meal plan or vendor income', () => ({ ...s, addons: { ...s.addons, otherPer: 0 } })],
-    ['30% of sales paid by bank transfer', () => ({ ...s, proc: { ...s.proc, bankShare: 30 } })],
-  ];
-  $('sens').innerHTML = what.map(([label, make]) => {
-    const b = breakEven(make());
-    const d = be === null || b === null ? null : b - be;
-    const text = d === null ? (b === null ? 'no break-even' : int(b) + ' tickets') : d === 0 ? 'no change' : (d > 0 ? '+' : '−') + Math.abs(d) + (Math.abs(d) === 1 ? ' ticket' : ' tickets');
-    return `<li><span>${label}</span><b>${text}</b></li>`;
-  }).join('');
-  const open = s.timeline.filter(t => !t.done).sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 4);
+  const al = artistLine();
+  $('o-paid').textContent = int(s.paid);
+  $('o-ashare').textContent = al ? `${pct(num(al.share))} · ${money(r.artistBudget)} at ${int(r.paid)} tickets` : '';
+  // Where the next ticket's money goes, measured inside the current stage.
+  const top = maxPaid(s);
+  let a = r.paid, b = r.paid + 1;
+  if (b > top || people(s, b).level !== r.level) { a = r.paid - 1; b = r.paid; }
+  if (a < 0) { $('next-ticket').innerHTML = '<li><span>Move the plan above zero tickets to see this.</span></li>'; }
+  else {
+    const x = compute({ ...s, paid: a }), y = compute({ ...s, paid: b });
+    const lines = [['Comes in', y.revenue - x.revenue], ['Mandatory hard costs', -(y.hard - x.hard)]]
+      .concat(s.budgets.map((bd, i) => [bd.name, -(y.budgetRows[i].budget - x.budgetRows[i].budget)]))
+      .concat([["Partners' profit", y.profit - x.profit]]);
+    $('next-ticket').innerHTML = lines.map(([label, v], i) => `<li><span>${esc(label)}</span><b>${i === 0 || i === lines.length - 1 ? money(v) : (Math.abs(v) < 0.5 ? '$0' : money(v))}</b></li>`).join('');
+  }
+  // How each budget grows across ticket counts.
+  const counts = [...new Set([num(s.sold), 100, 150, 200, r.paid, ...s.stages.map((st, i) => maxPaid(s, i))])].filter(n => n > 0 && n <= top).sort((p, q) => p - q).slice(0, 8);
+  const cols = counts.map(n => compute({ ...s, paid: n }));
+  const head = n => n === num(s.sold) ? `${int(n)}<br><span class="muted">sold so far</span>` : n === r.paid ? `${int(n)}<br><span class="muted">planned</span>` : int(n);
+  const line = (label, f, cls) => `<tr class="${cls || ''}"><td>${label}</td>${cols.map(c => `<td>${money(f(c))}</td>`).join('')}</tr>`;
+  $('grow').innerHTML = `<thead><tr><th>Tickets sold</th>${counts.map(n => `<th>${head(n)}</th>`).join('')}</tr></thead><tbody>` +
+    line('Money in', c => c.revenue) + line('Mandatory hard costs', c => c.hard) + line('Surplus to share', c => c.surplus, 'total') +
+    s.budgets.map((bd, i) => line(esc(bd.name), c => c.budgetRows[i].budget)).join('') +
+    line("Partners' profit", c => c.profit, 'total') + line('Your take', c => c.yours) + '</tbody>';
+  const open = s.timeline.filter(t => !t.done).sort((p, q) => String(p.date).localeCompare(String(q.date))).slice(0, 4);
   $('next').innerHTML = open.length ? open.map(t => `<li><span>${esc(t.task)}${t.date < today() ? ' <span class="pill bad">overdue</span>' : ''}</span><b>${fmtDate(t.date)}</b></li>`).join('') : '<li><span>Everything on the timeline is done.</span></li>';
-  return be;
 }
 function renderTickets(r) {
   for (const [type, , key] of TYPES) {
@@ -677,22 +756,59 @@ function renderTickets(r) {
   }
   $('o-mixFull').textContent = int(s.mixFull) + '%'; $('o-mixSat').textContent = int(s.mixSat) + '%';
   $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
-  $('note-car').textContent = `${int(r.crewHead)} passes go to crew, which leaves ${int(Math.max(0, num(s.addons.carSpots) - r.crewHead))} to sell. ${int(r.carSold)} sell at the current ticket count.`;
+  $('note-car').textContent = `${int(r.crewHead)} passes go to crew, which leaves ${int(Math.max(0, num(s.addons.carSpots) - r.crewHead))} to sell. ${int(r.carSold)} sell at the planned ticket count.`;
 }
-function renderFees() {
-  const total = feeTotal();
-  s.artists.forEach((day, j) => {
-    const d = day.reduce((a, b) => a + num(b), 0);
-    $('fee-total-' + j).textContent = money(d);
-    $('fee-share-' + j).textContent = total ? Math.round(d / total * 100) + '%' : '';
+function renderBudgets(r) {
+  s.budgets.forEach((b, i) => {
+    const x = r.budgetRows[i];
+    const com = $('bud-com-' + i); if (com) com.textContent = money(x.committed);
+    $('bud-now-' + i).textContent = money(x.budget);
+    $('bud-left-' + i).textContent = money(x.left);
+    let st;
+    if (x.over > 0.5) { const at = lineCoveredAt(s, i); st = `<span class="pill ${at === null ? 'bad' : 'warn'}">${at === null ? 'committed beyond any size' : 'its share covers this at ' + tix(at)}</span>`; }
+    else if (x.committed > 0) st = '<span class="pill good">committed is covered</span>';
+    else st = '<span class="pill plain">nothing committed</span>';
+    $('bud-st-' + i).innerHTML = st;
   });
+  $('bud-t-share').textContent = pct(r.shareTotal);
+  $('bud-t-floor').textContent = money(r.floors);
+  $('bud-t-com').textContent = money(sumCommitted(r));
+  $('bud-t-now').textContent = money(r.spend);
+  $('bud-t-left').textContent = money(r.budgetRows.reduce((a, b) => a + b.left, 0));
+  $('note-budgets').textContent = r.profitShare < 0
+    ? `The shares add up to ${pct(r.shareTotal)}, which is more than the whole surplus. Bring them to 100% or less.`
+    : `The shares add up to ${pct(r.shareTotal)}. The other ${pct(r.profitShare)} of the surplus is the partners' profit. At ${int(r.paid)} tickets the surplus is ${money(r.surplus)}.`;
+}
+function renderArtists(r) {
+  const targetTotal = s.slots.flat().reduce((a, x) => a + num(x.target), 0);
+  s.slots.forEach((day, j) => {
+    let dayNow = 0, dayTarget = 0;
+    day.forEach((x, i) => {
+      dayNow += r.slotNow[j][i]; dayTarget += num(x.target);
+      $(`slot-row-${j}-${i}`).className = x.locked ? 'locked' : '';
+      $(`slot-now-${j}-${i}`).innerHTML = x.locked ? `${money(x.fee)} <span class="pill good">locked</span>` : money(r25(r.slotNow[j][i]));
+    });
+    $('day-now-' + j).textContent = money(dayNow);
+    $('day-share-' + j).textContent = targetTotal ? `${Math.round(dayTarget / targetTotal * 100)}% of the targets` : '';
+  });
+  const open = s.slots.flat().filter(x => !x.locked).length;
+  const facts = [
+    [`Artist budget at ${int(r.paid)} tickets`, money(r.artistBudget)],
+    [`Locked in, ${r.lockedCount} of ${s.slots.flat().length} slots`, money(r.locked)],
+    [`Left for the ${open} open slots`, money(Math.max(0, r.artistBudget - r.locked))],
+    ['Open slots are at this share of their targets', r.openTargets ? Math.round(r.factor * 100) + '%' : 'all locked'],
+  ];
+  const ai = s.budgets.findIndex(b => b.id === 'artists');
+  if (ai >= 0 && r.budgetRows[ai].over > 0.5) { const at = lineCoveredAt(s, ai); facts.push(['The artist share covers what is locked at', at === null ? 'no size that fits' : tix(at)]); }
+  if (num(s.sold) > 0) facts.push([`Artist budget at the ${int(s.sold)} sold so far`, money(compute({ ...s, paid: num(s.sold) }).artistBudget)]);
+  $('artist-facts').innerHTML = facts.map(([a, b]) => `<li><span>${a}</span><b>${b}</b></li>`).join('');
 }
 function renderProduction(r) {
   s.partners.forEach((p, i) => {
     const x = r.partnerRows[i], from = num(p.from);
     const when = from === 0 ? 'Active from the first ticket.' : `Comes in at ticket ${int(stageStart(s, from))}, when more than ${int(s.stages[from - 1].limit)} people are on site.`;
     const share = num(p.share) > 0 ? s.stages.map((st, j) => j >= from ? `${pct(sharePct(s, j)[i])} up to ${int(st.limit)}` : null).filter(Boolean).join(', ') + ' of any profit.' : 'No profit share.';
-    const now = x.active ? `At the current size: ${money(x.total)}${x.guar ? `, including the ${money(x.guar)} guarantee` : ''}${x.fee ? `, including ${money(x.fee)} in ticket fees` : ''}.` : 'Not active at the current size.';
+    const now = x.active ? `At the planned size: ${money(x.total)}${x.guar ? `, including the ${money(x.guar)} guarantee` : ''}${x.fee ? `, including ${money(x.fee)} in ticket fees` : ''}.` : 'Not active at the planned size.';
     $('partner-fact-' + i).textContent = `${when} ${share} ${now}`;
   });
   $('shares').innerHTML = `<thead><tr><th>Partner</th>${s.stages.map(st => `<th>Up to ${int(st.limit)}</th>`).join('')}<th>Guarantee</th><th>Comes in at ticket</th><th>Places now</th></tr></thead><tbody>` +
@@ -705,14 +821,14 @@ function covPill(supply, need) {
   return `<span class="pill ${supply >= need * 0.8 ? 'warn' : 'bad'}">short ${int(need - supply)}, ${int(supply)} of ${int(need)}</span>`;
 }
 function renderCrew(r) {
-  let people = 0, pay = 0, supply = 0, need = 0;
+  let ppl = 0, pay = 0, supply = 0, need = 0;
   s.crew.forEach((c, i) => {
     const active = r.crewRows[i].active, sup = num(c.people) * num(c.shifts);
     $('crew-row-' + i).className = active ? '' : 'off';
     $('crew-cov-' + i).innerHTML = active ? covPill(sup, num(c.need)) : `<span class="pill plain">starts ${esc(stageLabel(num(c.from)).toLowerCase())}</span>`;
-    if (active) { people += num(c.people); pay += r.crewRows[i].pay; if (num(c.need)) { supply += sup; need += num(c.need); } }
+    if (active) { ppl += num(c.people); pay += r.crewRows[i].pay; if (num(c.need)) { supply += sup; need += num(c.need); } }
   });
-  $('crew-t-people').textContent = int(people); $('crew-t-pay').textContent = money(pay);
+  $('crew-t-people').textContent = int(ppl); $('crew-t-pay').textContent = money(pay);
   $('crew-t-supply').textContent = int(supply); $('crew-t-need').textContent = int(need);
   $('crew-t-cov').innerHTML = covPill(supply, need);
   const rows = [['Production partners', 'partners'], ['Crew', 'crew'], ['Artists, medical and other groups', 'others'], ['Total without a ticket', 'total']];
@@ -721,9 +837,10 @@ function renderCrew(r) {
     `<tr><td>Tickets that fit</td>${s.stages.map((st, j) => `<td>${int(maxPaid(s, j))}</td>`).join('')}</tr></tbody>`;
 }
 function renderCosts(r) {
-  let total = 0;
-  s.costs.forEach((c, i) => { const x = r.costRows[i]; $('cost-row-' + i).className = x.active ? '' : 'off'; $('cost-now-' + i).textContent = x.active ? money(x.value) : num(c.from) > r.level ? 'not yet' : 'no longer'; total += x.value; });
-  $('cost-total').textContent = money(total);
+  s.costs.forEach((c, i) => { const x = r.costRows[i]; $('cost-row-' + i).className = x.active ? '' : 'off'; $('cost-now-' + i).textContent = x.active ? money(x.value) : num(c.from) > r.level ? 'not yet' : 'no longer'; });
+  $('cost-total').textContent = money(r.siteCosts);
+  $('cost-rest').textContent = money(r.hard - r.siteCosts);
+  $('cost-hard').textContent = money(r.hard);
 }
 function renderTimeline() {
   s.timeline.forEach((t, i) => { $('tl-status-' + i).innerHTML = t.done ? '<span class="pill good">done</span>' : t.date < today() ? '<span class="pill bad">overdue</span>' : '<span class="pill plain">open</span>'; });
@@ -734,81 +851,102 @@ function renderPL(r) {
   const partnerLines = pairs.filter(([p, x]) => x.guar || x.fee)
     .map(([p, x]) => row(esc(p.name), money(x.guar + x.fee), [x.guar ? 'guarantee' : '', x.fee ? 'ticket fee' : ''].filter(Boolean).join(' and '))).join('');
   const costLines = s.costs.map((c, i) => [c, r.costRows[i]]).filter(([c, x]) => x.active).map(([c, x]) => row(esc(c.name), money(x.value))).join('');
+  const budgetLines = s.budgets.map((b, i) => row(esc(b.name), money(r.budgetRows[i].budget), `${pct(num(b.share))} share${r.budgetRows[i].committed ? ', ' + money(r.budgetRows[i].committed) + ' committed' : ''}`)).join('');
   const splitLines = pairs.filter(([p, x]) => x.active && (num(p.share) > 0 || x.guar || x.fee))
     .map(([p, x]) => row(esc(p.name), money(x.total), [x.pct ? pct(x.pct) + ' share' : '', x.guar ? 'guarantee' : '', x.fee ? 'ticket fee' : ''].filter(Boolean).join(' + '))).join('');
   $('pl').innerHTML = `<tbody>
-    <tr class="head"><td colspan="3">Money in</td></tr>
+    <tr class="head"><td colspan="3">Money in at ${int(r.paid)} tickets</td></tr>
     ${row('Tickets', money(r.tickets), `${int(r.paid)} sold`)}
     ${row('Car camping', money(r.car), `${int(r.carSold)} passes`)}
     ${row('Cabins', money(r.cabinRev), `${int(num(s.addons.cabinsSold))} sold`)}
     ${row('Merch, meals, vendors', money(r.other))}
     <tr class="total"><td>Total in</td><td></td><td>${money(r.revenue)}</td></tr>
-    <tr class="head"><td colspan="3">Money out</td></tr>
-    ${row('Artist fees', money(r.artistFees), '24 sets')}
+    <tr class="head"><td colspan="3">Mandatory hard costs</td></tr>
     ${partnerLines}
     ${row('Crew pay', money(r.crewPay), `${int(r.crewHead)} people`)}
     ${costLines}
     ${row('Payment processing', money(r.processing), pct(r.processing / Math.max(1, r.online) * 100) + ' of online sales')}
-    ${row('Contingency', money(r.contingency), pct(num(s.contingencyPct)))}
-    <tr class="total"><td>Total out</td><td></td><td>${money(r.costs)}</td></tr>
+    <tr class="total"><td>Total hard costs</td><td></td><td>${money(r.hard)}</td></tr>
+    <tr class="total"><td>Surplus to share</td><td></td><td>${money(r.surplus)}</td></tr>
+    <tr class="head"><td colspan="3">Budgets that grow with sales</td></tr>
+    ${budgetLines}
+    <tr class="total"><td>Total budgets</td><td></td><td>${money(r.spend)}</td></tr>
     <tr class="head"><td colspan="3">${r.profit >= 0 ? 'Profit' : 'Loss'}, and what each partner takes home</td></tr>
-    ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
+    ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit), r.profit >= 0 ? pct(r.profitShare) + ' of the surplus after floors' : '')}
     ${splitLines}
   </tbody>`;
 }
 
-let curve = [];
-const C = { w: 640, h: 300, l: 54, r: 16, t: 34, b: 38 };
-function niceStep(range) { const raw = range / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
-function renderChart(top) {
-  curve = [];
-  for (let n = 0; n <= top; n++) curve.push(compute({ ...s, paid: n }).profit);
-  const lo = Math.min(0, ...curve), hi = Math.max(0, ...curve);
+/* ---------- charts: one line each, on a shared ticket axis ---------- */
+const C = { w: 640, h: 250, l: 54, r: 16, t: 30, b: 36 };
+const charts = {};
+function niceStep(range) { const raw = range / 4, p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
+function drawChart(key, values, top, opts) {
+  const lo = Math.min(0, ...values, opts.hline ? opts.hline.v : 0), hi = Math.max(0, ...values, opts.hline ? opts.hline.v : 0);
   const step = niceStep((hi - lo) || 1000);
-  const y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step;
+  const y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step || step;
   const X = n => C.l + (top ? n / top : 0) * (C.w - C.l - C.r);
   const Y = v => C.t + (1 - (v - y0) / ((y1 - y0) || 1)) * (C.h - C.t - C.b);
-  renderChart.X = X; renderChart.Y = Y; renderChart.max = top;
+  charts[key] = { X, Y, values, top, label: opts.label };
   let g = '';
   for (let v = y0; v <= y1 + 1; v += step) {
     const zero = Math.abs(v) < 1;
     g += `<line x1="${C.l}" x2="${C.w - C.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(${zero ? '--ink-3' : '--rule'})" stroke-width="${zero ? 1.25 : 1}"/>`;
     g += `<text x="${C.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${v < 0 ? '−' : ''}$${Math.abs(v) >= 1000 ? Math.abs(v) / 1000 + 'k' : Math.abs(v)}</text>`;
   }
-  const xStep = niceStep(Math.max(top, 50));
+  const xStep = niceStep(Math.max(top, 50) * 0.8);
   for (let n = 0; n <= top; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
   g += `<text x="${C.w - C.r}" y="${C.h - 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">paid tickets</text>`;
-  const marks = [[90, 'Reeguez Rocks sold 90', 'end']].concat(s.stages.slice(1).map((st, i) => [stageStart(s, i + 1), `Above ${int(s.stages[i].limit)}`, i === 0 ? 'start' : 'middle']));
+  const marks = [];
+  if (num(s.sold) > 0 && num(s.sold) <= top) marks.push([num(s.sold), `Sold so far: ${int(s.sold)}`, 'end']);
+  else marks.push([90, 'Reeguez Rocks sold 90', 'end']);
+  s.stages.slice(1).forEach((st, i) => marks.push([stageStart(s, i + 1), `Above ${int(s.stages[i].limit)}`, i === 0 ? 'start' : 'middle']));
   marks.forEach(([n, label, anchor]) => {
     if (n <= 0 || n > top) return;
     const dx = anchor === 'end' ? 3 : anchor === 'start' ? -3 : 0;
     g += `<line x1="${X(n)}" x2="${X(n)}" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>`;
     g += `<text x="${X(n) + dx}" y="${C.t - 12}" text-anchor="${anchor}" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
   });
-  if (curve.length) g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  if (opts.hline && opts.hline.v > 0) {
+    g += `<line x1="${C.l}" x2="${C.w - C.r}" y1="${Y(opts.hline.v)}" y2="${Y(opts.hline.v)}" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+    g += `<text x="${C.w - C.r - 4}" y="${Y(opts.hline.v) - 6}" text-anchor="end" font-size="11.5" fill="var(--ink-2)">${opts.hline.label}</text>`;
+  }
+  if (values.length) g += `<path d="${values.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
   const p = Math.min(s.paid, top);
-  g += `<circle cx="${X(p)}" cy="${Y(curve[p] || 0)}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
-  g += `<g id="hover" hidden><line id="hx" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-2)" stroke-width="1"/><circle id="hd" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/></g>`;
-  $('chart').innerHTML = g;
-  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(top)}, the most that fit at the last stage. The line drops where each stage begins, because its guest lists and costs switch on.`;
+  g += `<circle cx="${X(p)}" cy="${Y(values[p] || 0)}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<g class="hover" hidden><line class="hx" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-2)" stroke-width="1"/><circle class="hd" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/></g>`;
+  $('chart-' + key).innerHTML = g;
 }
-function hover(e) {
-  const box = $('chart').getBoundingClientRect();
-  const sx = (e.clientX - box.left) / box.width * C.w;
-  const max = renderChart.max;
-  const n = Math.max(0, Math.min(max, Math.round((sx - C.l) / (C.w - C.l - C.r) * max)));
-  const x = renderChart.X(n), y = renderChart.Y(curve[n]);
-  const h = $('chart').querySelector('#hover');
-  h.removeAttribute('hidden');
-  h.querySelector('#hx').setAttribute('x1', x); h.querySelector('#hx').setAttribute('x2', x);
-  h.querySelector('#hd').setAttribute('cx', x); h.querySelector('#hd').setAttribute('cy', y);
-  const tip = $('tip');
-  tip.hidden = false;
-  tip.textContent = `${int(n)} tickets · ${int(people(s, n).onSite)} on site · ${money(curve[n])}`;
-  tip.style.left = Math.max(110, Math.min(box.width - 110, x / C.w * box.width)) + 'px';
-  tip.style.top = Math.max(26, y / C.h * box.height - 12) + 'px';
+function renderCharts(r) {
+  const top = maxPaid(s), profit = [], artists = [];
+  for (let n = 0; n <= top; n++) { const x = compute({ ...s, paid: n }); profit.push(x.profit); artists.push(x.artistBudget); }
+  drawChart('artists', artists, top, { label: 'artist budget', hline: { v: r.locked, label: `Locked in: ${money(r.locked)}` } });
+  drawChart('profit', profit, top, { label: 'profit' });
+  $('note-artists-chart').textContent = r.locked > 0
+    ? 'The dashed line is what you have locked in. Where the budget line is flat, sales have not yet caught up with what is locked.'
+    : 'Nothing is locked yet, so the whole budget moves with sales. Lock a slot on the Artists tab and a dashed line shows what is committed.';
 }
-function unhover() { $('tip').hidden = true; const h = $('chart').querySelector('#hover'); if (h) h.setAttribute('hidden', ''); }
+function bindHover(key) {
+  const box = $('box-' + key), svg = $('chart-' + key), tip = $('tip-' + key);
+  const move = e => {
+    const c = charts[key]; if (!c) return;
+    const b = svg.getBoundingClientRect();
+    const sx = (e.clientX - b.left) / b.width * C.w;
+    const n = Math.max(0, Math.min(c.top, Math.round((sx - C.l) / (C.w - C.l - C.r) * c.top)));
+    const x = c.X(n), y = c.Y(c.values[n]);
+    const h = svg.querySelector('.hover');
+    h.removeAttribute('hidden');
+    h.querySelector('.hx').setAttribute('x1', x); h.querySelector('.hx').setAttribute('x2', x);
+    h.querySelector('.hd').setAttribute('cx', x); h.querySelector('.hd').setAttribute('cy', y);
+    tip.hidden = false;
+    tip.textContent = `${tix(n)} · ${int(people(s, n).onSite)} on site · ${money(c.values[n])} ${c.label}`;
+    tip.style.left = Math.max(130, Math.min(b.width - 130, x / C.w * b.width)) + 'px';
+    tip.style.top = Math.max(26, y / C.h * b.height - 12) + 'px';
+  };
+  box.addEventListener('pointermove', move);
+  box.addEventListener('pointerdown', move);
+  box.addEventListener('pointerleave', () => { tip.hidden = true; const h = svg.querySelector('.hover'); if (h) h.setAttribute('hidden', ''); });
+}
 
 function renderSave() {
   const dirty = JSON.stringify(s) !== savedJSON;
@@ -821,14 +959,16 @@ function render(skip) {
   const top = maxPaid(s);
   if (s.paid > top) s.paid = top;
   $('f-paid').max = top;
-  setVal($('f-paid'), s.paid, skip); $('o-paid').textContent = int(s.paid);
-  document.querySelectorAll('.artist-slider').forEach(el => setVal(el, feeTotal(), skip));
-  $('o-artist').textContent = $('o-artist2').textContent = money(feeTotal());
-  s.artists.forEach((day, j) => day.forEach((v, i) => setVal($(`fee-${j}-${i}`), v, skip)));
+  setVal($('f-paid'), s.paid, skip); setVal($('f-sold'), s.sold, skip);
+  const al = artistLine();
+  setVal($('f-ashare'), al ? num(al.share) : 0, skip);
+  const ai = s.budgets.indexOf(al);
+  if (ai >= 0) setVal($(`budgets-${ai}-share`), al.share, skip);
   setVal($('f-mixFull'), s.mixFull, skip); setVal($('f-mixSat'), s.mixSat, skip);
+  s.slots.forEach((day, j) => day.forEach((x, i) => { setVal($(`slot-${j}-${i}-fee`), x.fee || '', skip); $(`slot-${j}-${i}-locked`).checked = !!x.locked; }));
   const r = compute(s);
-  const be = renderOverview();
-  renderVerdict(r, be); renderTickets(r); renderFees(); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderChart(top);
+  renderVerdict(r, coveredAt(s));
+  renderOverview(r); renderTickets(r); renderBudgets(r); renderArtists(r); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderCharts(r);
   renderSave();
 }
 function rebuild() { buildAll(); render(); }
@@ -838,8 +978,14 @@ document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
   const val = t.type === 'checkbox' ? t.checked : d.int ? Number(t.value) : t.type === 'number' || t.type === 'range' || d.num ? Math.max(0, Number(t.value) || 0) : t.value;
   if (t.id === 'f-paid') s.paid = val;
-  else if (t.classList.contains('artist-slider')) s.artists = scaleFees(feeShape, val);
-  else if (d.day !== undefined) { s.artists[+d.day][+d.slot] = val; feeShape = structuredClone(s.artists); }
+  else if (t.id === 'f-ashare') { const al = artistLine(); if (al) al.share = val; }
+  else if (d.day !== undefined) {
+    const slot = s.slots[+d.day][+d.slot];
+    // Locking an empty slot takes the budget it has right now as the fee, so read that before the lock applies.
+    const takeNow = d.f === 'locked' && val && !num(slot.fee) ? r25(compute(s).slotNow[+d.day][+d.slot]) : null;
+    slot[d.f] = val;
+    if (takeNow !== null) slot.fee = takeNow;
+  }
   else if (d.tier) s.tiers[d.tier][+d.i][d.f] = val;
   else if (d.list) { if (d.j !== undefined) s[d.list][+d.i][d.f][+d.j] = val; else s[d.list][+d.i][d.f] = val; }
   else if (d.k) {
@@ -862,7 +1008,7 @@ document.addEventListener('click', e => {
     const el = $(`${d.add}-${s[d.add].length - 1}-${d.add === 'timeline' ? 'task' : 'name'}`);
     if (el) { el.focus(); el.select(); }
   } else if (d.del) { s[d.del].splice(+d.i, 1); rebuild(); }
-  else if (d.jump !== undefined) { s.paid = maxPaid(s, +d.jump); render(); }
+  else if (d.jump !== undefined) { s.paid = d.jump === 'sold' ? Math.min(num(s.sold), maxPaid(s)) : maxPaid(s, +d.jump); render(); }
   else if (b.id === 'btn-add-stage') {
     const last = s.stages[s.stages.length - 1];
     s.stages.push({ name: 'New stage', limit: Math.round(num(last.limit) * 1.5 / 50) * 50 });
@@ -882,9 +1028,7 @@ document.addEventListener('click', e => {
     else { b.dataset.armed = '1'; b.textContent = 'Click again to load it'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Starting plan'; }, 4000); }
   }
 });
-$('chartbox').addEventListener('pointermove', hover);
-$('chartbox').addEventListener('pointerdown', hover);
-$('chartbox').addEventListener('pointerleave', unhover);
+bindHover('artists'); bindHover('profit');
 
 function showTab() {
   const name = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
@@ -894,8 +1038,8 @@ function showTab() {
 window.addEventListener('hashchange', showTab);
 
 /* ---------- saving: the shared store when the viewer has one, this browser otherwise ---------- */
-function valid(json) { try { const o = JSON.parse(json); return o && o.v === SCHEMA && Array.isArray(o.stages) && Array.isArray(o.partners) ? o : null; } catch (e) { return null; } }
-function load(json) { const o = valid(json); if (!o) return false; s = o; feeShape = structuredClone(s.artists); remoteNote = ''; rebuild(); return true; }
+function valid(json) { try { const o = JSON.parse(json); return o && o.v === SCHEMA && Array.isArray(o.stages) && Array.isArray(o.partners) && Array.isArray(o.budgets) && Array.isArray(o.slots) ? o : null; } catch (e) { return null; } }
+function load(json) { const o = valid(json); if (!o) return false; s = o; remoteNote = ''; rebuild(); return true; }
 function localGet() { try { return localStorage.getItem(STORE_KEY); } catch (e) { return null; } }
 function localSet(json) { try { localStorage.setItem(STORE_KEY, json); } catch (e) { /* storage can be blocked */ } }
 async function save() {
