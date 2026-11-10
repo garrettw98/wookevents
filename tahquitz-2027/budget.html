@@ -377,7 +377,8 @@ const DEFAULTS = {
   // people is the number on site at each stage, crew and guest list together.
   partners: [
     { name: 'You', role: 'Organiser', you: true, from: 0, guarantee: 0, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [1, 1, 1] },
-    { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [4, 19, 29] },
+    // Kinetic Desert: a guarantee for the crew, then a fee on every ticket past the point the event covers itself. No profit share.
+    { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 15, feeAbove: 75, cap: 0, share: 0, sharesLoss: false, people: [4, 19, 29] },
     { name: 'The Dome', role: '24-foot dome with sound, decks, travel, setup and takedown', from: 0, guarantee: 0, perTicket: 10, feeAbove: 0, cap: 2000, share: 0, sharesLoss: false, people: [2, 2, 2] },
     // Project Seismic: rentals covered up front, then a fee on every ticket the bigger event adds. No profit share.
     { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 275, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
@@ -778,7 +779,7 @@ function renderOverview(r, all, cov) {
     const x = compute({ ...s, paid: a }), y = compute({ ...s, paid: b });
     const lines = [['Comes in', y.revenue - x.revenue], ['Mandatory hard costs', -(y.hard - x.hard)]]
       .concat(s.budgets.map((bd, i) => [bd.name, -(y.budgetRows[i].budget - x.budgetRows[i].budget)]))
-      .concat([["Partners' profit", y.profit - x.profit]]);
+      .concat([['Profit', y.profit - x.profit]]);
     $('next-ticket').innerHTML = lines.map(([label, v], i) => `<li><span>${esc(label)}</span><b>${i === 0 || i === lines.length - 1 ? money(v) : (Math.abs(v) < 0.5 ? '$0' : money(v))}</b></li>`).join('');
   }
   // How each budget grows across ticket counts.
@@ -789,7 +790,7 @@ function renderOverview(r, all, cov) {
   $('grow').innerHTML = `<thead><tr><th>Tickets sold</th>${counts.map(n => `<th>${head(n)}</th>`).join('')}</tr></thead><tbody>` +
     line('Money in', c => c.revenue) + line('Mandatory hard costs', c => c.hard) + line('Surplus to share', c => c.surplus, 'total') +
     s.budgets.map((bd, i) => line(esc(bd.name), c => c.budgetRows[i].budget)).join('') +
-    line("Partners' profit", c => c.profit, 'total') + line('Your take', c => c.yours) + '</tbody>';
+    line('Profit', c => c.profit, 'total') + line('Your take', c => c.yours) + '</tbody>';
   const sign = v => `<span class="${v < -0.5 ? 'is-bad' : ''}">${money(v)}</span>`;
   const who = (label, f, cls) => `<tr class="${cls || ''}"><td>${label}</td>${cols.map(c => `<td>${sign(f(c))}</td>`).join('')}</tr>`;
   $('who').innerHTML = `<thead><tr><th>Tickets sold</th>${counts.map(n => `<th>${head(n)}</th>`).join('')}</tr></thead><tbody>` +
@@ -828,7 +829,7 @@ function renderBudgets(r, all) {
   $('bud-t-left').textContent = money(r.budgetRows.reduce((a, b) => a + b.left, 0));
   $('note-budgets').textContent = r.profitShare < 0
     ? `The shares add up to ${pct(r.shareTotal)}, which is more than the whole surplus. Bring them to 100% or less.`
-    : `The shares add up to ${pct(r.shareTotal)}. The other ${pct(r.profitShare)} of the surplus is the partners' profit. At ${int(r.paid)} tickets the surplus is ${money(r.surplus)}.`;
+    : `The shares add up to ${pct(r.shareTotal)}. The other ${pct(r.profitShare)} of the surplus is profit. At ${int(r.paid)} tickets the surplus is ${money(r.surplus)}.`;
 }
 function renderArtists(r, all) {
   const targetTotal = s.slots.flat().reduce((a, x) => a + num(x.target), 0);

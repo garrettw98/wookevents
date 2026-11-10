@@ -49,7 +49,8 @@ const DEFAULTS = {
   // people is the number on site at each stage, crew and guest list together.
   partners: [
     { name: 'You', role: 'Organiser', you: true, from: 0, guarantee: 0, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [1, 1, 1] },
-    { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [4, 19, 29] },
+    // Kinetic Desert: a guarantee for the crew, then a fee on every ticket past the point the event covers itself. No profit share.
+    { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 15, feeAbove: 75, cap: 0, share: 0, sharesLoss: false, people: [4, 19, 29] },
     { name: 'The Dome', role: '24-foot dome with sound, decks, travel, setup and takedown', from: 0, guarantee: 0, perTicket: 10, feeAbove: 0, cap: 2000, share: 0, sharesLoss: false, people: [2, 2, 2] },
     // Project Seismic: rentals covered up front, then a fee on every ticket the bigger event adds. No profit share.
     { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 275, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
