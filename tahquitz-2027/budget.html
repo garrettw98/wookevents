@@ -92,6 +92,9 @@ td.muted, .muted { color: var(--ink-3); }
 .fees input { width: 76px; font: 500 14px var(--body); font-variant-numeric: tabular-nums; text-align: right; color: var(--ink);
   background: var(--sunk); border: 1px solid transparent; border-radius: 6px; padding: 5px 6px; }
 .fees td, .fees th { padding: 5px 6px; }
+.tiers h3 { font-size: 14px; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 14px 0 4px; }
+.tiers h3:first-child { margin-top: 0; }
+.tiers h3 span { font: 500 13px var(--body); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 
 .chartbox { position: relative; }
 svg { display: block; width: 100%; height: auto; }
@@ -123,15 +126,15 @@ svg { display: block; width: 100%; height: auto; }
     <div><div class="eyebrow" id="v-profit-label">Profit</div><div class="big" id="v-profit"></div><div class="sub" id="v-profit-sub"></div></div>
     <div><div class="eyebrow">Break-even</div><div class="big" id="v-be"></div><div class="sub" id="v-be-sub"></div></div>
     <div><div class="eyebrow">People on site</div><div class="big" id="v-site"></div><div class="pill" id="v-site-pill"></div></div>
-    <div><div class="eyebrow">Your take</div><div class="big" id="v-you"></div><div class="sub" id="v-you-sub"></div></div>
+    <div><div class="eyebrow" id="v-you-label">Your take</div><div class="big" id="v-you"></div><div class="sub" id="v-you-sub"></div></div>
   </section>
 
   <div class="presets" role="group" aria-label="Scenarios">
     <span>Scenario</span>
     <button class="preset" id="preset-plan" data-preset="plan">350 plan</button>
     <button class="preset" id="preset-unlock" data-preset="unlock">500 unlock</button>
+    <button class="preset" id="preset-leaner" data-preset="leaner">Leaner lineup</button>
     <button class="preset" id="preset-lean" data-preset="lean">Under 199, no permit</button>
-    <button class="preset" id="preset-outlined" data-preset="outlined">As first outlined</button>
   </div>
 
   <div class="cols">
@@ -157,29 +160,44 @@ svg { display: block; width: 100%; height: auto; }
 
 <script>
 // Pure budget model. Shared verbatim by the page and by the node check.
+// Ticket tiers fill in order; the last tier of each type takes every ticket after the earlier tiers sell out.
 const DEFAULTS = {
   paid: 290, mixFull: 65, mixSat: 25,
-  pFull: 195, pSat: 155, pSun: 82,
-  carRate: 20, carSpots: 60, pCar: 50,
-  cabinsRented: 8, cabinCost: 250, cabinsSold: 7, pCabin: 850, otherPer: 10,
+  tiers: {
+    full: [{ name: 'Presale', price: 169, qty: 50 }, { name: 'Tier 1', price: 189, qty: 60 }, { name: 'Tier 2', price: 209, qty: 50 }, { name: 'Final', price: 229, qty: 0 }],
+    sat: [{ name: 'Tier 1', price: 139, qty: 20 }, { name: 'Tier 2', price: 155, qty: 30 }, { name: 'Final', price: 169, qty: 0 }],
+    sun: [{ name: 'Tier 1', price: 79, qty: 15 }, { name: 'Final', price: 85, qty: 0 }],
+  },
+  carRate: 20, carSpots: 120, carComped: 24, pCar: 50,
+  cabinsRented: 8, cabinCost: 250, cabinsSold: 6, pCabin: 850, otherPer: 10,
   unticketed: 60,
   venuePerDay: 10, domePer: 10, domeCap: 2000,
   permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
-  kd: 2000, insurance: 750, chef: 1000, food: 2500, crewCount: 12, crewPay: 100,
-  art: 2500, marketing: 750, ops: 1200, medical: 600, travel: 1500, contingencyPct: 5,
+  kd: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
+  art: 3000, marketing: 750, ops: 1200, medical: 600, flights: 2000, hospitality: 600, contingencyPct: 5,
   artists: [
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50, recoup: false,
+  kdShare: 50,
 };
+function fillTiers(tiers, n) {
+  let left = n, rev = 0;
+  const sold = tiers.map((t, i) => {
+    const q = i === tiers.length - 1 ? left : Math.min(left, t.qty);
+    rev += q * t.price; left -= q;
+    return q;
+  });
+  return { rev, sold, avg: n ? rev / n : 0 };
+}
 function compute(s) {
   const nFull = s.paid * s.mixFull / 100;
   const nSat = s.paid * s.mixSat / 100;
   const nSun = Math.max(0, s.paid - nFull - nSat);
-  const tickets = nFull * s.pFull + nSat * s.pSat + nSun * s.pSun;
-  const carSold = Math.min(s.carSpots, s.paid * s.carRate / 100);
+  const tFull = fillTiers(s.tiers.full, nFull), tSat = fillTiers(s.tiers.sat, nSat), tSun = fillTiers(s.tiers.sun, nSun);
+  const tickets = tFull.rev + tSat.rev + tSun.rev;
+  const carSold = Math.min(Math.max(0, s.carSpots - s.carComped), s.paid * s.carRate / 100);
   const car = carSold * s.pCar;
   const cabinRev = Math.min(s.cabinsSold, s.cabinsRented) * s.pCabin;
   const other = s.paid * s.otherPer;
@@ -193,15 +211,14 @@ function compute(s) {
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
-  const fixedBase = artistFees + s.travel + s.kd + s.insurance + s.chef + s.food + crew
+  const fixedBase = artistFees + s.flights + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
     + s.art + s.marketing + s.ops + s.medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
-  let kdShareAmt;
-  if (s.recoup) kdShareAmt = Math.max(0, (profit + s.kd) * s.kdShare / 100 - s.kd);
-  else kdShareAmt = Math.max(0, profit) * s.kdShare / 100;
-  return { nFull, nSat, nSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
+  // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
+  const kdShareAmt = profit * s.kdShare / 100;
+  return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
     onSite, permit, portos, artistFees, cabins, crew, contingency, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
@@ -219,9 +236,9 @@ const DAYS = ['Fri', 'Sat', 'Sun'];
 const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
 const PRESETS = {
   plan: {},
-  unlock: { paid: 440, carSpots: 80, ops: 2000, medical: 1000, food: 2800 },
-  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 5, food: 1800, art: 1500, travel: 800, medical: 300 },
-  outlined: { pFull: 180, pSat: 145, pSun: 75, cabinsSold: 6, otherPer: 0 },
+  unlock: { paid: 440, ops: 2000, medical: 1000, food: 3100 },
+  leaner: { paid: 200, artists: LEAN_FEES, flights: 1200 },
+  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000, flights: 1200, medical: 300 },
 };
 const GROUPS = [
   { title: 'Tickets sold', fields: [
@@ -229,15 +246,12 @@ const GROUPS = [
     { k: 'mixFull', label: 'Share buying Fri–Sun', slider: true, min: 0, max: 100, unit: '%' },
     { k: 'mixSat', label: 'Share buying Sat–Sun', slider: true, min: 0, max: 100, unit: '%' },
   ], note: 'mix' },
-  { title: 'Average ticket price', fields: [
-    { k: 'pFull', label: 'Fri–Sun', hint: 'Ladder $169 / $189 / $209 / $229' },
-    { k: 'pSat', label: 'Sat–Sun', hint: 'Ladder $139 / $155 / $169' },
-    { k: 'pSun', label: 'Sunday only', hint: 'Ladder $79 / $85' },
-  ] },
+  { title: 'Ticket tiers', tiers: true, fields: [] },
   { title: 'Add-ons', fields: [
     { k: 'pCar', label: 'Car camping pass' },
     { k: 'carRate', label: 'Passes per 100 tickets' },
-    { k: 'carSpots', label: 'Car camping spots', hint: 'A guess. Replace with the real count.' },
+    { k: 'carSpots', label: 'Car camping spots' },
+    { k: 'carComped', label: 'Passes comped to crew', hint: '12 paid crew and 12 volunteers' },
     { k: 'cabinsSold', label: 'Cabins sold to attendees', hint: 'Of the 8 shared cabins, 9 beds each' },
     { k: 'pCabin', label: 'Price per cabin' },
     { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
@@ -247,7 +261,8 @@ const GROUPS = [
   ] },
   { title: 'Fixed costs', fields: [
     { k: 'kd', label: 'Kinetic Desert guarantee' },
-    { k: 'travel', label: 'Artist travel and hospitality' },
+    { k: 'flights', label: 'Artist flights', hint: 'Fees exclude travel. Set to 0 if artists book their own.' },
+    { k: 'hospitality', label: 'Artist hospitality and airport runs' },
     { k: 'insurance', label: 'Insurance' },
     { k: 'permit', label: 'Permit', hint: 'Charged at 200 or more on site' },
     { k: 'portos', label: 'Porto-potties', hint: 'A guess. Charged above 350 on site.' },
@@ -270,7 +285,7 @@ const GROUPS = [
   ] },
   { title: 'Profit split', fields: [
     { k: 'kdShare', label: 'Kinetic Desert share of profit, %' },
-  ], check: { k: 'recoup', label: 'Count the guarantee as an advance against Kinetic Desert\'s share' } },
+  ], text: 'The $2,000 guarantee is paid on top of the share. A loss is split the same way as a profit.' },
 ];
 
 let s = structuredClone(DEFAULTS);
@@ -288,11 +303,20 @@ function buildControls() {
       : `<div class="field"><label for="f-${f.k}">${f.label}${f.hint ? `<small>${f.hint}</small>` : ''}</label>
            <input type="number" id="f-${f.k}" data-k="${f.k}" min="0" step="1" inputmode="numeric"></div>`).join('');
     const check = g.check ? `<label class="check" for="f-${g.check.k}"><input type="checkbox" id="f-${g.check.k}" data-k="${g.check.k}"><span>${g.check.label}</span></label>` : '';
-    const note = g.note ? `<p class="note" id="note-${g.note}"></p>` : '';
+    const note = g.note ? `<p class="note" id="note-${g.note}"></p>` : g.text ? `<p class="note">${g.text}</p>` : '';
+    if (g.tiers) return `<section class="panel"><h2>${g.title}</h2><div class="tiers">${tierTables()}</div>
+      <p class="note">Tiers sell in order. The last tier of each type takes every ticket after the earlier ones sell out.</p></section>`;
     return `<section class="panel"><h2>${g.title}</h2>${rows}${check}${note}</section>`;
   }).join('');
   root.addEventListener('input', e => {
-    const k = e.target.dataset.k;
+    const d = e.target.dataset;
+    if (d.type) {
+      s.tiers[d.type][+d.i][d.f] = Math.max(0, Number(e.target.value) || 0);
+      active = null;
+      render(e.target);
+      return;
+    }
+    const k = d.k;
     if (!k) return;
     s[k] = e.target.type === 'checkbox' ? e.target.checked : Math.max(0, Number(e.target.value) || 0);
     if (k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
@@ -300,6 +324,25 @@ function buildControls() {
     active = null;
     render(e.target);
   });
+}
+
+const TYPES = [['full', 'Fri–Sun', 'tFull'], ['sat', 'Sat–Sun', 'tSat'], ['sun', 'Sunday only', 'tSun']];
+function tierTables() {
+  return TYPES.map(([type, label]) => `<h3>${label}<span id="ta-${type}"></span></h3>
+    <div class="scroll"><table class="fees"><thead><tr><th>Tier</th><th>Price</th><th>Tickets</th><th>Sold</th></tr></thead><tbody>` +
+    DEFAULTS.tiers[type].map((tier, i, all) => `<tr><td>${tier.name}</td>
+      <td><input type="number" id="t-${type}-${i}-price" data-type="${type}" data-i="${i}" data-f="price" min="0" step="1" inputmode="numeric" aria-label="${label} ${tier.name} price"></td>
+      <td>${i === all.length - 1 ? '<span class="muted">the rest</span>' : `<input type="number" id="t-${type}-${i}-qty" data-type="${type}" data-i="${i}" data-f="qty" min="0" step="1" inputmode="numeric" aria-label="${label} ${tier.name} tickets at this price">`}</td>
+      <td id="ts-${type}-${i}"></td></tr>`).join('') + '</tbody></table></div>').join('');
+}
+function syncTiers(r, skip) {
+  for (const [type, , key] of TYPES) {
+    s.tiers[type].forEach((tier, i) => {
+      for (const f of ['price', 'qty']) { const el = $(`t-${type}-${i}-${f}`); if (el && el !== skip) el.value = tier[f]; }
+      $(`ts-${type}-${i}`).textContent = int(r[key].sold[i]);
+    });
+    $('ta-' + type).textContent = r[key].avg ? 'averages ' + money(r[key].avg) : '';
+  }
 }
 
 function buildFees() {
@@ -326,7 +369,6 @@ function syncInputs(skip) {
       if (el !== skip) el.value = s[f.k];
       if (f.slider) $('o-' + f.k).textContent = int(s[f.k]) + (f.unit || '');
     }
-    if (g.check) $('f-' + g.check.k).checked = s[g.check.k];
   }
   s.artists.forEach((day, j) => {
     day.forEach((v, i) => { const el = $(`fee-${j}-${i}`); if (el !== skip) el.value = v; });
@@ -352,16 +394,17 @@ function renderVerdict(r, be, maxPaid) {
   else if (r.onSite <= s.portoOver) { pill.textContent = 'Permit required'; pill.className = 'pill warn'; }
   else if (r.onSite <= s.hardCap) { pill.textContent = 'Permit and porto-potties'; pill.className = 'pill warn'; }
   else { pill.textContent = 'Over the 500 limit'; pill.className = 'pill bad'; }
+$('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
-  $('v-you-sub').textContent = `Kinetic Desert ${money(r.kdTotal)} with guarantee`;
+  $('v-you-sub').textContent = `Kinetic Desert ${money(r.kdTotal)} including the $2,000 guarantee`;
   $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
 }
 
 function renderPL(r) {
   const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
   const fixedLines = [
-    ['Artist fees', r.artistFees, '24 sets'], ['Artist travel and hospitality', s.travel], ['Kinetic Desert guarantee', s.kd],
+    ['Artist fees', r.artistFees, '24 sets'], ['Artist flights', s.flights], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
     ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
     ['Permit', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, r.portos ? '' : 'not needed'],
     ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
@@ -381,7 +424,7 @@ function renderPL(r) {
     <tr class="head"><td colspan="3">Split</td></tr>
     ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
     ${row('Kinetic Desert', money(r.kdTotal), `${money(s.kd)} guarantee + ${money(r.kdShareAmt)} share`)}
-    ${row('You', money(r.yours), r.profit < 0 ? 'assumes you carry the loss' : '')}
+    ${row('You', money(r.yours))}
   </tbody>`;
 }
 
@@ -406,11 +449,12 @@ function renderChart(maxPaid) {
   const xStep = maxPaid > 300 ? 100 : 50;
   for (let n = 0; n <= maxPaid; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
   g += `<text x="${C.w - C.r}" y="${C.h - 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">paid tickets</text>`;
-  const marks = [[s.permitOver - s.unticketed + 1, 'Permit starts'], [s.portoOver - s.unticketed + 1, 'Portos start']];
-  marks.forEach(([n, label]) => {
+  const marks = [[90, 'Reeguez Rocks sold 90', 'end'], [s.permitOver - s.unticketed + 1, 'Permit starts', 'start'], [s.portoOver - s.unticketed + 1, 'Portos start', 'middle']];
+  marks.forEach(([n, label, anchor]) => {
     if (n <= 0 || n > maxPaid) return;
+    const dx = anchor === 'end' ? 3 : anchor === 'start' ? -3 : 0;
     g += `<line x1="${X(n)}" x2="${X(n)}" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>`;
-    g += `<text x="${X(n)}" y="${C.t - 12}" text-anchor="middle" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
+    g += `<text x="${X(n) + dx}" y="${C.t - 12}" text-anchor="${anchor}" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
   });
   g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
   const p = Math.min(s.paid, maxPaid);
@@ -442,6 +486,7 @@ function render(skip) {
   const maxPaid = Math.max(0, s.hardCap - s.unticketed);
   syncInputs(skip);
   const r = compute(s);
+  syncTiers(r, skip);
   renderVerdict(r, breakEven(s), maxPaid);
   renderPL(r);
   renderChart(maxPaid);

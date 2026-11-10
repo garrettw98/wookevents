@@ -1,27 +1,42 @@
 // Pure budget model. Shared verbatim by the page and by the node check.
+// Ticket tiers fill in order; the last tier of each type takes every ticket after the earlier tiers sell out.
 const DEFAULTS = {
   paid: 290, mixFull: 65, mixSat: 25,
-  pFull: 195, pSat: 155, pSun: 82,
-  carRate: 20, carSpots: 60, pCar: 50,
-  cabinsRented: 8, cabinCost: 250, cabinsSold: 7, pCabin: 850, otherPer: 10,
+  tiers: {
+    full: [{ name: 'Presale', price: 169, qty: 50 }, { name: 'Tier 1', price: 189, qty: 60 }, { name: 'Tier 2', price: 209, qty: 50 }, { name: 'Final', price: 229, qty: 0 }],
+    sat: [{ name: 'Tier 1', price: 139, qty: 20 }, { name: 'Tier 2', price: 155, qty: 30 }, { name: 'Final', price: 169, qty: 0 }],
+    sun: [{ name: 'Tier 1', price: 79, qty: 15 }, { name: 'Final', price: 85, qty: 0 }],
+  },
+  carRate: 20, carSpots: 120, carComped: 24, pCar: 50,
+  cabinsRented: 8, cabinCost: 250, cabinsSold: 6, pCabin: 850, otherPer: 10,
   unticketed: 60,
   venuePerDay: 10, domePer: 10, domeCap: 2000,
   permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
-  kd: 2000, insurance: 750, chef: 1000, food: 2500, crewCount: 12, crewPay: 100,
-  art: 2500, marketing: 750, ops: 1200, medical: 600, travel: 1500, contingencyPct: 5,
+  kd: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
+  art: 3000, marketing: 750, ops: 1200, medical: 600, flights: 2000, hospitality: 600, contingencyPct: 5,
   artists: [
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50, recoup: false,
+  kdShare: 50,
 };
+function fillTiers(tiers, n) {
+  let left = n, rev = 0;
+  const sold = tiers.map((t, i) => {
+    const q = i === tiers.length - 1 ? left : Math.min(left, t.qty);
+    rev += q * t.price; left -= q;
+    return q;
+  });
+  return { rev, sold, avg: n ? rev / n : 0 };
+}
 function compute(s) {
   const nFull = s.paid * s.mixFull / 100;
   const nSat = s.paid * s.mixSat / 100;
   const nSun = Math.max(0, s.paid - nFull - nSat);
-  const tickets = nFull * s.pFull + nSat * s.pSat + nSun * s.pSun;
-  const carSold = Math.min(s.carSpots, s.paid * s.carRate / 100);
+  const tFull = fillTiers(s.tiers.full, nFull), tSat = fillTiers(s.tiers.sat, nSat), tSun = fillTiers(s.tiers.sun, nSun);
+  const tickets = tFull.rev + tSat.rev + tSun.rev;
+  const carSold = Math.min(Math.max(0, s.carSpots - s.carComped), s.paid * s.carRate / 100);
   const car = carSold * s.pCar;
   const cabinRev = Math.min(s.cabinsSold, s.cabinsRented) * s.pCabin;
   const other = s.paid * s.otherPer;
@@ -35,15 +50,14 @@ function compute(s) {
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
-  const fixedBase = artistFees + s.travel + s.kd + s.insurance + s.chef + s.food + crew
+  const fixedBase = artistFees + s.flights + s.hospitality + s.kd + s.insurance + s.chef + s.food + crew
     + s.art + s.marketing + s.ops + s.medical + cabins + permit + portos;
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
-  let kdShareAmt;
-  if (s.recoup) kdShareAmt = Math.max(0, (profit + s.kd) * s.kdShare / 100 - s.kd);
-  else kdShareAmt = Math.max(0, profit) * s.kdShare / 100;
-  return { nFull, nSat, nSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
+  // Kinetic Desert's guarantee is paid on top of their share. Profit and loss are both split.
+  const kdShareAmt = profit * s.kdShare / 100;
+  return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
     onSite, permit, portos, artistFees, cabins, crew, contingency, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
