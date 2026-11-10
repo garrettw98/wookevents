@@ -12,7 +12,7 @@ const DEFAULTS = {
   cabinsRented: 8, cabinCost: 250, cabinsSold: 6, pCabin: 850, otherPer: 10,
   unticketed: 60, kdGuests1: 15, kdGuests2: 10, psGuests: 30,
   venuePerDay: 10, domePer: 10, domeCap: 2000,
-  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500, extra500: 1100,
+  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500, chef2: 1000, food500: 2500, ops500: 800, drinksPer: 3,
   kd: 2000, psGuarantee: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
   art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
   procPct: 2.9, procFixed: 0.3, bankShare: 0, bankPct: 0.8,
@@ -62,14 +62,17 @@ function compute(s) {
   const { unt, level, onSite } = people(s, s.paid);
   const permit = level >= 2 ? s.permit : 0;
   const portos = level >= 3 ? s.portos : 0;
-  const extra500 = level >= 3 ? s.extra500 : 0;
+  // Above 350 a second chef comes in and the kitchen also feeds Project Seismic, Kinetic Desert's guests and all artists.
+  const kitchen500 = level >= 3 ? s.chef2 + s.food500 : 0;
+  const ops500 = level >= 3 ? s.ops500 : 0;
+  const drinks = onSite * s.drinksPer;
   const psGuar = level >= 3 ? s.psGuarantee : 0;
   const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
   const cabins = s.cabinsRented * s.cabinCost;
   const crew = s.crewCount * s.crewPay;
   const medical = s.medicalPerDay * s.medicalDays;
   const fixedBase = artistFees + s.hospitality + s.kd + psGuar + s.insurance + s.chef + s.food + crew
-    + s.art + s.marketing + s.ops + medical + cabins + permit + portos + extra500;
+    + s.art + s.marketing + s.ops + medical + cabins + permit + portos + kitchen500 + ops500 + drinks;
   const contingency = fixedBase * s.contingencyPct / 100;
   // Card and bank fees on what is sold through the site. The fixed card fee is counted once per ticket.
   const online = tickets + car + cabinRev;
@@ -82,7 +85,7 @@ function compute(s) {
   const psShareAmt = level >= 3 ? Math.max(0, profit) * s.psShare / 100 : 0;
   const kdShareAmt = (profit - psShareAmt) * s.kdShare / 100;
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
-    unt, level, onSite, permit, portos, extra500, psGuar, artistFees, cabins, crew, medical, contingency, processing, costs, profit,
+    unt, level, onSite, permit, portos, kitchen500, ops500, drinks, psGuar, artistFees, cabins, crew, medical, contingency, processing, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: psGuar + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
     avgTicket: s.paid ? tickets / s.paid : 0 };
 }
