@@ -47,16 +47,19 @@ const DEFAULTS = {
   ],
   others: [
     { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
-    { name: 'Medical team', people: 2, from: 0 },
+    { name: 'Medical team', people: 2, from: 1 },
   ],
   // basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site)
+  // until: the last stage a row applies at; leave it out for a row that never stops
   costs: [
     { name: 'Venue fee', amount: 10, basis: 'ticketday', from: 0 },
     { name: 'Cabin rental, 8 at $250', amount: 2000, basis: 'flat', from: 0 },
     { name: 'Permits', amount: 3000, basis: 'flat', from: 1 },
     { name: 'Porto-potties', amount: 2500, basis: 'flat', from: 2 },
     { name: 'Insurance', amount: 750, basis: 'flat', from: 0 },
-    { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 0 },
+    { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 1 },
+    { name: 'Venue medical rep, required without our own medic', amount: 500, basis: 'flat', from: 0, until: 0 },
+    { name: 'Our own medical kit', amount: 200, basis: 'flat', from: 0, until: 0 },
     { name: 'Groceries', amount: 2800, basis: 'flat', from: 0 },
     { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
     { name: 'Drinks for everyone', amount: 6, basis: 'person', from: 0 },
@@ -89,7 +92,8 @@ const DEFAULTS = {
 };
 const sum = a => a.reduce((x, y) => x + y, 0);
 const n0 = v => Number(v) || 0;
-const on = (row, level) => n0(row.from) <= level;
+// A row is active from its starting stage and, when it names a last stage, only up to that one.
+const on = (row, level) => n0(row.from) <= level && (row.until === undefined || row.until === null || Number(row.until) < 0 || level <= Number(row.until));
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
   const sold = tiers.map((t, i) => {

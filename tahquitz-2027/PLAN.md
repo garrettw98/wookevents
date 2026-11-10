@@ -25,13 +25,13 @@ The numbers in this plan come from one planning model. Open [`budget.html`](budg
 ## The short version
 
 1. **The 350 plan sells out at 275 tickets, and the full lineup breaks even at 249.** That is 91% sold before anyone makes a dollar, with about $4,700 of profit at a sell-out. Three things moved it: Kinetic Desert's 15 extra guests take 15 sellable places, card fees are your cost, and drinks for everyone add about $2,200.
-2. **Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $21,100, or $10,600 each for you and Kinetic Desert.
-3. **Site costs alone are covered by about 99 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds about six tickets to break-even.
+2. **Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $19,900, or $10,000 each for you and Kinetic Desert.
+3. **Site costs alone are covered by about 91 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds about six tickets to break-even.
 4. **Let the alumni presale set the artist budget.** A leaner lineup at $11,300 breaks even at 206 tickets and makes about $12,100 at a sell-out.
 5. **Stay on Stripe for the ticket site.** Card fees come to about $1,700 at a sell-out, 3% of online sales. The cheaper options save a few hundred dollars at most. Pay-by-bank is worth offering on cabins.
 6. **California requires all-in prices.** The listed ticket price has to include every mandatory fee, so a processing fee cannot be added at checkout.
 7. **The 500 unlock pays you once 334 tickets sell, and the upside is thin.** It adds about $9,200 of fixed cost, including a second chef and feeding the partners' people. With 116 on guest lists and crew, 384 tickets fit. At 384 sold the event makes about $15,000: $6,000 to you, $8,000 to Kinetic Desert and $5,000 to Project Seismic.
-8. **Staying under 199 on site does not work.** Only 139 tickets fit, and even the leaner lineup loses about $5,700 with all of them sold.
+8. **Staying under 199 on site does not work.** Only 141 tickets fit, and even the leaner lineup loses about $4,300 with all of them sold.
 9. **The crew plan is short by more than half.** Twelve ticket-only volunteers close the gap.
 10. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
 
@@ -81,7 +81,7 @@ If 30% of sales went by bank, fees would drop by about $370.
 
 ### Build notes
 
-- **Enforce the caps in code.** The site should stop sales at 139, 275 or 384 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
+- **Enforce the caps in code.** The site should stop sales at 141, 275 or 384 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
 - **Tier inventory.** Use conditional writes so two buyers cannot take the last ticket in a tier, and release held tickets when a checkout session expires.
 - **Issue tickets from Stripe's webhook**, verified and safe to receive twice. Do not issue from the browser redirect.
 - **Scanner.** Keep what worked at Reeguez Rocks. Make sure it still scans with no signal, from a list synced beforehand.
@@ -140,9 +140,9 @@ Ninety tickets proved the location. Every version of this event that pays real h
 
 | Artist budget | Break-even | At 90 sold | At 150 | At 200 | At 275 |
 |---|---|---|---|---|---|
-| None | 99 | −$1,235 | $4,052 | $11,579 | $24,603 |
-| Leaner, $11,300 | 206 | −$13,730 | −$8,443 | −$916 | $12,108 |
-| Full, $18,325 | 249 | −$21,106 | −$15,819 | −$8,292 | $4,732 |
+| None | 91 | −$68 | $4,052 | $11,579 | $24,603 |
+| Leaner, $11,300 | 206 | −$12,563 | −$8,443 | −$916 | $12,108 |
+| Full, $18,325 | 249 | −$19,939 | −$15,819 | −$8,292 | $4,732 |
 
 Profit and loss are both split 50/50 with Kinetic Desert, so your side is half of each figure. The artist budget slider on the budget page moves between these and anything in between.
 
@@ -172,7 +172,8 @@ Each of these is an input in the budget model.
 
 | Assumption | Value used | Why it matters |
 |---|---|---|
-| Crew, artists and their guests | 60 at every size | The base that every limit is counted from |
+| Crew, artists and their guests | 58 up to 199 on site, 60 above | The base that every limit is counted from. The two extra are the medical team |
+| Medical at 199 or fewer | $500 venue medical rep and $200 for your own kit | Replaces the $1,800 medical team. I did not count the venue's rep as one of your people on site |
 | Card fees | 2.9% + 30¢, all sales by card | About $1,700 at a sell-out, and eight tickets on break-even |
 | Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
 | Extra cost above 350 | $2,500 porto-potties, $1,000 second chef, $2,500 more groceries, $800 supplies | The grocery and porto-potty figures are guesses. Get a porto-potty quote early because of Stagecoach |
@@ -190,8 +191,8 @@ Every limit is counted on people on site. Guest lists grow as the event does, so
 
 | People on site | Without a ticket | Tickets that fit | Added cost |
 |---|---|---|---|
-| Up to 199 | 60 | 139 | None |
-| 200 to 350 | 75: adds 15 Kinetic Desert guests | 275 | Permits |
+| Up to 199 | 58 | 141 | Venue medical rep and your own kit, $700 |
+| 200 to 350 | 75: adds 15 Kinetic Desert guests and the 2-person medical team | 275 | Permits, and the $1,800 medical team in place of the venue's rep |
 | 351 to 500 | 116: adds 10 more Kinetic Desert guests, 30 for Project Seismic and the second chef | 384 | Porto-potties, Project Seismic's guarantee, a second chef, more groceries and supplies |
 
 Kinetic Desert's 15 guests at the 350 level take the place of 15 tickets. If the event sells out, that is about $2,800 of profit. If it does not sell out, they cost nothing.
@@ -287,8 +288,8 @@ The 350 plan with the full lineup, at a sell-out of 275 paid tickets.
 
 | Paid tickets | Share of 275 | Result | Your half |
 |---|---|---|---|
-| 90 | 33% | −$21,106 | −$10,553 |
-| 139 | 51% | −$14,139 | −$7,069 |
+| 90 | 33% | −$19,939 | −$9,969 |
+| 141 | 51% | −$12,687 | −$6,343 |
 | 175 | 64% | −$12,177 | −$6,088 |
 | 200 | 73% | −$8,292 | −$4,146 |
 | 225 | 82% | −$4,072 | −$2,036 |
@@ -448,7 +449,8 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 - **Cold.** The council lists the camp at 6,500 feet. Expect nights near freezing, and late-April snow is possible. You have October there for comparison. Tell ticket buyers plainly what to pack.
 - **Rain or snow at The Bowl.** There is no covered space for 350 people. The K Lodge holds 105. Decide the bad-weather plan and the refund terms before tickets go on sale.
-- **Medical.** $600 a day from Friday 10:00 AM to Monday 10:00 AM. The nearest hospital is a long drive down Highway 38, so agree with the team where an ambulance meets you and who calls. Add naloxone and a harm-reduction table.
+- **Medical above 199 on site.** Your own medical team at $600 a day, from Friday 10:00 AM to Monday 10:00 AM. The nearest hospital is a long drive down Highway 38, so agree with the team where an ambulance meets you and who calls. Add naloxone and a harm-reduction table.
+- **Medical at 199 or fewer.** No medical team. The venue requires its own medical rep when you bring no medic, for a $500 fee, and that rep only handles real emergencies. Everything short of that is yours, so the budget has $200 for your own kit. Name the crew member who carries it and has first-aid training, and make sure the rest of the crew know who that is.
 - **Insurance.** Confirm the $3M/$1M policy can name the camp and, if asked, the county, covers overnight camping, and says what it does about alcohol people bring.
 - **Fire.** Ask the camp what the forest's April fire rules allow for fire pits and fire performance.
 - **Stagecoach.** Reserve porto-potties, generators, light towers and radios on a refundable hold now.

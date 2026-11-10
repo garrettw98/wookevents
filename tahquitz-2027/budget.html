@@ -275,7 +275,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
       <div class="scroll"><table class="edit" id="costs"></table></div>
       <button class="add" data-add="costs">Add a cost</button>
       <div class="narrow" id="cont"></div>
-      <p class="note">Artist fees, partner guarantees and crew pay live in their own sections. Contingency is added on everything that does not move ticket by ticket.</p>
+      <p class="note">Artist fees, partner guarantees and crew pay live in their own sections. A cost can start at one stage and stop at a later one, as the venue's medical rep does once you bring your own medical team. Contingency is added on everything that does not move ticket by ticket.</p>
     </div>
   </section>
 
@@ -338,16 +338,19 @@ const DEFAULTS = {
   ],
   others: [
     { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
-    { name: 'Medical team', people: 2, from: 0 },
+    { name: 'Medical team', people: 2, from: 1 },
   ],
   // basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site)
+  // until: the last stage a row applies at; leave it out for a row that never stops
   costs: [
     { name: 'Venue fee', amount: 10, basis: 'ticketday', from: 0 },
     { name: 'Cabin rental, 8 at $250', amount: 2000, basis: 'flat', from: 0 },
     { name: 'Permits', amount: 3000, basis: 'flat', from: 1 },
     { name: 'Porto-potties', amount: 2500, basis: 'flat', from: 2 },
     { name: 'Insurance', amount: 750, basis: 'flat', from: 0 },
-    { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 0 },
+    { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 1 },
+    { name: 'Venue medical rep, required without our own medic', amount: 500, basis: 'flat', from: 0, until: 0 },
+    { name: 'Our own medical kit', amount: 200, basis: 'flat', from: 0, until: 0 },
     { name: 'Groceries', amount: 2800, basis: 'flat', from: 0 },
     { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
     { name: 'Drinks for everyone', amount: 6, basis: 'person', from: 0 },
@@ -380,7 +383,8 @@ const DEFAULTS = {
 };
 const sum = a => a.reduce((x, y) => x + y, 0);
 const n0 = v => Number(v) || 0;
-const on = (row, level) => n0(row.from) <= level;
+// A row is active from its starting stage and, when it names a last stage, only up to that one.
+const on = (row, level) => n0(row.from) <= level && (row.until === undefined || row.until === null || Number(row.until) < 0 || level <= Number(row.until));
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
   const sold = tiers.map((t, i) => {
@@ -526,6 +530,7 @@ const getPath = (o, p) => p.split('.').reduce((x, k) => x[k], o);
 const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); ks.reduce((x, k) => x[k], o)[last] = v; };
 const stageLabel = i => i === 0 ? 'Always' : `Above ${int(s.stages[i - 1].limit)} on site`;
 const fromSelect = (list, i, val) => `<select data-list="${list}" data-i="${i}" data-f="from" data-num="1" id="${list}-${i}-from" aria-label="Starts">${s.stages.map((st, j) => `<option value="${j}"${j === num(val) ? ' selected' : ''}>${stageLabel(j)}</option>`).join('')}</select>`;
+const untilSelect = (list, i, val) => { const v = val === undefined || val === null ? -1 : Number(val); return `<select data-list="${list}" data-i="${i}" data-f="until" data-int="1" id="${list}-${i}-until" aria-label="Stops"><option value="-1"${v < 0 ? ' selected' : ''}>Never</option>${s.stages.slice(0, -1).map((st, j) => `<option value="${j}"${j === v ? ' selected' : ''}>Above ${int(st.limit)} on site</option>`).join('')}</select>`; };
 const numField = (path, label, hint, step) => { const id = 'f-' + path.replace(/\./g, '-'); return `<div class="field"><label for="${id}">${label}${hint ? `<small>${hint}</small>` : ''}</label><input type="number" id="${id}" data-k="${path}" min="0" step="${step || 1}" inputmode="decimal" value="${esc(getPath(s, path))}"></div>`; };
 const cell = (list, i, f, v, type, extra) => `<input type="${type}" id="${list}-${i}-${f}" data-list="${list}" data-i="${i}" data-f="${f}" value="${esc(v)}" ${extra || ''}>`;
 const delBtn = (list, i, label) => `<button class="ghost" data-del="${list}" data-i="${i}" aria-label="Remove ${esc(label)}">Remove</button>`;
@@ -588,18 +593,18 @@ function buildCrew() {
       <td class="l">${fromSelect('crew', i, c.from)}</td><td class="l" id="crew-cov-${i}"></td><td>${delBtn('crew', i, c.name)}</td></tr>`).join('') +
     `</tbody><tfoot><tr class="total"><td>At the current size</td><td id="crew-t-people"></td><td id="crew-t-pay"></td><td id="crew-t-supply"></td><td id="crew-t-need"></td><td></td><td class="l" id="crew-t-cov"></td><td></td></tr></tfoot>`;
   $('others').className = 'edit compact';
-  $('others').innerHTML = `<thead><tr><th>Group</th><th>People</th><th class="l">Starts</th><th></th></tr></thead><tbody>` +
+  $('others').innerHTML = `<thead><tr><th>Group</th><th>People</th><th class="l">Starts</th><th class="l">Stops</th><th></th></tr></thead><tbody>` +
     s.others.map((o, i) => `<tr><td>${cell('others', i, 'name', o.name, 'text', 'aria-label="Group"')}</td>
       <td>${cell('others', i, 'people', o.people, 'number', 'min="0" step="1" aria-label="People"')}</td>
-      <td class="l">${fromSelect('others', i, o.from)}</td><td>${delBtn('others', i, o.name)}</td></tr>`).join('') + '</tbody>';
+      <td class="l">${fromSelect('others', i, o.from)}</td><td class="l">${untilSelect('others', i, o.until)}</td><td>${delBtn('others', i, o.name)}</td></tr>`).join('') + '</tbody>';
 }
 function buildCosts() {
-  $('costs').innerHTML = `<thead><tr><th>Cost</th><th>Amount</th><th class="l">Charged</th><th class="l">Starts</th><th>At the current size</th><th></th></tr></thead><tbody>` +
+  $('costs').innerHTML = `<thead><tr><th>Cost</th><th>Amount</th><th class="l">Charged</th><th class="l">Starts</th><th class="l">Stops</th><th>At the current size</th><th></th></tr></thead><tbody>` +
     s.costs.map((c, i) => `<tr id="cost-row-${i}"><td>${cell('costs', i, 'name', c.name, 'text', 'aria-label="Cost"')}</td>
       <td>${cell('costs', i, 'amount', c.amount, 'number', 'min="0" step="any" aria-label="Amount"')}</td>
       <td class="l"><select id="costs-${i}-basis" data-list="costs" data-i="${i}" data-f="basis" aria-label="Charged">${BASIS.map(([v, l]) => `<option value="${v}"${v === c.basis ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
-      <td class="l">${fromSelect('costs', i, c.from)}</td><td id="cost-now-${i}"></td><td>${delBtn('costs', i, c.name)}</td></tr>`).join('') +
-    `</tbody><tfoot><tr class="total"><td>Total</td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr></tfoot>`;
+      <td class="l">${fromSelect('costs', i, c.from)}</td><td class="l">${untilSelect('costs', i, c.until)}</td><td id="cost-now-${i}"></td><td>${delBtn('costs', i, c.name)}</td></tr>`).join('') +
+    `</tbody><tfoot><tr class="total"><td>Total</td><td></td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr></tfoot>`;
   $('cont').innerHTML = numField('contingencyPct', 'Contingency, %');
 }
 function buildTimeline() {
@@ -717,7 +722,7 @@ function renderCrew(r) {
 }
 function renderCosts(r) {
   let total = 0;
-  s.costs.forEach((c, i) => { const x = r.costRows[i]; $('cost-row-' + i).className = x.active ? '' : 'off'; $('cost-now-' + i).textContent = x.active ? money(x.value) : 'not yet'; total += x.value; });
+  s.costs.forEach((c, i) => { const x = r.costRows[i]; $('cost-row-' + i).className = x.active ? '' : 'off'; $('cost-now-' + i).textContent = x.active ? money(x.value) : num(c.from) > r.level ? 'not yet' : 'no longer'; total += x.value; });
   $('cost-total').textContent = money(total);
 }
 function renderTimeline() {
@@ -831,7 +836,7 @@ function rebuild() { buildAll(); render(); }
 /* ---------- events ---------- */
 document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
-  const val = t.type === 'checkbox' ? t.checked : t.type === 'number' || t.type === 'range' || d.num ? Math.max(0, Number(t.value) || 0) : t.value;
+  const val = t.type === 'checkbox' ? t.checked : d.int ? Number(t.value) : t.type === 'number' || t.type === 'range' || d.num ? Math.max(0, Number(t.value) || 0) : t.value;
   if (t.id === 'f-paid') s.paid = val;
   else if (t.classList.contains('artist-slider')) s.artists = scaleFees(feeShape, val);
   else if (d.day !== undefined) { s.artists[+d.day][+d.slot] = val; feeShape = structuredClone(s.artists); }
@@ -868,7 +873,7 @@ document.addEventListener('click', e => {
     s.stages.pop();
     const max = s.stages.length - 1;
     s.partners.forEach(p => { p.people.length = s.stages.length; p.from = Math.min(num(p.from), max); });
-    ['crew', 'others', 'costs'].forEach(k => s[k].forEach(x => { x.from = Math.min(num(x.from), max); }));
+    ['crew', 'others', 'costs'].forEach(k => s[k].forEach(x => { x.from = Math.min(num(x.from), max); if (Number(x.until) >= max) x.until = -1; }));
     rebuild();
   } else if (b.id === 'btn-save') save();
   else if (b.id === 'btn-revert') load(savedJSON);
