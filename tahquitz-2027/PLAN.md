@@ -6,7 +6,7 @@ The numbers in this plan come from one budget model. Open [`budget.html`](budget
 
 ## The short version
 
-1. **The permit is lighter than I first wrote.** The county told you the camp is already approved for gatherings, so you need a Temporary Use Permit for the added structures and sound. The county code backs that reading. The Temporary Use Permit sheet has no hold on ticket sales, so the December presale is back in the plan. Get the county's answer in an email first.
+1. **The permit is lighter than I first wrote.** The county told you the camp is already approved for gatherings, so you need a Temporary Use Permit for the added structures and sound. The county code backs that reading. It puts no hold on ticket sales, which the county confirmed to you last year, so the December presale stands.
 2. **The full lineup needs 230 paid tickets to break even. Reeguez Rocks sold 90.** If the full plan sells 90 again, the loss is about $19,600, or $9,800 each for you and Kinetic Desert.
 3. **Site costs alone are covered by about 88 tickets.** Everything above that is the lineup. Each $1,000 of artist cost adds five or six tickets to break-even.
 4. **Let the alumni presale decide how big to book.** A leaner lineup with $2,000 headliners breaks even at 188 tickets. Upgrade to $3,000 headliners if the presale sells out.
@@ -32,7 +32,7 @@ From the county's Temporary Use Permit information sheet, revised June 4, 2025:
 - **How it runs:** you apply through the county's EZOP portal and are invoiced once the application is complete. A planner reviews it and may route it to other agencies, then approves it "as quickly as possible" once the standards are met.
 - **Standards:** access, heights, parking, setbacks, signs and utilities, plus removal of everything and restoration of the site. The county can ask for a performance bond.
 - **Deadline:** the sheet states none. You were told 90 days, which makes the last working day Friday, January 22.
-- **Ticket sales:** the sheet has no hold on sales or advertising. The 11-day hold I flagged belongs to the special event permit.
+- **Ticket sales:** tickets can go on sale before the permit is issued. The sheet has no hold on sales or advertising, and the county confirmed that to you last year. The 11-day hold I flagged belongs to the special event permit.
 - **Fee:** the 2025–26 county fee schedule lists a Major Temporary Use Permit at a flat $2,108. I could not find the minor fee or the 2026–27 figure. Your $3,000 ballpark is a reasonable budget until the county quotes it.
 
 ### What this removes
@@ -48,19 +48,15 @@ These come from other agencies' own pages, so ask whether the Temporary Use Perm
 - **Environmental Health.** Only if food is sold or served to attendees: vendors, the meal plan, a brunch for everyone.
 - **Noise.** The county standard for sound heard at a residence is 55 dB(A) from 7:00 AM to 10:00 PM and 45 dB(A) overnight. You have run sound on this property and found it is not an issue at the property line, which is where it counts. A permit for sound may still come with hours, so state the midnight outdoor cut-off in the letter of intent.
 
-### Get it in one email
+### Questions left for the planner
 
-Ask the planner to confirm in writing (Land Use Services, 909.387.8311):
+Land Use Services, 909.387.8311.
 
-1. A Temporary Use Permit is what this event needs, and the special event permit does not apply.
-2. Which type of Temporary Use Permit, and the fee.
-3. The filing deadline.
-4. Tickets can be sold and the event advertised before the permit is issued.
-5. Whether the stage, truss and Dome need a separate structure permit or engineered plans.
-6. Whether the application is routed to County Fire or you apply there yourself.
-7. Whether the permit is needed at all below 200 people.
-
-The reason to have it in writing: the special event chapter says no one may advertise or sell admission to a temporary special event without that permit. An email saying it does not apply here protects your ticket sales if someone else at the county reads it differently later.
+1. Which type of Temporary Use Permit this is, and the fee.
+2. The filing deadline for this year.
+3. Whether the stage, truss and Dome need a separate structure permit or engineered plans.
+4. Whether the application is routed to County Fire or you apply there yourself.
+5. Whether the permit is needed at all below 200 people.
 
 The camp itself sets no rules beyond the law and its bathroom capacity: 350 people on the existing facilities, up to 500 with porto-potties brought in.
 
@@ -171,8 +167,6 @@ Tiers sell in order. Quantities assume 290 paid tickets.
 | Mar 15 | Decision on the 500 unlock |
 | Mar 23 | Set times out. Sunday-only tickets open |
 | Apr 9 | Final tier |
-
-The presale waits on the planner's email confirming that sales can start before the permit is issued.
 
 ## Budget
 
@@ -376,11 +370,11 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 | When | What |
 |---|---|
-| This week | Email the county planner the seven questions. Ask the four target artists for quotes |
+| This week | Put the five questions to the county planner. Ask your target artists for quotes |
 | November | Kinetic Desert and Project Seismic deals in writing. Stage, truss and Dome dimensions. Draft the letter of intent and site plan |
-| Dec 1–15 | Alumni presale, once the planner confirms sales can start |
+| Dec 1–15 | Alumni presale |
 | By Dec 11 | Submit the Temporary Use Permit application |
-| Mid-December | Pick the lineup size. Send offers and pay deposits |
+| Mid-December | Set the artist budget from the presale result. Choose from the quotes, send offers and pay deposits |
 | Jan 12 | First lineup. Tier 1 and Sat–Sun tickets open |
 | Jan 22 | Last day to file, by the 90 days you were given. Treat it as a backstop |
 | Feb 1 | Sunday decision |
@@ -393,9 +387,9 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 ## Questions that would change this plan
 
-1. **The planner's written answers**, above all whether sales can start before the permit is issued and whether County Fire is separate.
-2. **Artist quotes.** The fee curve is built from your targets. Real quotes from the four names will move it.
-3. **How the alumni presale sells.** It sets the lineup size.
+1. **Whether County Fire and a structure permit are separate applications.** They add lead time and possibly engineered plans.
+2. **Artist quotes.** You are collecting them and choosing who fits. Enter each quote in the fee grid on the budget page to see break-even move.
+3. **How the alumni presale sells.** It sets the artist budget: about $18,300 if it sells out, about $11,300 if it sells under 25.
 
 ## Sources
 
