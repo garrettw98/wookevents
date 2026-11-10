@@ -8,7 +8,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
-/* Layout: a working ledger. Verdict strip on top, controls left, chart + P&L right; stacks to one column on a phone. */
+/* Layout: a planner in sections. The verdict strip stays pinned; each section is a tab of panels and editable lists. */
 :root {
   --bg: #F3F6F4; --surface: #FFFFFF; --sunk: #E9EEEB;
   --ink: #14211D; --ink-2: #47564F; --ink-3: #6E7C75; --rule: #D5DDD8;
@@ -33,105 +33,146 @@
 
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
-.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: flex; flex-direction: column; gap: 22px; }
-h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
-h1 { font-size: 30px; line-height: 1.15; letter-spacing: -0.01em; }
-h2 { font-size: 17px; }
-.eyebrow { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
-.lede { color: var(--ink-2); max-width: 68ch; margin: 6px 0 0; }
-.num { font-variant-numeric: tabular-nums; }
-
-.verdict { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--surface);
-  border: 1px solid var(--rule); border-radius: 10px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
-  box-shadow: 0 6px 14px -10px var(--ink-3); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-.verdict > div { padding: 16px 18px; border-left: 1px solid var(--rule); min-width: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 28px; line-height: 1.15; letter-spacing: -0.01em; }
+h2 { font-size: 17px; }
+h3 { font-size: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.muted { color: var(--ink-3); }
+.note { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; max-width: 72ch; }
+.intro { color: var(--ink-2); max-width: 72ch; margin: 0; }
+
+.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; }
+.savebar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.savebar span { font-size: 13px; color: var(--ink-2); margin-right: 4px; }
+button { font: 500 14px var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 13px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button:disabled { color: var(--ink-3); cursor: default; border-color: var(--rule); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
+button.primary:disabled { background: var(--sunk); border-color: var(--rule); color: var(--ink-3); }
+button.ghost { padding: 4px 9px; font-size: 13px; color: var(--ink-2); }
+button.add { align-self: flex-start; margin-top: 12px; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--rule); }
+.tabs a { flex: none; padding: 9px 14px; color: var(--ink-2); text-decoration: none; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+.verdict { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--rule); border-radius: 10px;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; box-shadow: 0 6px 14px -10px var(--ink-3); }
+.verdict > div { padding: 12px 16px; border-left: 1px solid var(--rule); min-width: 0; }
 .verdict > div:first-child { border-left: 0; }
-.verdict .big { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.verdict .big { font: 700 25px/1.15 var(--display); font-variant-numeric: tabular-nums; }
 .verdict .sub { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
-.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-top: 6px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.verdict .pill { margin-top: 5px; white-space: normal; }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.plain { background: var(--sunk); color: var(--ink-2); }
 .is-good { color: var(--good); } .is-bad { color: var(--bad); }
 
-.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.presets span { color: var(--ink-3); font-size: 13px; margin-right: 4px; }
-button.preset { font: 500 14px var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--rule);
-  border-radius: 8px; padding: 8px 14px; cursor: pointer; }
-button.preset:hover { border-color: var(--accent); }
-button.preset[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-.cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 22px; align-items: start; }
+.tab { display: flex; flex-direction: column; gap: 18px; }
+.cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+.cols.even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .stack { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; min-width: 0; display: flex; flex-direction: column; }
 .panel > h2 { margin-bottom: 12px; }
-.panel .note { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.narrow { max-width: 420px; margin-top: 8px; }
 
 .field { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 10px; align-items: center; padding: 6px 0; }
 .field label { color: var(--ink-2); font-size: 14px; }
 .field label small { display: block; color: var(--ink-3); font-size: 12px; }
-.field input[type="number"] { width: 100%; font: 500 14px var(--body); font-variant-numeric: tabular-nums; text-align: right;
-  color: var(--ink); background: var(--sunk); border: 1px solid transparent; border-radius: 6px; padding: 6px 8px; }
+.field.wide { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+.field.pick { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+input[type="number"], input[type="text"], input[type="date"], select { font: 500 14px var(--body); color: var(--ink); background: var(--sunk);
+  border: 1px solid transparent; border-radius: 6px; padding: 6px 8px; width: 100%; min-width: 0; }
+input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; }
 .field.slider { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .field.slider .row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
-.field.slider output { font: 600 16px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+.field.slider output { font: 600 16px var(--display); font-variant-numeric: tabular-nums; }
 input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
-.check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0 0; color: var(--ink-2); font-size: 14px; }
-.check input { margin-top: 3px; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
 .scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--rule); font-size: 14px; }
 th:first-child, td:first-child { text-align: left; }
-thead th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+thead th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; white-space: nowrap; }
 tr.total td { font-weight: 600; border-bottom: 0; border-top: 2px solid var(--ink-3); }
-tr.head td { font-family: var(--display); font-weight: 600; color: var(--ink); padding-top: 14px; }
-td.muted, .muted { color: var(--ink-3); }
-.fees input { width: 76px; font: 500 14px var(--body); font-variant-numeric: tabular-nums; text-align: right; color: var(--ink);
-  background: var(--sunk); border: 1px solid transparent; border-radius: 6px; padding: 5px 6px; }
-.fees td, .fees th { padding: 5px 6px; }
-.tiers h3 { font-size: 14px; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 14px 0 4px; }
+tr.head td { font-family: var(--display); font-weight: 600; padding-top: 14px; }
+tr.off td, tr.off input, tr.off select { color: var(--ink-3); }
+table.edit td, table.edit th { padding: 5px 5px; }
+table.edit td:first-child input { min-width: 280px; }
+table.edit.compact td:first-child input { min-width: 200px; }
+table.edit input[type="number"] { width: 84px; }
+table.edit select { min-width: 150px; }
+table.edit td.l, table.edit th.l { text-align: left; }
+table.edit input.task { min-width: 300px; }
+table.edit input.mid { min-width: 135px; }
+.fees input[type="number"] { width: 76px; }
+.tiers h3 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 14px 0 4px; }
 .tiers h3:first-child { margin-top: 0; }
 .tiers h3 span { font: 500 13px var(--body); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.card-head { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.card-head input { font: 600 17px var(--display); background: transparent; padding: 2px 4px; margin-left: -4px; }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.given-title { margin-top: 8px; }
+.given { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.given label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--ink-3); }
+.given input { width: 92px; }
+.fact { background: var(--sunk); border-radius: 8px; padding: 9px 11px; font-size: 13px; color: var(--ink-2); margin-top: 12px; }
+.check { display: flex; gap: 8px; align-items: center; color: var(--ink-2); font-size: 14px; padding: 6px 0; }
 
 .chartbox { position: relative; }
 svg { display: block; width: 100%; height: auto; }
 .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.4;
   padding: 7px 10px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -100%); font-variant-numeric: tabular-nums; }
-.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.split .big { font: 700 24px var(--display); font-variant-numeric: tabular-nums; }
+ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ul.plain li { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--ink-2); }
+ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 860px) {
-  .cols { display: flex; flex-direction: column; gap: 18px; }
-  .stack { display: contents; }
-  .cols .panel { order: 3; }
-  .cols #panel-0 { order: 1; }
-  .cols #panel-chart { order: 2; }
-  .cols #panel-pl, .cols #panel-fees { order: 4; }
-  .verdict > div { padding: 9px 12px; }
-  .verdict .big { font-size: 21px; }
-  .verdict .sub { font-size: 12px; line-height: 1.3; }
-  .verdict .pill { margin-top: 3px; }
+  .cols, .cols.even, .cards { grid-template-columns: minmax(0, 1fr); }
   .verdict { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .verdict > div { padding: 8px 12px; }
   .verdict > div:nth-child(3) { border-left: 0; }
   .verdict > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
-  h1 { font-size: 25px; }
+  .verdict .big { font-size: 20px; }
+  .verdict .sub { font-size: 12px; line-height: 1.3; }
+  h1 { font-size: 23px; }
+  .kv { grid-template-columns: minmax(0, 1fr); }
 }
-@media (max-width: 420px) { .verdict .big { font-size: 19px; } .field { grid-template-columns: minmax(0, 1fr) 92px; } }
+@media (max-width: 420px) { .field { grid-template-columns: minmax(0, 1fr) 92px; } .field.pick { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <header>
-    <div class="eyebrow">Camp Tahquitz · Fri Apr 23 – Mon Apr 26, 2027</div>
-    <h1>Tahquitz 2027 budget model</h1>
-    <p class="lede">Move the ticket count, the artist budget, prices and costs to see profit, break-even and each partner's share. Limits are counted on people on site, and guest lists grow at 200 and at 351 people, so the number of tickets you can sell steps at each level.</p>
+  <header class="top">
+    <div>
+      <div class="eyebrow">Camp Tahquitz · Fri Apr 23 – Mon Apr 26, 2027</div>
+      <h1>Tahquitz 2027 planner</h1>
+    </div>
+    <div class="savebar">
+      <span id="save-status" aria-live="polite"></span>
+      <button class="primary" id="btn-save">Save plan</button>
+      <button id="btn-revert">Revert to saved</button>
+      <button id="btn-reset">Starting plan</button>
+    </div>
   </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#overview">Overview</a><a href="#tickets">Tickets</a><a href="#artists">Artists</a><a href="#production">Production</a>
+    <a href="#crew">Crew</a><a href="#costs">Costs</a><a href="#timeline">Timeline</a>
+  </nav>
 
   <section class="verdict" aria-live="polite">
     <div><div class="eyebrow" id="v-profit-label">Profit</div><div class="big" id="v-profit"></div><div class="sub" id="v-profit-sub"></div></div>
@@ -140,140 +181,311 @@ svg { display: block; width: 100%; height: auto; }
     <div><div class="eyebrow" id="v-you-label">Your take</div><div class="big" id="v-you"></div><div class="sub" id="v-you-sub"></div></div>
   </section>
 
-  <div class="presets" role="group" aria-label="Scenarios">
-    <span>Scenario</span>
-    <button class="preset" id="preset-plan" data-preset="plan">350 plan</button>
-    <button class="preset" id="preset-unlock" data-preset="unlock">500 unlock</button>
-    <button class="preset" id="preset-leaner" data-preset="leaner">Leaner lineup</button>
-    <button class="preset" id="preset-lean" data-preset="lean">Under 199, no permit</button>
-  </div>
-
-  <div class="cols">
-    <div class="stack" id="controls"></div>
-    <div class="stack">
-      <section class="panel" id="panel-chart">
+  <section class="tab" id="tab-overview">
+    <div class="cols">
+      <div class="stack">
+        <div class="panel">
+          <h2>Tickets and artist budget</h2>
+          <div class="field slider"><div class="row"><label for="f-paid">Paid tickets</label><output id="o-paid"></output></div><input type="range" id="f-paid" min="0" max="384" step="1"></div>
+          <div class="field slider"><div class="row"><label for="f-artist">Artist budget, all 24 sets</label><output id="o-artist"></output></div><input type="range" id="f-artist" class="artist-slider" min="0" max="30000" step="250"></div>
+          <div class="jump" id="jump"></div>
+        </div>
+        <div class="panel">
+          <h2>What moves break-even</h2>
+          <ul class="plain" id="sens"></ul>
+        </div>
+      </div>
+      <div class="panel">
         <h2>Profit by tickets sold</h2>
-        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with drops where the permit and the 500-person costs begin"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with a drop at the start of each stage"></svg><div class="tip" id="tip" hidden></div></div>
         <p class="note" id="chart-note"></p>
-      </section>
-      <section class="panel" id="panel-pl">
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Scale stages</h2>
+      <div class="scroll"><table class="edit compact" id="stages"></table></div>
+      <div class="jump"><button id="btn-add-stage">Add a stage</button><button id="btn-del-stage">Remove the last stage</button></div>
+      <p class="note">Each stage is a limit on people on site. Partners, crew and costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket.</p>
+    </div>
+    <div class="cols">
+      <div class="panel">
+        <h2>Next on the timeline</h2>
+        <ul class="plain" id="next"></ul>
+      </div>
+      <div class="panel">
         <h2>Profit and loss</h2>
         <div class="scroll"><table id="pl"></table></div>
-      </section>
-      <section class="panel" id="panel-fees">
-        <h2>Artist fees by slot</h2>
-        <div class="scroll"><table class="fees" id="fees"></table></div>
-        <p class="note">Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. The artist budget slider scales every slot together and keeps those shares. Edit a slot here to change the shape. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
-      </section>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="tab" id="tab-tickets" hidden>
+    <div class="cols even">
+      <div class="stack">
+        <div class="panel"><h2>Who buys which ticket</h2><div id="mix"></div><p class="note" id="note-mix"></p></div>
+        <div class="panel"><h2>Add-ons</h2><div id="addons"></div><p class="note" id="note-car"></p></div>
+        <div class="panel"><h2>Payment processing</h2><div id="proc"></div><p class="note">California requires the listed ticket price to include every mandatory fee, so these fees come out of your side.</p></div>
+      </div>
+      <div class="panel"><h2>Ticket tiers</h2><div class="tiers" id="tiers"></div><p class="note">Tiers sell in order. The last tier of each type takes every ticket after the earlier ones sell out.</p></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-artists" hidden>
+    <div class="cols">
+      <div class="panel">
+        <h2>Artist budget</h2>
+        <div class="field slider"><div class="row"><label for="f-artist2">All 24 sets</label><output id="o-artist2"></output></div><input type="range" id="f-artist2" class="artist-slider" min="0" max="30000" step="250"></div>
+        <p class="note">The slider scales every slot together and keeps each day's share. Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. Edit a slot to change the shape, for example when a quote comes in.</p>
+        <p class="note">The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight. Artists book their own flights. Their meals and airport rides are under Costs and Crew.</p>
+      </div>
+      <div class="panel"><h2>Fees by slot</h2><div class="scroll"><table class="edit fees" id="fees"></table></div></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-production" hidden>
+    <p class="intro">Everyone who brings production or shares the result. Each partner has a minimum guarantee, the stage it comes in at, a share of the profit, and the places it is given on site.</p>
+    <div class="cards" id="partners"></div>
+    <button class="add" data-add="partners">Add a production partner</button>
+    <div class="panel"><h2>Profit share at each stage</h2><div class="scroll"><table id="shares"></table></div><p class="note">Shares are entered in parts. Two, two and one means 40%, 40% and 20% among the partners active at that stage. A loss is split only among the partners marked as sharing one.</p></div>
+  </section>
+
+  <section class="tab" id="tab-crew" hidden>
+    <div class="panel">
+      <h2>Crew roles</h2>
+      <div class="scroll"><table class="edit" id="crew"></table></div>
+      <button class="add" data-add="crew">Add a crew role</button>
+      <p class="note">Everyone here is on site without a paid ticket and gets a car camping pass. Shifts needed is your estimate of the job. Coverage compares it with people times shifts each.</p>
+    </div>
+    <div class="cols even">
+      <div class="panel">
+        <h2>Other people on site</h2>
+        <div class="scroll"><table class="edit" id="others"></table></div>
+        <button class="add" data-add="others">Add a group</button>
+      </div>
+      <div class="panel">
+        <h2>Who is on site without a ticket</h2>
+        <div class="scroll"><table id="ledger"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-costs" hidden>
+    <div class="panel">
+      <h2>Site and operating costs</h2>
+      <div class="scroll"><table class="edit" id="costs"></table></div>
+      <button class="add" data-add="costs">Add a cost</button>
+      <div class="narrow" id="cont"></div>
+      <p class="note">Artist fees, partner guarantees and crew pay live in their own sections. Contingency is added on everything that does not move ticket by ticket.</p>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-timeline" hidden>
+    <div class="panel">
+      <h2>Timeline</h2>
+      <div class="scroll"><table class="edit" id="timeline"></table></div>
+      <button class="add" data-add="timeline">Add a date</button>
+    </div>
+  </section>
 </div>
 
 <script>
-// Pure budget model. Shared verbatim by the page and by the node check.
-// Ticket tiers fill in order; the last tier of each type takes every ticket after the earlier tiers sell out.
-// Guest lists and some costs step up when people on site pass 199 and 350.
+// Pure planning model, shared verbatim by the page and by the node check.
+// The event grows through stages, each a limit on people on site. Partners, crew roles, other people and
+// costs each name the stage they start at, so guest lists and costs switch on as the event scales.
+const SCHEMA = 3;
 const DEFAULTS = {
+  v: SCHEMA,
+  stages: [
+    { name: 'Under the permit line', limit: 199 },
+    { name: 'Camp facilities', limit: 350 },
+    { name: 'With porto-potties and a second stage', limit: 500 },
+  ],
   paid: 275, mixFull: 65, mixSat: 25,
   tiers: {
     full: [{ name: 'Presale', price: 169, qty: 50 }, { name: 'Tier 1', price: 189, qty: 60 }, { name: 'Tier 2', price: 209, qty: 50 }, { name: 'Final', price: 229, qty: 0 }],
     sat: [{ name: 'Tier 1', price: 139, qty: 20 }, { name: 'Tier 2', price: 155, qty: 30 }, { name: 'Final', price: 169, qty: 0 }],
     sun: [{ name: 'Tier 1', price: 79, qty: 15 }, { name: 'Final', price: 85, qty: 0 }],
   },
-  carRate: 20, carSpots: 120, carComped: 24, pCar: 50,
-  cabinsRented: 8, cabinCost: 250, cabinsSold: 6, pCabin: 850, otherPer: 10,
-  unticketed: 60, kdGuests1: 15, kdGuests2: 10, psGuests: 30,
-  venuePerDay: 10, domePer: 10, domeCap: 2000,
-  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500, chef2: 1000, food500: 2500, ops500: 800, drinksPer: 6,
-  kd: 2000, psGuarantee: 2000, insurance: 750, chef: 1000, food: 2800, crewCount: 12, crewPay: 100,
-  art: 3000, marketing: 750, ops: 1200, medicalPerDay: 600, medicalDays: 3, hospitality: 600, contingencyPct: 5,
-  procPct: 2.9, procFixed: 0.3, bankShare: 0, bankPct: 0.8,
+  addons: { carRate: 20, carSpots: 120, pCar: 50, cabinsSold: 6, pCabin: 850, otherPer: 10 },
+  proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
+  contingencyPct: 5,
+  // Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets.
   artists: [
-    // Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets.
     [75, 100, 200, 300, 500, 1000, 2000, 3000],
     [75, 100, 150, 250, 400, 750, 1500, 3000],
     [75, 100, 150, 200, 300, 600, 1250, 2250],
   ],
-  kdShare: 50, psShare: 20,
+  // share is in parts: 2 / 2 / 1 means 40% / 40% / 20% among the partners active at that stage.
+  // people is the number on site at each stage, crew and guest list together.
+  partners: [
+    { name: 'You', role: 'Organiser', you: true, from: 0, guarantee: 0, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [1, 1, 1] },
+    { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 0, cap: 0, share: 2, sharesLoss: true, people: [4, 19, 29] },
+    { name: 'The Dome', role: '24-foot dome with sound, decks, travel, setup and takedown', from: 0, guarantee: 0, perTicket: 10, cap: 2000, share: 0, sharesLoss: false, people: [2, 2, 2] },
+    { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 2000, perTicket: 0, cap: 0, share: 1, sharesLoss: false, people: [0, 0, 30] },
+  ],
+  // shifts is what each person works, need is how many shifts the job takes. Zero need means not shift-based.
+  crew: [
+    { name: 'Chef', people: 1, pay: 1000, shifts: 0, need: 0, from: 0 },
+    { name: 'Second chef', people: 1, pay: 1000, shifts: 0, need: 0, from: 2 },
+    { name: 'Setup and strike', people: 5, pay: 100, shifts: 3, need: 16, from: 0 },
+    { name: 'Runners: airport and errands', people: 3, pay: 100, shifts: 3, need: 10, from: 0 },
+    { name: 'Gate', people: 4, pay: 100, shifts: 3, need: 12, from: 0 },
+    { name: 'Second gate and parking', people: 3, pay: 0, shifts: 3, need: 8, from: 0 },
+    { name: 'Artist hospitality and check-in', people: 3, pay: 0, shifts: 3, need: 9, from: 0 },
+    { name: 'Informal security: K Lodge door and night rounds', people: 2, pay: 0, shifts: 3, need: 6, from: 0 },
+    { name: 'Kitchen help', people: 2, pay: 0, shifts: 3, need: 6, from: 0 },
+    { name: 'Site upkeep: trash, bathrooms, firewood', people: 2, pay: 0, shifts: 3, need: 6, from: 0 },
+  ],
+  others: [
+    { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
+    { name: 'Medical team', people: 2, from: 0 },
+  ],
+  // basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site)
+  costs: [
+    { name: 'Venue fee', amount: 10, basis: 'ticketday', from: 0 },
+    { name: 'Cabin rental, 8 at $250', amount: 2000, basis: 'flat', from: 0 },
+    { name: 'Permits', amount: 3000, basis: 'flat', from: 1 },
+    { name: 'Porto-potties', amount: 2500, basis: 'flat', from: 2 },
+    { name: 'Insurance', amount: 750, basis: 'flat', from: 0 },
+    { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 0 },
+    { name: 'Groceries', amount: 2800, basis: 'flat', from: 0 },
+    { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
+    { name: 'Drinks for everyone', amount: 6, basis: 'person', from: 0 },
+    { name: 'Art, projection and lighting', amount: 3000, basis: 'flat', from: 0 },
+    { name: 'Marketing and design', amount: 750, basis: 'flat', from: 0 },
+    { name: 'Site supplies', amount: 1200, basis: 'flat', from: 0 },
+    { name: 'Extra site supplies', amount: 800, basis: 'flat', from: 2 },
+    { name: 'Artist hospitality and airport runs', amount: 600, basis: 'flat', from: 0 },
+  ],
+  timeline: [
+    { date: '2026-11-13', task: 'Put the five permit questions to the county planner', owner: 'You', done: false },
+    { date: '2026-11-20', task: 'Ask target artists for quotes', owner: 'You', done: false },
+    { date: '2026-11-30', task: 'Kinetic Desert and Project Seismic deals in writing', owner: 'You', done: false },
+    { date: '2026-12-01', task: 'Ticket site live. Alumni presale opens', owner: 'You', done: false },
+    { date: '2026-12-11', task: 'Submit the Temporary Use Permit application', owner: 'You', done: false },
+    { date: '2026-12-15', task: 'Presale closes. Set the artist budget from the result', owner: 'You', done: false },
+    { date: '2026-12-20', task: 'Send artist offers and pay deposits', owner: 'You', done: false },
+    { date: '2027-01-12', task: 'First lineup. Tier 1 and Sat–Sun tickets on sale', owner: 'You', done: false },
+    { date: '2027-01-22', task: 'Last day to file the permit', owner: 'You', done: false },
+    { date: '2027-02-01', task: 'Decide the Sunday closer', owner: 'You', done: false },
+    { date: '2027-02-09', task: 'Full lineup. Art grants and merch pre-order open', owner: 'You', done: false },
+    { date: '2027-03-01', task: 'Decide on a headliner upgrade', owner: 'You', done: false },
+    { date: '2027-03-15', task: 'Decide on the 500 unlock. Order porto-potties', owner: 'You and Kinetic Desert', done: false },
+    { date: '2027-03-23', task: 'Set times out. Sunday tickets on sale. Fire permit application in', owner: 'You', done: false },
+    { date: '2027-04-09', task: 'Final ticket tier. Grocery order. Shift schedule out', owner: 'You', done: false },
+    { date: '2027-04-21', task: 'Load-in begins', owner: 'Kinetic Desert', done: false },
+    { date: '2027-04-23', task: 'Gates open at 10:00 AM', owner: 'Gate crew', done: false },
+    { date: '2027-04-28', task: 'Production out by noon. Walk-through with the camp', owner: 'You', done: false },
+  ],
 };
+const sum = a => a.reduce((x, y) => x + y, 0);
+const n0 = v => Number(v) || 0;
+const on = (row, level) => n0(row.from) <= level;
 function fillTiers(tiers, n) {
   let left = n, rev = 0;
   const sold = tiers.map((t, i) => {
-    const q = i === tiers.length - 1 ? left : Math.min(left, t.qty);
-    rev += q * t.price; left -= q;
+    const q = i === tiers.length - 1 ? left : Math.min(left, n0(t.qty));
+    rev += q * n0(t.price); left -= q;
     return q;
   });
   return { rev, sold, avg: n ? rev / n : 0 };
 }
-// Who is on site without a paid ticket. Level 1: up to 199 on site. Level 2: 200 to 350. Level 3: 351 to 500.
-function people(s, paid) {
-  let unt = s.unticketed, level = 1;
-  if (paid + unt > s.permitOver) { unt += s.kdGuests1; level = 2; }
-  if (paid + unt > s.portoOver) { unt += s.kdGuests2 + s.psGuests; level = 3; }
-  return { unt, level, onSite: paid + unt };
+function headcount(s, level) {
+  const partners = sum(s.partners.map(p => n0(p.people[Math.min(level, p.people.length - 1)])));
+  const crew = sum(s.crew.map(c => on(c, level) ? n0(c.people) : 0));
+  const others = sum(s.others.map(o => on(o, level) ? n0(o.people) : 0));
+  return { partners, crew, others, total: partners + crew + others };
 }
-function maxPaid(s, limit) {
-  const cap = limit === undefined ? s.hardCap : limit;
-  for (let n = cap; n >= 0; n--) if (people(s, n).onSite <= cap) return n;
+// The stage the event is at for a given number of paid tickets, and who is on site.
+function people(s, paid) {
+  const last = s.stages.length - 1;
+  let level = 0;
+  while (level < last && paid + headcount(s, level).total > n0(s.stages[level].limit)) level++;
+  const unt = headcount(s, level).total;
+  return { level, unt, onSite: paid + unt, over: paid + unt > n0(s.stages[last].limit) };
+}
+// The most paid tickets that fit at a stage (the last stage when none is given).
+function maxPaid(s, level) {
+  const L = level === undefined ? s.stages.length - 1 : level;
+  const limit = n0(s.stages[L].limit);
+  for (let n = limit; n >= 0; n--) { const p = people(s, n); if (p.level <= L && p.onSite <= limit) return n; }
   return 0;
 }
+// The first paid ticket at which a stage begins.
+function stageStart(s, level) { return level <= 0 ? 0 : maxPaid(s, level - 1) + 1; }
 function compute(s) {
-  const nFull = s.paid * s.mixFull / 100;
-  const nSat = s.paid * s.mixSat / 100;
-  const nSun = Math.max(0, s.paid - nFull - nSat);
+  const paid = n0(s.paid);
+  const nFull = paid * s.mixFull / 100, nSat = paid * s.mixSat / 100, nSun = Math.max(0, paid - nFull - nSat);
   const tFull = fillTiers(s.tiers.full, nFull), tSat = fillTiers(s.tiers.sat, nSat), tSun = fillTiers(s.tiers.sun, nSun);
   const tickets = tFull.rev + tSat.rev + tSun.rev;
-  const carSold = Math.min(Math.max(0, s.carSpots - s.carComped), s.paid * s.carRate / 100);
-  const car = carSold * s.pCar;
-  const cabinRev = Math.min(s.cabinsSold, s.cabinsRented) * s.pCabin;
-  const other = s.paid * s.otherPer;
+  const { level, unt, onSite, over } = people(s, paid);
+  const a = s.addons;
+  const crewHead = headcount(s, level).crew;
+  const carSold = Math.min(Math.max(0, n0(a.carSpots) - crewHead), paid * n0(a.carRate) / 100);
+  const car = carSold * n0(a.pCar);
+  const cabinRev = n0(a.cabinsSold) * n0(a.pCabin);
+  const other = paid * n0(a.otherPer);
   const revenue = tickets + car + cabinRev + other;
   const ticketDays = nFull * 3 + nSat * 2 + nSun;
-  const venue = ticketDays * s.venuePerDay;
-  const dome = Math.min(s.paid * s.domePer, s.domeCap);
-  const { unt, level, onSite } = people(s, s.paid);
-  const permit = level >= 2 ? s.permit : 0;
-  const portos = level >= 3 ? s.portos : 0;
-  // Above 350 a second chef comes in and the kitchen also feeds Project Seismic, Kinetic Desert's guests and all artists.
-  const kitchen500 = level >= 3 ? s.chef2 + s.food500 : 0;
-  const ops500 = level >= 3 ? s.ops500 : 0;
-  const drinks = onSite * s.drinksPer;
-  const psGuar = level >= 3 ? s.psGuarantee : 0;
-  const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
-  const cabins = s.cabinsRented * s.cabinCost;
-  const crew = s.crewCount * s.crewPay;
-  const medical = s.medicalPerDay * s.medicalDays;
-  const fixedBase = artistFees + s.hospitality + s.kd + psGuar + s.insurance + s.chef + s.food + crew
-    + s.art + s.marketing + s.ops + medical + cabins + permit + portos + kitchen500 + ops500 + drinks;
-  const contingency = fixedBase * s.contingencyPct / 100;
-  // Card and bank fees on what is sold through the site. The fixed card fee is counted once per ticket.
+  const artistFees = sum(s.artists.flat().map(n0));
+  const partnerRows = s.partners.map(p => {
+    const active = on(p, level);
+    const guar = active ? n0(p.guarantee) : 0;
+    const raw = active ? n0(p.perTicket) * paid : 0;
+    return { active, guar, fee: n0(p.cap) > 0 ? Math.min(raw, n0(p.cap)) : raw };
+  });
+  const crewRows = s.crew.map(c => ({ active: on(c, level), pay: on(c, level) ? n0(c.people) * n0(c.pay) : 0 }));
+  const costRows = s.costs.map(c => {
+    const active = on(c, level), amt = n0(c.amount);
+    const variable = c.basis === 'ticket' || c.basis === 'ticketday';
+    const value = !active ? 0 : c.basis === 'ticket' ? amt * paid : c.basis === 'ticketday' ? amt * ticketDays : c.basis === 'person' ? amt * onSite : amt;
+    return { active, variable, value };
+  });
+  const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
+  const crewPay = sum(crewRows.map(c => c.pay));
+  const fixedCosts = sum(costRows.map(c => c.variable ? 0 : c.value)), variableCosts = sum(costRows.map(c => c.variable ? c.value : 0));
+  // Contingency covers everything that does not move ticket by ticket.
+  const fixedBase = artistFees + guarantees + crewPay + fixedCosts;
+  const contingency = fixedBase * n0(s.contingencyPct) / 100;
   const online = tickets + car + cabinRev;
-  const bank = Math.min(100, s.bankShare) / 100;
-  const processing = online * ((1 - bank) * s.procPct + bank * s.bankPct) / 100 + s.paid * (1 - bank) * s.procFixed;
-  const costs = fixedBase + contingency + venue + dome + processing;
+  const bank = Math.min(100, n0(s.proc.bankShare)) / 100;
+  const processing = online * ((1 - bank) * n0(s.proc.pct) + bank * n0(s.proc.bankPct)) / 100 + paid * (1 - bank) * n0(s.proc.fixed);
+  const costs = fixedBase + contingency + partnerFees + variableCosts + processing;
   const profit = revenue - costs;
-  // Guarantees are paid on top of each share. Project Seismic joins above 350 on site and shares a profit
-  // but not a loss. Kinetic Desert takes its share of whatever is left, profit or loss.
-  const psShareAmt = level >= 3 ? Math.max(0, profit) * s.psShare / 100 : 0;
-  const kdShareAmt = (profit - psShareAmt) * s.kdShare / 100;
-  return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
-    unt, level, onSite, permit, portos, kitchen500, ops500, drinks, psGuar, artistFees, cabins, crew, medical, contingency, processing, costs, profit,
-    kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: psGuar + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
-    avgTicket: s.paid ? tickets / s.paid : 0 };
+  // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
+  const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
+  const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
+  const youIdx = s.partners.findIndex(p => p.you);
+  s.partners.forEach((p, i) => {
+    const r = partnerRows[i];
+    r.pct = inPool(p, i) && parts ? n0(p.share) / parts * 100 : 0;
+    r.shareAmt = profit * r.pct / 100;
+    if (!parts && i === youIdx) r.shareAmt = profit;
+    r.total = r.guar + r.fee + r.shareAmt;
+  });
+  return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays,
+    level, unt, onSite, over, crewHead, artistFees, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay,
+    fixedCosts, variableCosts, contingency, processing, online, costs, profit,
+    yours: youIdx >= 0 ? partnerRows[youIdx].shareAmt : profit, avgTicket: paid ? tickets / paid : 0 };
 }
 function breakEven(s) {
   const max = maxPaid(s);
   for (let n = 0; n <= max; n++) if (compute({ ...s, paid: n }).profit >= 0) return n;
   return null;
 }
+// Each partner's share of a profit at a stage, in percent.
+function sharePct(s, level) {
+  const parts = sum(s.partners.map(p => on(p, level) ? n0(p.share) : 0));
+  return s.partners.map(p => on(p, level) && parts ? n0(p.share) / parts * 100 : 0);
+}
 // Scale a fee grid to a new total, keeping its shape. Slots round to $25 and the remainder goes to the biggest slots.
 function scaleFees(shape, target) {
-  const flat = shape.flat();
-  const sum = flat.reduce((a, b) => a + b, 0);
-  if (!sum) return shape.map(d => d.slice());
-  const out = flat.map(v => Math.round(v * target / sum / 25) * 25);
-  let diff = Math.round((target - out.reduce((a, b) => a + b, 0)) / 25);
-  const order = flat.map((v, i) => i).sort((a, b) => flat[b] - flat[a]);
+  const flat = shape.flat().map(n0);
+  const total = sum(flat);
+  if (!total) return shape.map(d => d.slice());
+  const out = flat.map(v => Math.round(v * target / total / 25) * 25);
+  let diff = Math.round((target - sum(out)) / 25);
+  const order = flat.map((v, i) => i).sort((x, y) => flat[y] - flat[x]);
   for (let i = 0; diff !== 0 && i < 10000; i++) {
     const idx = order[i % order.length], step = diff > 0 ? 25 : -25;
     if (out[idx] + step >= 0) { out[idx] += step; diff -= Math.sign(diff); }
@@ -286,224 +498,257 @@ function scaleFees(shape, target) {
 <script>
 const SLOTS = ['2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:30 PM', '9:00 PM', '10:30 PM'];
 const DAYS = ['Fri', 'Sat', 'Sun'];
-const LEAN_FEES = [[75, 75, 100, 150, 300, 600, 1100, 2000], [75, 75, 100, 150, 250, 500, 1000, 1750], [75, 75, 100, 150, 200, 400, 750, 1250]];
-const PRESETS = {
-  plan: {},
-  unlock: { paid: 385 },
-  leaner: { paid: 200, artists: LEAN_FEES },
-  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 4, food: 2000, art: 2000 },
+const TYPES = [['full', 'Fri–Sun', 'tFull'], ['sat', 'Sat–Sun', 'tSat'], ['sun', 'Sunday only', 'tSun']];
+const TABS = ['overview', 'tickets', 'artists', 'production', 'crew', 'costs', 'timeline'];
+const BASIS = [['flat', 'Flat amount'], ['ticket', 'Per paid ticket'], ['ticketday', 'Per ticket per day'], ['person', 'Per person on site']];
+const BLANK = {
+  partners: () => ({ name: 'New partner', role: '', from: 0, guarantee: 0, perTicket: 0, cap: 0, share: 0, sharesLoss: false, people: s.stages.map(() => 0) }),
+  crew: () => ({ name: 'New role', people: 1, pay: 0, shifts: 3, need: 3, from: 0 }),
+  others: () => ({ name: 'New group', people: 1, from: 0 }),
+  costs: () => ({ name: 'New cost', amount: 0, basis: 'flat', from: 0 }),
+  timeline: () => ({ date: '2027-04-30', task: 'New task', owner: '', done: false }),
 };
-const GROUPS = [
-  { title: 'Tickets and artist budget', fields: [
-    { k: 'paid', label: 'Paid tickets', slider: true, min: 0, max: 385 },
-    { k: 'artistBudget', label: 'Artist budget, all 24 sets', slider: true, min: 0, max: 30000, step: 250, unit: '$', virtual: true },
-    { k: 'mixFull', label: 'Share buying Fri–Sun', slider: true, min: 0, max: 100, unit: '%' },
-    { k: 'mixSat', label: 'Share buying Sat–Sun', slider: true, min: 0, max: 100, unit: '%' },
-  ], note: 'mix' },
-  { title: 'Ticket tiers', tiers: true, fields: [] },
-  { title: 'Add-ons', fields: [
-    { k: 'pCar', label: 'Car camping pass' },
-    { k: 'carRate', label: 'Passes per 100 tickets' },
-    { k: 'carSpots', label: 'Car camping spots' },
-    { k: 'carComped', label: 'Passes comped to crew', hint: '12 paid crew and 12 volunteers' },
-    { k: 'cabinsSold', label: 'Cabins sold to attendees', hint: 'Of the 8 shared cabins, 9 beds each' },
-    { k: 'pCabin', label: 'Price per cabin' },
-    { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
-  ] },
-  { title: 'People on site without a ticket', fields: [
-    { k: 'unticketed', label: 'Crew, artists and their guests', hint: 'At every size' },
-    { k: 'kdGuests1', label: 'Kinetic Desert guests, 200 or more on site' },
-    { k: 'kdGuests2', label: 'More Kinetic Desert guests, above 350' },
-    { k: 'psGuests', label: 'Project Seismic guest list, above 350' },
-  ], note: 'people' },
-  { title: 'Payment processing', fields: [
-    { k: 'procPct', label: 'Card fee, %', step: 0.1 },
-    { k: 'procFixed', label: 'Card fee per order, $', step: 0.05, hint: 'Counted once per ticket' },
-    { k: 'bankShare', label: 'Share of sales paid by bank transfer, %' },
-    { k: 'bankPct', label: 'Bank transfer fee, %', step: 0.1 },
-  ], text: 'California requires the listed ticket price to include every mandatory fee, so these fees come out of your side.' },
-  { title: 'Fixed costs', fields: [
-    { k: 'kd', label: 'Kinetic Desert guarantee' },
-    { k: 'hospitality', label: 'Artist hospitality and airport runs', hint: 'Artists book their own flights' },
-    { k: 'insurance', label: 'Insurance' },
-    { k: 'permit', label: 'Permits', hint: 'At 200 or more on site' },
-    { k: 'portos', label: 'Porto-potties', hint: 'A guess. Above 350 on site.' },
-    { k: 'chef', label: 'Chef' },
-    { k: 'food', label: 'Groceries' },
-    { k: 'chef2', label: 'Second chef', hint: 'Above 350 on site' },
-    { k: 'food500', label: 'Extra groceries', hint: 'Above 350: feeding Project Seismic, Kinetic Desert guests and all artists. A guess.' },
-    { k: 'drinksPer', label: 'Drinks per person on site', hint: 'Bulk seltzers and other drinks for everyone. A guess.' },
-    { k: 'ops500', label: 'Extra site supplies', hint: 'Above 350 on site' },
-    { k: 'crewCount', label: 'Paid crew and gate' },
-    { k: 'crewPay', label: 'Pay per crew member' },
-    { k: 'cabinsRented', label: 'Cabins rented from camp' },
-    { k: 'cabinCost', label: 'Cost per cabin' },
-    { k: 'art', label: 'Art, projection, path lighting' },
-    { k: 'marketing', label: 'Marketing and design' },
-    { k: 'ops', label: 'Site supplies', hint: 'Wristbands, signage, radios, trash, firewood' },
-    { k: 'medicalPerDay', label: 'Medical team per day' },
-    { k: 'medicalDays', label: 'Days of medical cover', hint: 'Friday 10 AM to Monday 10 AM' },
-    { k: 'contingencyPct', label: 'Contingency, % of fixed costs' },
-  ] },
-  { title: 'Per-ticket costs', fields: [
-    { k: 'venuePerDay', label: 'Venue fee per ticket per day' },
-    { k: 'domePer', label: 'Dome fee per ticket' },
-    { k: 'domeCap', label: 'Dome fee cap' },
-  ] },
-  { title: 'Profit split', fields: [
-    { k: 'psGuarantee', label: 'Project Seismic guarantee', hint: 'Above 350 on site' },
-    { k: 'psShare', label: 'Project Seismic share, %', hint: 'Above 350 on site. Profit only.' },
-    { k: 'kdShare', label: 'Kinetic Desert share, %', hint: 'Of what is left after Project Seismic' },
-  ], text: 'Guarantees are paid on top of each share. You take what is left. A loss is split between you and Kinetic Desert only.' },
-];
+const STORE_KEY = 'tahquitz-2027-plan';
 
 let s = structuredClone(DEFAULTS);
 let feeShape = structuredClone(DEFAULTS.artists);
-let active = 'plan';
+let savedJSON = JSON.stringify(DEFAULTS);
+let remote = null, remoteNote = '', readOnly = false;
+
 const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const num = v => Number(v) || 0;
 const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
 const int = n => Math.round(n).toLocaleString('en-US');
-const feeTotal = () => s.artists.flat().reduce((a, b) => a + b, 0);
+const pct = n => (Math.round(n * 10) / 10).toString() + '%';
+const feeTotal = () => s.artists.flat().reduce((a, b) => a + num(b), 0);
+const getPath = (o, p) => p.split('.').reduce((x, k) => x[k], o);
+const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); ks.reduce((x, k) => x[k], o)[last] = v; };
+const stageLabel = i => i === 0 ? 'Always' : `Above ${int(s.stages[i - 1].limit)} on site`;
+const fromSelect = (list, i, val) => `<select data-list="${list}" data-i="${i}" data-f="from" data-num="1" id="${list}-${i}-from" aria-label="Starts">${s.stages.map((st, j) => `<option value="${j}"${j === num(val) ? ' selected' : ''}>${stageLabel(j)}</option>`).join('')}</select>`;
+const numField = (path, label, hint, step) => { const id = 'f-' + path.replace(/\./g, '-'); return `<div class="field"><label for="${id}">${label}${hint ? `<small>${hint}</small>` : ''}</label><input type="number" id="${id}" data-k="${path}" min="0" step="${step || 1}" inputmode="decimal" value="${esc(getPath(s, path))}"></div>`; };
+const cell = (list, i, f, v, type, extra) => `<input type="${type}" id="${list}-${i}-${f}" data-list="${list}" data-i="${i}" data-f="${f}" value="${esc(v)}" ${extra || ''}>`;
+const delBtn = (list, i, label) => `<button class="ghost" data-del="${list}" data-i="${i}" aria-label="Remove ${esc(label)}">Remove</button>`;
 
-function buildControls() {
-  const root = $('controls');
-  root.innerHTML = GROUPS.map((g, gi) => {
-    const rows = g.fields.map(f => f.slider
-      ? `<div class="field slider"><div class="row"><label for="f-${f.k}">${f.label}</label><output id="o-${f.k}"></output></div>
-           <input type="range" id="f-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="${f.step || 1}"></div>`
-      : `<div class="field"><label for="f-${f.k}">${f.label}${f.hint ? `<small>${f.hint}</small>` : ''}</label>
-           <input type="number" id="f-${f.k}" data-k="${f.k}" min="0" step="${f.step || 1}" inputmode="decimal"></div>`).join('');
-    const note = (g.note ? `<p class="note" id="note-${g.note}"></p>` : '') + (g.text ? `<p class="note">${g.text}</p>` : '');
-    if (g.tiers) return `<section class="panel" id="panel-${gi}"><h2>${g.title}</h2><div class="tiers">${tierTables()}</div>
-      <p class="note">Tiers sell in order. The last tier of each type takes every ticket after the earlier ones sell out.</p></section>`;
-    return `<section class="panel" id="panel-${gi}"><h2>${g.title}</h2>${rows}${note}</section>`;
-  }).join('');
-  root.addEventListener('input', e => {
-    const d = e.target.dataset;
-    if (d.type) {
-      s.tiers[d.type][+d.i][d.f] = Math.max(0, Number(e.target.value) || 0);
-    } else if (d.k === 'artistBudget') {
-      s.artists = scaleFees(feeShape, Number(e.target.value) || 0);
-    } else if (d.k) {
-      s[d.k] = Math.max(0, Number(e.target.value) || 0);
-      if (d.k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
-      if (d.k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
-    } else return;
-    active = null;
-    render(e.target);
-  });
+/* ---------- builders: run when the structure changes ---------- */
+function buildStages() {
+  $('stages').innerHTML = `<thead><tr><th>Stage</th><th>Limit on site</th><th>Without a ticket</th><th>Tickets that fit</th><th>Starts at ticket</th><th class="l">Switches on</th></tr></thead><tbody>` +
+    s.stages.map((st, i) => `<tr><td>${cell('stages', i, 'name', st.name, 'text', 'aria-label="Stage name"')}</td>
+      <td>${cell('stages', i, 'limit', st.limit, 'number', 'min="1" step="1" aria-label="Limit on site"')}</td>
+      <td id="st-unt-${i}"></td><td id="st-fit-${i}"></td><td id="st-start-${i}"></td><td class="l muted" id="st-on-${i}"></td></tr>`).join('') + '</tbody>';
+  $('jump').innerHTML = s.stages.map((st, i) => `<button data-jump="${i}">Sell out at ${int(st.limit)}</button>`).join('');
+  $('btn-del-stage').disabled = s.stages.length < 2;
 }
-
-const TYPES = [['full', 'Fri–Sun', 'tFull'], ['sat', 'Sat–Sun', 'tSat'], ['sun', 'Sunday only', 'tSun']];
-function tierTables() {
-  return TYPES.map(([type, label]) => `<h3>${label}<span id="ta-${type}"></span></h3>
-    <div class="scroll"><table class="fees"><thead><tr><th>Tier</th><th>Price</th><th>Tickets</th><th>Sold</th></tr></thead><tbody>` +
-    DEFAULTS.tiers[type].map((tier, i, all) => `<tr><td>${tier.name}</td>
-      <td><input type="number" id="t-${type}-${i}-price" data-type="${type}" data-i="${i}" data-f="price" min="0" step="1" inputmode="numeric" aria-label="${label} ${tier.name} price"></td>
-      <td>${i === all.length - 1 ? '<span class="muted">the rest</span>' : `<input type="number" id="t-${type}-${i}-qty" data-type="${type}" data-i="${i}" data-f="qty" min="0" step="1" inputmode="numeric" aria-label="${label} ${tier.name} tickets at this price">`}</td>
+function buildTickets() {
+  $('mix').innerHTML = [['mixFull', 'Share buying Fri–Sun'], ['mixSat', 'Share buying Sat–Sun']].map(([k, label]) =>
+    `<div class="field slider"><div class="row"><label for="f-${k}">${label}</label><output id="o-${k}"></output></div><input type="range" id="f-${k}" data-k="${k}" min="0" max="100" step="1" value="${s[k]}"></div>`).join('');
+  $('addons').innerHTML = numField('addons.pCar', 'Car camping pass') + numField('addons.carRate', 'Passes per 100 tickets') + numField('addons.carSpots', 'Car camping spots') +
+    numField('addons.cabinsSold', 'Cabins sold to attendees', 'Of the 8 shared cabins, 9 beds each') + numField('addons.pCabin', 'Price per cabin') +
+    numField('addons.otherPer', 'Other net income per ticket', 'Merch pre-orders, meal plan, vendor fees');
+  $('proc').innerHTML = numField('proc.pct', 'Card fee, %', '', 0.1) + numField('proc.fixed', 'Card fee per order, $', 'Counted once per ticket', 0.05) +
+    numField('proc.bankShare', 'Share of sales paid by bank transfer, %') + numField('proc.bankPct', 'Bank transfer fee, %', '', 0.1);
+  $('tiers').innerHTML = TYPES.map(([type, label]) => `<h3>${label}<span id="ta-${type}"></span></h3>
+    <div class="scroll"><table class="edit fees"><thead><tr><th>Tier</th><th>Price</th><th>Tickets</th><th>Sold</th></tr></thead><tbody>` +
+    s.tiers[type].map((tier, i, all) => `<tr><td>${esc(tier.name)}</td>
+      <td><input type="number" id="t-${type}-${i}-price" data-tier="${type}" data-i="${i}" data-f="price" min="0" step="1" value="${esc(tier.price)}" aria-label="${label} ${esc(tier.name)} price"></td>
+      <td>${i === all.length - 1 ? '<span class="muted">the rest</span>' : `<input type="number" id="t-${type}-${i}-qty" data-tier="${type}" data-i="${i}" data-f="qty" min="0" step="1" value="${esc(tier.qty)}" aria-label="${label} ${esc(tier.name)} tickets at this price">`}</td>
       <td id="ts-${type}-${i}"></td></tr>`).join('') + '</tbody></table></div>').join('');
 }
-function syncTiers(r, skip) {
-  for (const [type, , key] of TYPES) {
-    s.tiers[type].forEach((tier, i) => {
-      for (const f of ['price', 'qty']) { const el = $(`t-${type}-${i}-${f}`); if (el && el !== skip) el.value = tier[f]; }
-      $(`ts-${type}-${i}`).textContent = int(r[key].sold[i]);
-    });
-    $('ta-' + type).textContent = r[key].avg ? 'averages ' + money(r[key].avg) : '';
-  }
-}
-
 function buildFees() {
   $('fees').innerHTML = `<thead><tr><th>Set time</th>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>` +
     SLOTS.map((t, i) => `<tr><td>${t}</td>${DAYS.map((d, j) =>
-      `<td><input type="number" id="fee-${j}-${i}" data-day="${j}" data-slot="${i}" min="0" step="25" inputmode="numeric" aria-label="${d} ${t} fee"></td>`).join('')}</tr>`).join('') +
+      `<td><input type="number" id="fee-${j}-${i}" data-day="${j}" data-slot="${i}" min="0" step="25" value="${esc(s.artists[j][i])}" aria-label="${d} ${t} fee"></td>`).join('')}</tr>`).join('') +
     `</tbody><tfoot><tr class="total"><td>Day total</td>${DAYS.map((d, j) => `<td id="fee-total-${j}"></td>`).join('')}</tr>
     <tr><td class="muted">Share of budget</td>${DAYS.map((d, j) => `<td class="muted" id="fee-share-${j}"></td>`).join('')}</tr></tfoot>`;
-  $('fees').addEventListener('input', e => {
-    const t = e.target;
-    if (t.dataset.day === undefined) return;
-    s.artists[+t.dataset.day][+t.dataset.slot] = Math.max(0, Number(t.value) || 0);
-    feeShape = structuredClone(s.artists);
-    active = null;
-    render(t);
-  });
 }
-
-function syncInputs(skip, top) {
-  if (s.paid > top) s.paid = top;
-  $('f-paid').max = top;
-  for (const g of GROUPS) {
-    for (const f of g.fields) {
-      const el = $('f-' + f.k);
-      const v = f.virtual ? feeTotal() : s[f.k];
-      if (el !== skip) el.value = v;
-      if (f.slider) $('o-' + f.k).textContent = f.unit === '$' ? money(v) : int(v) + (f.unit || '');
-    }
-  }
-  s.artists.forEach((day, j) => {
-    day.forEach((v, i) => { const el = $(`fee-${j}-${i}`); if (el !== skip) el.value = v; });
-    const dayTotal = day.reduce((a, b) => a + b, 0);
-    $('fee-total-' + j).textContent = money(dayTotal);
-    $('fee-share-' + j).textContent = feeTotal() ? Math.round(dayTotal / feeTotal() * 100) + '%' : '';
-  });
-  document.querySelectorAll('button.preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === active)));
+function buildPartners() {
+  $('partners').innerHTML = s.partners.map((p, i) => `<div class="panel">
+    <div class="card-head">${cell('partners', i, 'name', p.name, 'text', 'aria-label="Partner name"')}${p.you ? '<span class="pill plain">Organiser</span>' : delBtn('partners', i, p.name)}</div>
+    <div class="field wide"><label for="partners-${i}-role">What they provide</label>${cell('partners', i, 'role', p.role, 'text')}</div>
+    <div class="kv">
+      <div class="field"><label for="partners-${i}-guarantee">Minimum guarantee</label>${cell('partners', i, 'guarantee', p.guarantee, 'number', 'min="0" step="50"')}</div>
+      <div class="field"><label for="partners-${i}-share">Profit share, parts</label>${cell('partners', i, 'share', p.share, 'number', 'min="0" step="0.5"')}</div>
+      <div class="field"><label for="partners-${i}-perTicket">Fee per paid ticket</label>${cell('partners', i, 'perTicket', p.perTicket, 'number', 'min="0" step="1"')}</div>
+      <div class="field"><label for="partners-${i}-cap">Cap on that fee<small>0 for no cap</small></label>${cell('partners', i, 'cap', p.cap, 'number', 'min="0" step="50"')}</div>
+    </div>
+    <div class="field pick"><label for="partners-${i}-from">Comes in</label>${fromSelect('partners', i, p.from)}</div>
+    <label class="check"><input type="checkbox" id="partners-${i}-sharesLoss" data-list="partners" data-i="${i}" data-f="sharesLoss"${p.sharesLoss ? ' checked' : ''}>Shares a loss as well as a profit</label>
+    <h3 class="given-title">Places on site, crew and guests together</h3>
+    <div class="given">${s.stages.map((st, j) => `<label>Up to ${int(st.limit)}<input type="number" id="partners-${i}-people-${j}" data-list="partners" data-i="${i}" data-f="people" data-j="${j}" min="0" step="1" value="${esc(p.people[j] ?? 0)}"></label>`).join('')}</div>
+    <div class="fact" id="partner-fact-${i}"></div>
+  </div>`).join('');
 }
+function buildCrew() {
+  $('crew').innerHTML = `<thead><tr><th>Role</th><th>People</th><th>Pay each</th><th>Shifts each</th><th>Shifts needed</th><th class="l">Starts</th><th class="l">Coverage</th><th></th></tr></thead><tbody>` +
+    s.crew.map((c, i) => `<tr id="crew-row-${i}"><td>${cell('crew', i, 'name', c.name, 'text', 'aria-label="Role"')}</td>
+      <td>${cell('crew', i, 'people', c.people, 'number', 'min="0" step="1" aria-label="People"')}</td>
+      <td>${cell('crew', i, 'pay', c.pay, 'number', 'min="0" step="25" aria-label="Pay each"')}</td>
+      <td>${cell('crew', i, 'shifts', c.shifts, 'number', 'min="0" step="1" aria-label="Shifts each"')}</td>
+      <td>${cell('crew', i, 'need', c.need, 'number', 'min="0" step="1" aria-label="Shifts needed"')}</td>
+      <td class="l">${fromSelect('crew', i, c.from)}</td><td class="l" id="crew-cov-${i}"></td><td>${delBtn('crew', i, c.name)}</td></tr>`).join('') +
+    `</tbody><tfoot><tr class="total"><td>At the current size</td><td id="crew-t-people"></td><td id="crew-t-pay"></td><td id="crew-t-supply"></td><td id="crew-t-need"></td><td></td><td class="l" id="crew-t-cov"></td><td></td></tr></tfoot>`;
+  $('others').className = 'edit compact';
+  $('others').innerHTML = `<thead><tr><th>Group</th><th>People</th><th class="l">Starts</th><th></th></tr></thead><tbody>` +
+    s.others.map((o, i) => `<tr><td>${cell('others', i, 'name', o.name, 'text', 'aria-label="Group"')}</td>
+      <td>${cell('others', i, 'people', o.people, 'number', 'min="0" step="1" aria-label="People"')}</td>
+      <td class="l">${fromSelect('others', i, o.from)}</td><td>${delBtn('others', i, o.name)}</td></tr>`).join('') + '</tbody>';
+}
+function buildCosts() {
+  $('costs').innerHTML = `<thead><tr><th>Cost</th><th>Amount</th><th class="l">Charged</th><th class="l">Starts</th><th>At the current size</th><th></th></tr></thead><tbody>` +
+    s.costs.map((c, i) => `<tr id="cost-row-${i}"><td>${cell('costs', i, 'name', c.name, 'text', 'aria-label="Cost"')}</td>
+      <td>${cell('costs', i, 'amount', c.amount, 'number', 'min="0" step="any" aria-label="Amount"')}</td>
+      <td class="l"><select id="costs-${i}-basis" data-list="costs" data-i="${i}" data-f="basis" aria-label="Charged">${BASIS.map(([v, l]) => `<option value="${v}"${v === c.basis ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
+      <td class="l">${fromSelect('costs', i, c.from)}</td><td id="cost-now-${i}"></td><td>${delBtn('costs', i, c.name)}</td></tr>`).join('') +
+    `</tbody><tfoot><tr class="total"><td>Total</td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr></tfoot>`;
+  $('cont').innerHTML = numField('contingencyPct', 'Contingency, %');
+}
+function buildTimeline() {
+  s.timeline.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  $('timeline').innerHTML = `<thead><tr><th>Task</th><th class="l">Date</th><th class="l">Owner</th><th class="l">Done</th><th class="l">Status</th><th></th></tr></thead><tbody>` +
+    s.timeline.map((t, i) => `<tr><td>${cell('timeline', i, 'task', t.task, 'text', 'class="task" aria-label="Task"')}</td>
+      <td class="l">${cell('timeline', i, 'date', t.date, 'date', 'class="mid" aria-label="Date"')}</td>
+      <td class="l">${cell('timeline', i, 'owner', t.owner, 'text', 'class="mid" aria-label="Owner"')}</td>
+      <td class="l"><input type="checkbox" id="timeline-${i}-done" data-list="timeline" data-i="${i}" data-f="done"${t.done ? ' checked' : ''} aria-label="Done"></td>
+      <td class="l" id="tl-status-${i}"></td><td>${delBtn('timeline', i, t.task)}</td></tr>`).join('') + '</tbody>';
+}
+function buildAll() { buildStages(); buildTickets(); buildFees(); buildPartners(); buildCrew(); buildCosts(); buildTimeline(); }
 
+/* ---------- derived output: runs on every change ---------- */
+function setVal(el, v, skip) { if (el && el !== skip && el.value !== String(v)) el.value = v; }
+const today = () => new Date().toISOString().slice(0, 10);
+function fmtDate(d) { const x = new Date(d + 'T12:00:00'); return isNaN(x) ? '' : x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
 function renderVerdict(r, be) {
   $('v-profit-label').textContent = r.profit >= 0 ? 'Profit' : 'Loss';
   $('v-profit').textContent = money(r.profit);
   $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
   $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.costs)} out`;
-  const cap350 = Math.max(1, maxPaid(s, s.portoOver));
-  if (be === null) { $('v-be').textContent = 'None'; $('v-be-sub').textContent = 'No ticket count up to 500 on site covers these costs'; }
+  if (be === null) { $('v-be').textContent = 'None'; $('v-be-sub').textContent = 'No ticket count that fits covers these costs'; }
   else {
+    let k = 0; while (k < s.stages.length - 1 && be > maxPaid(s, k)) k++;
+    const cap = Math.max(1, maxPaid(s, k));
     $('v-be').textContent = int(be) + ' tickets';
-    $('v-be-sub').textContent = be <= cap350 ? `${Math.round(be / cap350 * 100)}% of the ${int(cap350)} you can sell at 350 on site` : `Needs more than the ${int(cap350)} you can sell at 350 on site`;
+    $('v-be-sub').textContent = `${Math.round(be / cap * 100)}% of the ${int(cap)} that fit at ${int(s.stages[k].limit)} on site`;
   }
   $('v-site').textContent = int(r.onSite);
   const pill = $('v-site-pill');
-  if (r.onSite > s.hardCap) { pill.textContent = 'Over the 500 limit'; pill.className = 'pill bad'; }
-  else if (r.level === 1) { pill.textContent = 'No permit needed'; pill.className = 'pill good'; }
-  else if (r.level === 2) { pill.textContent = 'Permit required'; pill.className = 'pill warn'; }
-  else { pill.textContent = 'Permit, porto-potties, second stage'; pill.className = 'pill warn'; }
+  pill.textContent = r.over ? `Over the ${int(s.stages[s.stages.length - 1].limit)} limit` : s.stages[r.level].name;
+  pill.className = 'pill ' + (r.over ? 'bad' : r.level === 0 ? 'good' : 'warn');
   $('v-you-label').textContent = r.yours >= 0 ? 'Your take' : 'Your share of the loss';
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
-  $('v-you-sub').textContent = r.level === 3 ? `Kinetic Desert ${money(r.kdTotal)}, Project Seismic ${money(r.psTotal)}, guarantees included` : `Kinetic Desert ${money(r.kdTotal)} including the ${money(s.kd)} guarantee`;
-  $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
-  $('note-people').textContent = `Right now ${int(r.unt)} people are on site without a ticket. That leaves ${int(maxPaid(s, s.permitOver))} tickets under the permit line, ${int(cap350)} at 350 on site and ${int(maxPaid(s))} at 500.`;
+  const others = s.partners.map((p, i) => [p, r.partnerRows[i]]).filter(([p, x]) => !p.you && x.active && num(p.share) > 0);
+  $('v-you-sub').textContent = others.length ? others.map(([p, x]) => `${p.name} ${money(x.total)}`).join(', ') + ', guarantees included' : 'No other partner shares the result';
 }
-
+function renderOverview() {
+  s.stages.forEach((st, i) => {
+    $('st-unt-' + i).textContent = int(headcount(s, i).total);
+    $('st-fit-' + i).textContent = int(maxPaid(s, i));
+    $('st-start-' + i).textContent = i === 0 ? 'first' : int(stageStart(s, i));
+    const names = [...s.partners, ...s.crew, ...s.others, ...s.costs].filter(x => num(x.from) === i).map(x => x.name);
+    $('st-on-' + i).textContent = i === 0 ? 'The base plan' : names.length ? names.join(', ') : 'Nothing extra yet';
+  });
+  const be = breakEven(s);
+  const what = [
+    ['Artist budget up $1,000', () => ({ ...s, artists: scaleFees(s.artists, feeTotal() + 1000) })],
+    ['Every ticket price up $10', () => ({ ...s, tiers: Object.fromEntries(Object.entries(s.tiers).map(([k, ts]) => [k, ts.map(t => ({ ...t, price: num(t.price) + 10 }))])) })],
+    ['Ten more people on guest lists', () => ({ ...s, others: [...s.others, { name: '', people: 10, from: 0 }] })],
+    ['No merch, meal plan or vendor income', () => ({ ...s, addons: { ...s.addons, otherPer: 0 } })],
+    ['30% of sales paid by bank transfer', () => ({ ...s, proc: { ...s.proc, bankShare: 30 } })],
+  ];
+  $('sens').innerHTML = what.map(([label, make]) => {
+    const b = breakEven(make());
+    const d = be === null || b === null ? null : b - be;
+    const text = d === null ? (b === null ? 'no break-even' : int(b) + ' tickets') : d === 0 ? 'no change' : (d > 0 ? '+' : '−') + Math.abs(d) + (Math.abs(d) === 1 ? ' ticket' : ' tickets');
+    return `<li><span>${label}</span><b>${text}</b></li>`;
+  }).join('');
+  const open = s.timeline.filter(t => !t.done).sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 4);
+  $('next').innerHTML = open.length ? open.map(t => `<li><span>${esc(t.task)}${t.date < today() ? ' <span class="pill bad">overdue</span>' : ''}</span><b>${fmtDate(t.date)}</b></li>`).join('') : '<li><span>Everything on the timeline is done.</span></li>';
+  return be;
+}
+function renderTickets(r) {
+  for (const [type, , key] of TYPES) {
+    s.tiers[type].forEach((tier, i) => { $(`ts-${type}-${i}`).textContent = int(r[key].sold[i]); });
+    $('ta-' + type).textContent = r[key].avg ? 'averages ' + money(r[key].avg) : '';
+  }
+  $('o-mixFull').textContent = int(s.mixFull) + '%'; $('o-mixSat').textContent = int(s.mixSat) + '%';
+  $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
+  $('note-car').textContent = `${int(r.crewHead)} passes go to crew, which leaves ${int(Math.max(0, num(s.addons.carSpots) - r.crewHead))} to sell. ${int(r.carSold)} sell at the current ticket count.`;
+}
+function renderFees() {
+  const total = feeTotal();
+  s.artists.forEach((day, j) => {
+    const d = day.reduce((a, b) => a + num(b), 0);
+    $('fee-total-' + j).textContent = money(d);
+    $('fee-share-' + j).textContent = total ? Math.round(d / total * 100) + '%' : '';
+  });
+}
+function renderProduction(r) {
+  s.partners.forEach((p, i) => {
+    const x = r.partnerRows[i], from = num(p.from);
+    const when = from === 0 ? 'Active from the first ticket.' : `Comes in at ticket ${int(stageStart(s, from))}, when more than ${int(s.stages[from - 1].limit)} people are on site.`;
+    const share = num(p.share) > 0 ? s.stages.map((st, j) => j >= from ? `${pct(sharePct(s, j)[i])} up to ${int(st.limit)}` : null).filter(Boolean).join(', ') + ' of any profit.' : 'No profit share.';
+    const now = x.active ? `At the current size: ${money(x.total)}${x.guar ? `, including the ${money(x.guar)} guarantee` : ''}${x.fee ? `, including ${money(x.fee)} in ticket fees` : ''}.` : 'Not active at the current size.';
+    $('partner-fact-' + i).textContent = `${when} ${share} ${now}`;
+  });
+  $('shares').innerHTML = `<thead><tr><th>Partner</th>${s.stages.map(st => `<th>Up to ${int(st.limit)}</th>`).join('')}<th>Guarantee</th><th>Comes in at ticket</th><th>Places now</th></tr></thead><tbody>` +
+    s.partners.map((p, i) => `<tr class="${r.partnerRows[i].active ? '' : 'off'}"><td>${esc(p.name)}</td>${s.stages.map((st, j) => `<td>${sharePct(s, j)[i] ? pct(sharePct(s, j)[i]) : '–'}</td>`).join('')}
+      <td>${num(p.guarantee) ? money(p.guarantee) : '–'}</td><td>${num(p.from) === 0 ? 'first' : int(stageStart(s, num(p.from)))}</td><td>${int(num(p.people[r.level]))}</td></tr>`).join('') + '</tbody>';
+}
+function covPill(supply, need) {
+  if (!need) return '<span class="pill plain">not shift-based</span>';
+  if (supply >= need) return `<span class="pill good">covered, ${int(supply)} of ${int(need)}</span>`;
+  return `<span class="pill ${supply >= need * 0.8 ? 'warn' : 'bad'}">short ${int(need - supply)}, ${int(supply)} of ${int(need)}</span>`;
+}
+function renderCrew(r) {
+  let people = 0, pay = 0, supply = 0, need = 0;
+  s.crew.forEach((c, i) => {
+    const active = r.crewRows[i].active, sup = num(c.people) * num(c.shifts);
+    $('crew-row-' + i).className = active ? '' : 'off';
+    $('crew-cov-' + i).innerHTML = active ? covPill(sup, num(c.need)) : `<span class="pill plain">starts ${esc(stageLabel(num(c.from)).toLowerCase())}</span>`;
+    if (active) { people += num(c.people); pay += r.crewRows[i].pay; if (num(c.need)) { supply += sup; need += num(c.need); } }
+  });
+  $('crew-t-people').textContent = int(people); $('crew-t-pay').textContent = money(pay);
+  $('crew-t-supply').textContent = int(supply); $('crew-t-need').textContent = int(need);
+  $('crew-t-cov').innerHTML = covPill(supply, need);
+  const rows = [['Production partners', 'partners'], ['Crew', 'crew'], ['Artists, medical and other groups', 'others'], ['Total without a ticket', 'total']];
+  $('ledger').innerHTML = `<thead><tr><th>Group</th>${s.stages.map(st => `<th>Up to ${int(st.limit)}</th>`).join('')}</tr></thead><tbody>` +
+    rows.map(([label, k]) => `<tr class="${k === 'total' ? 'total' : ''}"><td>${label}</td>${s.stages.map((st, j) => `<td>${int(headcount(s, j)[k])}</td>`).join('')}</tr>`).join('') +
+    `<tr><td>Tickets that fit</td>${s.stages.map((st, j) => `<td>${int(maxPaid(s, j))}</td>`).join('')}</tr></tbody>`;
+}
+function renderCosts(r) {
+  let total = 0;
+  s.costs.forEach((c, i) => { const x = r.costRows[i]; $('cost-row-' + i).className = x.active ? '' : 'off'; $('cost-now-' + i).textContent = x.active ? money(x.value) : 'not yet'; total += x.value; });
+  $('cost-total').textContent = money(total);
+}
+function renderTimeline() {
+  s.timeline.forEach((t, i) => { $('tl-status-' + i).innerHTML = t.done ? '<span class="pill good">done</span>' : t.date < today() ? '<span class="pill bad">overdue</span>' : '<span class="pill plain">open</span>'; });
+}
 function renderPL(r) {
   const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
-  const big = r.level === 3;
-  const lines = [
-    ['Artist fees', r.artistFees, '24 sets'], ['Artist hospitality and airport runs', s.hospitality], ['Kinetic Desert guarantee', s.kd],
-    ['Project Seismic guarantee', r.psGuar, big ? '' : 'above 350 only'],
-    ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
-    ['Payment processing', r.processing, `${(r.processing / Math.max(1, r.tickets + r.car + r.cabinRev) * 100).toFixed(1)}% of online sales`],
-    ['Permits', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, big ? '' : 'above 350 only'],
-    ['Second chef and extra groceries', r.kitchen500, big ? '' : 'above 350 only'], ['Extra site supplies', r.ops500, big ? '' : 'above 350 only'],
-    ['Drinks for everyone', r.drinks, `${int(r.onSite)} people`],
-    ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
-    ['Art, projection, path lighting', s.art], ['Insurance', s.insurance], ['Marketing and design', s.marketing],
-    ['Site supplies', s.ops], ['Medical team', r.medical, `${s.medicalDays} days`], ['Contingency', r.contingency, `${s.contingencyPct}%`],
-  ];
+  const pairs = s.partners.map((p, i) => [p, r.partnerRows[i]]);
+  const partnerLines = pairs.filter(([p, x]) => x.guar || x.fee)
+    .map(([p, x]) => row(esc(p.name), money(x.guar + x.fee), [x.guar ? 'guarantee' : '', x.fee ? 'ticket fee' : ''].filter(Boolean).join(' and '))).join('');
+  const costLines = s.costs.map((c, i) => [c, r.costRows[i]]).filter(([c, x]) => x.active).map(([c, x]) => row(esc(c.name), money(x.value))).join('');
+  const splitLines = pairs.filter(([p, x]) => x.active && (num(p.share) > 0 || x.guar || x.fee))
+    .map(([p, x]) => row(esc(p.name), money(x.total), [x.pct ? pct(x.pct) + ' share' : '', x.guar ? 'guarantee' : '', x.fee ? 'ticket fee' : ''].filter(Boolean).join(' + '))).join('');
   $('pl').innerHTML = `<tbody>
     <tr class="head"><td colspan="3">Money in</td></tr>
-    ${row('Tickets', money(r.tickets), `${int(s.paid)} sold`)}
+    ${row('Tickets', money(r.tickets), `${int(r.paid)} sold`)}
     ${row('Car camping', money(r.car), `${int(r.carSold)} passes`)}
-    ${row('Cabins', money(r.cabinRev), `${int(Math.min(s.cabinsSold, s.cabinsRented))} sold`)}
+    ${row('Cabins', money(r.cabinRev), `${int(num(s.addons.cabinsSold))} sold`)}
     ${row('Merch, meals, vendors', money(r.other))}
     <tr class="total"><td>Total in</td><td></td><td>${money(r.revenue)}</td></tr>
     <tr class="head"><td colspan="3">Money out</td></tr>
-    ${lines.map(([a, b, c]) => row(a, money(b), c || '')).join('')}
+    ${row('Artist fees', money(r.artistFees), '24 sets')}
+    ${partnerLines}
+    ${row('Crew pay', money(r.crewPay), `${int(r.crewHead)} people`)}
+    ${costLines}
+    ${row('Payment processing', money(r.processing), pct(r.processing / Math.max(1, r.online) * 100) + ' of online sales')}
+    ${row('Contingency', money(r.contingency), pct(num(s.contingencyPct)))}
     <tr class="total"><td>Total out</td><td></td><td>${money(r.costs)}</td></tr>
-    <tr class="head"><td colspan="3">Split</td></tr>
+    <tr class="head"><td colspan="3">${r.profit >= 0 ? 'Profit' : 'Loss'}, and what each partner takes home</td></tr>
     ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
-    ${row('Kinetic Desert', money(r.kdTotal), `${money(s.kd)} guarantee + ${money(r.kdShareAmt)} share`)}
-    ${big ? row('Project Seismic', money(r.psTotal), `${money(r.psGuar)} guarantee + ${money(r.psShareAmt)} share`) : ''}
-    ${row('You', money(r.yours))}
+    ${splitLines}
   </tbody>`;
 }
 
@@ -525,22 +770,22 @@ function renderChart(top) {
     g += `<line x1="${C.l}" x2="${C.w - C.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(${zero ? '--ink-3' : '--rule'})" stroke-width="${zero ? 1.25 : 1}"/>`;
     g += `<text x="${C.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${v < 0 ? '−' : ''}$${Math.abs(v) >= 1000 ? Math.abs(v) / 1000 + 'k' : Math.abs(v)}</text>`;
   }
-  const xStep = top > 300 ? 100 : 50;
+  const xStep = niceStep(Math.max(top, 50));
   for (let n = 0; n <= top; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
   g += `<text x="${C.w - C.r}" y="${C.h - 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">paid tickets</text>`;
-  const marks = [[90, 'Reeguez Rocks sold 90', 'end'], [maxPaid(s, s.permitOver) + 1, 'Permit starts', 'start'], [maxPaid(s, s.portoOver) + 1, '500 setup starts', 'middle']];
+  const marks = [[90, 'Reeguez Rocks sold 90', 'end']].concat(s.stages.slice(1).map((st, i) => [stageStart(s, i + 1), `Above ${int(s.stages[i].limit)}`, i === 0 ? 'start' : 'middle']));
   marks.forEach(([n, label, anchor]) => {
     if (n <= 0 || n > top) return;
     const dx = anchor === 'end' ? 3 : anchor === 'start' ? -3 : 0;
     g += `<line x1="${X(n)}" x2="${X(n)}" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>`;
     g += `<text x="${X(n) + dx}" y="${C.t - 12}" text-anchor="${anchor}" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
   });
-  g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  if (curve.length) g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
   const p = Math.min(s.paid, top);
-  g += `<circle cx="${X(p)}" cy="${Y(curve[p])}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<circle cx="${X(p)}" cy="${Y(curve[p] || 0)}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
   g += `<g id="hover" hidden><line id="hx" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-2)" stroke-width="1"/><circle id="hd" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/></g>`;
   $('chart').innerHTML = g;
-  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(top)}, the most that fit under 500 on site. The line drops where the permit begins and again where the 500 setup begins.`;
+  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(top)}, the most that fit at the last stage. The line drops where each stage begins, because its guest lists and costs switch on.`;
 }
 function hover(e) {
   const box = $('chart').getBoundingClientRect();
@@ -555,37 +800,131 @@ function hover(e) {
   const tip = $('tip');
   tip.hidden = false;
   tip.textContent = `${int(n)} tickets · ${int(people(s, n).onSite)} on site · ${money(curve[n])}`;
-  const px = Math.max(110, Math.min(box.width - 110, x / C.w * box.width));
-  tip.style.left = px + 'px';
+  tip.style.left = Math.max(110, Math.min(box.width - 110, x / C.w * box.width)) + 'px';
   tip.style.top = Math.max(26, y / C.h * box.height - 12) + 'px';
 }
 function unhover() { $('tip').hidden = true; const h = $('chart').querySelector('#hover'); if (h) h.setAttribute('hidden', ''); }
 
+function renderSave() {
+  const dirty = JSON.stringify(s) !== savedJSON;
+  $('btn-save').disabled = !dirty || readOnly;
+  $('btn-revert').disabled = !dirty;
+  const where = readOnly ? 'You can explore, but only people with edit access can save.' : remote ? 'Saved for everyone with access.' : 'Saved in this browser only.';
+  $('save-status').textContent = remoteNote || (dirty ? 'Unsaved changes.' : where);
+}
 function render(skip) {
   const top = maxPaid(s);
-  syncInputs(skip, top);
+  if (s.paid > top) s.paid = top;
+  $('f-paid').max = top;
+  setVal($('f-paid'), s.paid, skip); $('o-paid').textContent = int(s.paid);
+  document.querySelectorAll('.artist-slider').forEach(el => setVal(el, feeTotal(), skip));
+  $('o-artist').textContent = $('o-artist2').textContent = money(feeTotal());
+  s.artists.forEach((day, j) => day.forEach((v, i) => setVal($(`fee-${j}-${i}`), v, skip)));
+  setVal($('f-mixFull'), s.mixFull, skip); setVal($('f-mixSat'), s.mixSat, skip);
   const r = compute(s);
-  syncTiers(r, skip);
-  renderVerdict(r, breakEven(s));
-  renderPL(r);
-  renderChart(top);
+  const be = renderOverview();
+  renderVerdict(r, be); renderTickets(r); renderFees(); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderChart(top);
+  renderSave();
 }
+function rebuild() { buildAll(); render(); }
 
-document.querySelector('.presets').addEventListener('click', e => {
-  const b = e.target.closest('button.preset');
+/* ---------- events ---------- */
+document.addEventListener('input', e => {
+  const t = e.target, d = t.dataset;
+  const val = t.type === 'checkbox' ? t.checked : t.type === 'number' || t.type === 'range' || d.num ? Math.max(0, Number(t.value) || 0) : t.value;
+  if (t.id === 'f-paid') s.paid = val;
+  else if (t.classList.contains('artist-slider')) s.artists = scaleFees(feeShape, val);
+  else if (d.day !== undefined) { s.artists[+d.day][+d.slot] = val; feeShape = structuredClone(s.artists); }
+  else if (d.tier) s.tiers[d.tier][+d.i][d.f] = val;
+  else if (d.list) { if (d.j !== undefined) s[d.list][+d.i][d.f][+d.j] = val; else s[d.list][+d.i][d.f] = val; }
+  else if (d.k) {
+    setPath(s, d.k, val);
+    if (d.k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
+    if (d.k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
+  } else return;
+  remoteNote = '';
+  render(t);
+});
+// Stage names and limits label every "starts" control, and dates order the timeline, so those rebuild once the field is left.
+document.addEventListener('change', e => { const d = e.target.dataset; if (d.list === 'stages' || (d.list === 'timeline' && d.f === 'date')) rebuild(); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
   if (!b) return;
-  active = b.dataset.preset;
-  s = { ...structuredClone(DEFAULTS), ...structuredClone(PRESETS[active]) };
-  feeShape = structuredClone(s.artists);
-  render();
+  const d = b.dataset;
+  if (d.add) {
+    s[d.add].push(BLANK[d.add]());
+    rebuild();
+    const el = $(`${d.add}-${s[d.add].length - 1}-${d.add === 'timeline' ? 'task' : 'name'}`);
+    if (el) { el.focus(); el.select(); }
+  } else if (d.del) { s[d.del].splice(+d.i, 1); rebuild(); }
+  else if (d.jump !== undefined) { s.paid = maxPaid(s, +d.jump); render(); }
+  else if (b.id === 'btn-add-stage') {
+    const last = s.stages[s.stages.length - 1];
+    s.stages.push({ name: 'New stage', limit: Math.round(num(last.limit) * 1.5 / 50) * 50 });
+    s.partners.forEach(p => p.people.push(num(p.people[p.people.length - 1])));
+    rebuild();
+  } else if (b.id === 'btn-del-stage') {
+    if (s.stages.length < 2) return;
+    s.stages.pop();
+    const max = s.stages.length - 1;
+    s.partners.forEach(p => { p.people.length = s.stages.length; p.from = Math.min(num(p.from), max); });
+    ['crew', 'others', 'costs'].forEach(k => s[k].forEach(x => { x.from = Math.min(num(x.from), max); }));
+    rebuild();
+  } else if (b.id === 'btn-save') save();
+  else if (b.id === 'btn-revert') load(savedJSON);
+  else if (b.id === 'btn-reset') {
+    if (b.dataset.armed) { delete b.dataset.armed; b.textContent = 'Starting plan'; load(JSON.stringify(DEFAULTS)); }
+    else { b.dataset.armed = '1'; b.textContent = 'Click again to load it'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Starting plan'; }, 4000); }
+  }
 });
 $('chartbox').addEventListener('pointermove', hover);
 $('chartbox').addEventListener('pointerdown', hover);
 $('chartbox').addEventListener('pointerleave', unhover);
 
-buildControls();
-buildFees();
-render();
+function showTab() {
+  const name = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
+  TABS.forEach(t => { $('tab-' + t).hidden = t !== name; });
+  document.querySelectorAll('.tabs a').forEach(a => { if (a.getAttribute('href') === '#' + name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+window.addEventListener('hashchange', showTab);
+
+/* ---------- saving: the shared store when the viewer has one, this browser otherwise ---------- */
+function valid(json) { try { const o = JSON.parse(json); return o && o.v === SCHEMA && Array.isArray(o.stages) && Array.isArray(o.partners) ? o : null; } catch (e) { return null; } }
+function load(json) { const o = valid(json); if (!o) return false; s = o; feeShape = structuredClone(s.artists); remoteNote = ''; rebuild(); return true; }
+function localGet() { try { return localStorage.getItem(STORE_KEY); } catch (e) { return null; } }
+function localSet(json) { try { localStorage.setItem(STORE_KEY, json); } catch (e) { /* storage can be blocked */ } }
+async function save() {
+  const json = JSON.stringify(s);
+  localSet(json);
+  if (remote) {
+    try { await remote.set({ v: SCHEMA, json, savedAt: new Date().toISOString() }); }
+    catch (err) { if (err && err.code === 'invalid_argument') readOnly = true; else remoteNote = 'Could not reach the shared plan. Saved in this browser.'; }
+  }
+  savedJSON = json;
+  renderSave();
+}
+(function start() {
+  buildAll();
+  const local = localGet();
+  if (local && valid(local)) { savedJSON = local; load(local); } else render();
+  showTab();
+  if (!(window.claude && typeof window.claude.use === 'function')) return;
+  window.claude.use('db').then(db => {
+    if (!db) return;
+    remote = db.doc('plans/current');
+    const slow = setTimeout(() => { remoteNote = 'The shared plan cannot be reached yet. Showing this browser\'s copy.'; renderSave(); }, 10000);
+    remote.onSnapshot(snap => {
+      if (!snap.metadata.fromCache) clearTimeout(slow);
+      const data = snap.exists ? snap.data() : null;
+      if (!data || typeof data.json !== 'string' || !valid(data.json) || data.json === savedJSON) { remoteNote = ''; renderSave(); return; }
+      const dirty = JSON.stringify(s) !== savedJSON;
+      savedJSON = data.json;
+      if (dirty) { remoteNote = 'Someone saved a newer plan. Revert to saved to load it.'; renderSave(); }
+      else load(data.json);
+    }, () => { clearTimeout(slow); remote = null; remoteNote = ''; renderSave(); });
+    renderSave();
+  }).catch(() => {});
+})();
 </script>
 </body>
 </html>

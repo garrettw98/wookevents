@@ -2,7 +2,25 @@
 
 Experimental bass and dubstep campout. Three days of music at The Bowl, afters at the K Lodge and The Dome until sunrise, everyone off site Monday.
 
-The numbers in this plan come from one budget model. Open [`budget.html`](budget.html) to change any input, including the artist budget and every ticket tier, and see profit, break-even and each partner's share update.
+The numbers in this plan come from one planning model. Open [`budget.html`](budget.html) to change any input and see profit, break-even and each partner's share update.
+
+## The planner
+
+[`budget.html`](budget.html) is organised in seven sections, with profit, break-even, people on site and your take pinned at the top.
+
+| Section | What it holds |
+|---|---|
+| Overview | Ticket and artist-budget sliders, the profit chart, the scale stages, what moves break-even, and the full profit and loss |
+| Tickets | Ticket mix, every price tier, add-ons and card fees |
+| Artists | The artist budget slider and the fee for each of the 24 slots |
+| Production | One card per partner: minimum guarantee, the stage and ticket count it comes in at, profit share, and the places it is given at each stage. Partners can be added |
+| Crew | One row per role with people, pay, shifts each, shifts needed and coverage. Roles can be added |
+| Costs | One row per cost, charged flat, per ticket, per ticket per day or per person on site, with the stage it starts at. Costs can be added |
+| Timeline | Dated tasks with an owner and a done box |
+
+**Scale stages** are what make it work beyond this event. Each stage is a limit on people on site (199, 350, 500, and you can add more). Every partner, crew role and cost names the stage it starts at, so guest lists and costs switch on as the event grows and the planner works out how many tickets fit.
+
+**Saving.** Save plan stores the plan for everyone you share the page with. Changes you have not saved stay yours, so you can try a what-if without disturbing the saved plan. The copy in this repository saves in your browser only.
 
 ## The short version
 
@@ -12,7 +30,7 @@ The numbers in this plan come from one budget model. Open [`budget.html`](budget
 4. **Let the alumni presale set the artist budget.** A leaner lineup at $11,300 breaks even at 206 tickets and makes about $12,100 at a sell-out.
 5. **Stay on Stripe for the ticket site.** Card fees come to about $1,700 at a sell-out, 3% of online sales. The cheaper options save a few hundred dollars at most. Pay-by-bank is worth offering on cabins.
 6. **California requires all-in prices.** The listed ticket price has to include every mandatory fee, so a processing fee cannot be added at checkout.
-7. **The 500 unlock pays you once 334 tickets sell, and the upside is thin.** It adds about $9,200 of fixed cost, including a second chef and feeding the partners' people. With 115 on guest lists and crew, 385 tickets fit. At 385 sold the event makes about $15,200: $6,100 to you, $8,100 to Kinetic Desert and $5,000 to Project Seismic.
+7. **The 500 unlock pays you once 334 tickets sell, and the upside is thin.** It adds about $9,200 of fixed cost, including a second chef and feeding the partners' people. With 116 on guest lists and crew, 384 tickets fit. At 384 sold the event makes about $15,000: $6,000 to you, $8,000 to Kinetic Desert and $5,000 to Project Seismic.
 8. **Staying under 199 on site does not work.** Only 139 tickets fit, and even the leaner lineup loses about $5,700 with all of them sold.
 9. **The crew plan is short by more than half.** Twelve ticket-only volunteers close the gap.
 10. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
@@ -63,7 +81,7 @@ If 30% of sales went by bank, fees would drop by about $370.
 
 ### Build notes
 
-- **Enforce the caps in code.** The site should stop sales at 139, 275 or 385 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
+- **Enforce the caps in code.** The site should stop sales at 139, 275 or 384 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
 - **Tier inventory.** Use conditional writes so two buyers cannot take the last ticket in a tier, and release held tickets when a checkout session expires.
 - **Issue tickets from Stripe's webhook**, verified and safe to receive twice. Do not issue from the browser redirect.
 - **Scanner.** Keep what worked at Reeguez Rocks. Make sure it still scans with no signal, from a list synced beforehand.
@@ -159,7 +177,7 @@ Each of these is an input in the budget model.
 | Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
 | Extra cost above 350 | $2,500 porto-potties, $1,000 second chef, $2,500 more groceries, $800 supplies | The grocery and porto-potty figures are guesses. Get a porto-potty quote early because of Stagecoach |
 | Drinks for everyone | $6 per person on site, at every size | Double my first guess, at your request. About $2,100 at 350 people and $3,000 at 500 |
-| Car camping demand | One pass per five tickets | 96 of the 120 spots are for sale after 24 crew passes. Selling all 96 adds about $2,000 |
+| Car camping demand | One pass per five tickets | 95 of the 120 spots are for sale after 25 crew passes. Selling all 95 adds about $2,000 |
 | Ticket mix | 65% Fri–Sun, 25% Sat–Sun, 10% Sunday | Drives average ticket price and the venue fee |
 | Cabins sold | 6 of 8 | Two held for artists who stay on and for staff. Selling a seventh moves break-even to 245 |
 | Merch, meal plan and vendor income | $10 per ticket | Untested. At 0, break-even rises to 264 |
@@ -174,7 +192,7 @@ Every limit is counted on people on site. Guest lists grow as the event does, so
 |---|---|---|---|
 | Up to 199 | 60 | 139 | None |
 | 200 to 350 | 75: adds 15 Kinetic Desert guests | 275 | Permits |
-| 351 to 500 | 115: adds 10 more Kinetic Desert guests and 30 for Project Seismic | 385 | Porto-potties, Project Seismic's guarantee, a second chef, more groceries and supplies |
+| 351 to 500 | 116: adds 10 more Kinetic Desert guests, 30 for Project Seismic and the second chef | 384 | Porto-potties, Project Seismic's guarantee, a second chef, more groceries and supplies |
 
 Kinetic Desert's 15 guests at the 350 level take the place of 15 tickets. If the event sells out, that is about $2,800 of profit. If it does not sell out, they cost nothing.
 
@@ -183,7 +201,7 @@ Kinetic Desert's 15 guests at the 350 level take the place of 15 tickets. If the
 - **Their deal:** a $2,000 minimum, a profit share half the size of yours and Kinetic Desert's, and 30 guest-list places for crew, artists and friends. That makes the split 40% you, 40% Kinetic Desert, 20% Project Seismic.
 - **What it costs:** about $9,200 more in fixed costs, and 40 more places that cannot be sold. The costs are porto-potties, Project Seismic's guarantee, a second chef, groceries to feed Project Seismic's people, Kinetic Desert's guests and all artists, and more supplies.
 - **When it pays:** the event itself is back in profit at 302 tickets. Your own take passes what a 275-ticket sell-out of the 350 plan gives you at 334 tickets. The same number holds for Kinetic Desert.
-- **How much it pays:** at a full 385 your take is about $6,100, against $2,400 for a 275-ticket sell-out. That is $3,700 more for selling 110 more tickets.
+- **How much it pays:** at a full 384 your take is about $6,000, against $2,400 for a 275-ticket sell-out. That is $3,600 more for selling 109 more tickets.
 - **If it loses money:** Project Seismic does not share a loss, so it falls on you and Kinetic Desert 50/50 and their $2,000 is still owed. They would only take on losses in exchange for a larger share.
 - **Kinetic Desert's guarantee** stays at $2,000.
 
@@ -211,7 +229,7 @@ Tiers sell in order. Averages are at a 275-ticket sell-out. These are the prices
 
 | Add-on | Price | Notes |
 |---|---|---|
-| Car camping pass | $50 | 120 spots: 24 comped to crew and volunteers, 96 for sale |
+| Car camping pass | $50 | 120 spots: 25 comped to crew and volunteers, 95 for sale |
 | Whole cabin, 9 beds, three nights | $850 | About $94 a bed. Six for sale. Put them in the presale: nights will be near freezing |
 | Hoodie or shirt pre-order | $60–$65 | Pre-order only, so there is no leftover stock |
 | Meal plan | about $45 for three dinners | Cap it at 60. Ask Environmental Health about food permits first |
@@ -277,14 +295,14 @@ The 350 plan with the full lineup, at a sell-out of 275 paid tickets.
 | 250 | 91% | $197 | $98 |
 | 275 | 100% | $4,732 | $2,366 |
 
-With the 500 unlock, 115 unticketed people and Project Seismic's deal:
+With the 500 unlock, 116 unticketed people and Project Seismic's deal:
 
 | Paid tickets | People on site | Result | You, 40% | Kinetic Desert | Project Seismic |
 |---|---|---|---|---|---|
-| 300 | 415 | −$224 | −$112 | $1,888 | $2,000 |
-| 325 | 440 | $4,311 | $1,724 | $3,724 | $2,862 |
-| 350 | 465 | $8,847 | $3,539 | $5,539 | $3,769 |
-| 385 | 500 | $15,196 | $6,079 | $8,079 | $5,039 |
+| 300 | 416 | −$231 | −$115 | $1,885 | $2,000 |
+| 325 | 441 | $4,305 | $1,722 | $3,722 | $2,861 |
+| 350 | 466 | $8,840 | $3,536 | $5,536 | $3,768 |
+| 384 | 500 | $15,009 | $6,003 | $8,003 | $5,002 |
 
 Both partners' columns include their $2,000 guarantee.
 
