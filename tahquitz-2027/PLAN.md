@@ -46,7 +46,7 @@ Profit and loss are both split 50/50 with Kinetic Desert, so your side is half o
 | Permit deadline | Ask the county for the date and whether the $3,000 is due at filing | Under 110 sold and slow: cap sales at 139 and skip the permit |
 | Mar 15 | About 230 sold and still moving | Unlock 500 |
 
-Avoid ending between 140 and 157 tickets. The permit costs about $3,150 with contingency, and it takes roughly 19 tickets to earn that back.
+Avoid ending between 140 and 159 tickets. The permit costs about $3,150 with contingency, and it takes 21 tickets to earn that back.
 
 ## What I assumed
 
@@ -75,7 +75,7 @@ Every limit is counted on people on site, so the 60 unticketed people come off t
 | 350 | 290 | $3,000 permit | The plan |
 | 500 | 440 | Permit, porto-potties, more medical and site supplies | Unlock if sales support it |
 
-**The 500 unlock.** The main stage moves to a larger area, The Bowl becomes a side stage, and Kinetic Desert provides production for both. In the model the unlock adds about $4,200 and pays for itself after roughly 25 extra tickets. Two things are not in that number:
+**The 500 unlock.** The main stage moves to a larger area, The Bowl becomes a side stage, and Kinetic Desert provides production for both. In the model the unlock adds about $4,200 and pays for itself after 22 extra tickets. Two things are not in that number:
 
 - **Programming a second stage.** Either the 24 sets are spread across two stages or more acts are booked. More acts means more fees.
 - **Any change to Kinetic Desert's guarantee** for running a second stage.
