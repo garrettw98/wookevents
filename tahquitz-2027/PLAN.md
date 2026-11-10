@@ -46,7 +46,7 @@ These come from other agencies' own pages, so ask whether the Temporary Use Perm
 - **County Fire.** Its special event page says a fire permit is needed for an outdoor public assembly of 200 or more, and for any tent over 400 square feet. A 24-foot dome is about 452 square feet. Applications go in at least 30 days ahead.
 - **A Temporary Structure Permit from Building and Safety.** The county's sheet covers temporary non-residential structures used for assembly, says it is approved only after Planning approves the Temporary Use Permit, and asks for engineered plans. Whether a stage and truss fall under it is a question for the planner. Have Kinetic Desert's dimensions and heights ready.
 - **Environmental Health.** Only if food is sold or served to attendees: vendors, the meal plan, a brunch for everyone.
-- **Noise.** The county standard for sound heard at a residence is 55 dB(A) from 7:00 AM to 10:00 PM and 45 dB(A) overnight. A permit for sound will likely come with hours. The Bowl running to midnight is the part to raise early.
+- **Noise.** The county standard for sound heard at a residence is 55 dB(A) from 7:00 AM to 10:00 PM and 45 dB(A) overnight. You have run sound on this property and found it is not an issue at the property line, which is where it counts. A permit for sound may still come with hours, so state the midnight outdoor cut-off in the letter of intent.
 
 ### Get it in one email
 
@@ -62,7 +62,7 @@ Ask the planner to confirm in writing (Land Use Services, 909.387.8311):
 
 The reason to have it in writing: the special event chapter says no one may advertise or sell admission to a temporary special event without that permit. An email saying it does not apply here protects your ticket sales if someone else at the county reads it differently later.
 
-Also ask the camp for a copy of its own approval. Its limits on headcount, hours and amplified sound are the real ceiling for this event.
+The camp itself sets no rules beyond the law and its bathroom capacity: 350 people on the existing facilities, up to 500 with porto-potties brought in.
 
 ## What Reeguez Rocks changes
 
@@ -103,7 +103,7 @@ Each of these is an input in the budget model.
 |---|---|---|
 | People on site without a paid ticket | 60, or 100 with Project Seismic's 40 | Sets how many tickets fit under each limit: 139, 290 and 400 |
 | Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
-| A loss at 500 | Split 40/40/20, the same as a profit | You told me you and Kinetic Desert split losses. I extended that to Project Seismic |
+| A loss at 500 | Split 50/50 between you and Kinetic Desert | Project Seismic shares a profit but not a loss, and still receives its $2,000 |
 | Ticketing fees | Paid by the buyer on top of the ticket price | Otherwise take about 6% off ticket income |
 | Car camping demand | One pass per five tickets | 96 of the 120 spots are for sale after 24 crew passes. Selling all 96 adds $1,900 |
 | Ticket mix | 65% Fri–Sun, 25% Sat–Sun, 10% Sunday | Drives average ticket price and the venue fee |
@@ -128,6 +128,7 @@ Every limit is counted on people on site, so unticketed people come off the top.
 - **Their deal:** a $2,000 minimum, a profit share half the size of yours and Kinetic Desert's, and 40 guest-list places for crew, artists and friends. That makes the split 40% you, 40% Kinetic Desert, 20% Project Seismic.
 - **What it costs:** about $5,900 more in fixed costs, and 40 places that cannot be sold.
 - **When it pays:** the event as a whole breaks even at 248 tickets. Your own take passes what a 290-ticket sell-out of the 350 plan would give you at 336 tickets. The same number holds for Kinetic Desert.
+- **If it loses money:** Project Seismic does not share a loss, so it falls on you and Kinetic Desert 50/50 and their $2,000 is still owed. At 230 tickets sold under the unlock the event loses about $3,200, which is $1,600 each. They would only take on losses in exchange for a larger share.
 - **Kinetic Desert's guarantee** stays at $2,000.
 
 Afters still hold 145 people indoors (105 in the K Lodge, 40 in The Dome). At 500 on site that needs a third space, or a late slot on one of the two stages if the sound permit allows it.
@@ -375,7 +376,7 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 | When | What |
 |---|---|
-| This week | Email the county planner the seven questions. Ask the camp for its approval document. Ask the four target artists for quotes |
+| This week | Email the county planner the seven questions. Ask the four target artists for quotes |
 | November | Kinetic Desert and Project Seismic deals in writing. Stage, truss and Dome dimensions. Draft the letter of intent and site plan |
 | Dec 1–15 | Alumni presale, once the planner confirms sales can start |
 | By Dec 11 | Submit the Temporary Use Permit application |
@@ -393,8 +394,8 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 ## Questions that would change this plan
 
 1. **The planner's written answers**, above all whether sales can start before the permit is issued and whether County Fire is separate.
-2. **What does the camp's own approval allow** for headcount, hours and amplified sound?
-3. **Does Project Seismic share a loss** the way they share a profit?
+2. **Artist quotes.** The fee curve is built from your targets. Real quotes from the four names will move it.
+3. **How the alumni presale sells.** It sets the lineup size.
 
 ## Sources
 

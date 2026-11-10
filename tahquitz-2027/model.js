@@ -56,9 +56,10 @@ function compute(s) {
   const contingency = fixedBase * s.contingencyPct / 100;
   const costs = fixedBase + contingency + venue + dome;
   const profit = revenue - costs;
-  // Guarantees are paid on top of each partner's share. Profit and loss are both split.
-  const kdShareAmt = profit * s.kdShare / 100;
-  const psShareAmt = profit * s.psShare / 100;
+  // Guarantees are paid on top of each partner's share. Project Seismic shares a profit but not a loss:
+  // a loss falls on you and Kinetic Desert in proportion to your two shares.
+  const psShareAmt = Math.max(0, profit) * s.psShare / 100;
+  const kdShareAmt = profit >= 0 ? profit * s.kdShare / 100 : profit * s.kdShare / Math.max(1, 100 - s.psShare);
   return { nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
     onSite, permit, portos, artistFees, cabins, crew, medical, contingency, costs, profit,
     kdShareAmt, kdTotal: s.kd + kdShareAmt, psShareAmt, psTotal: s.psGuarantee + psShareAmt, yours: profit - kdShareAmt - psShareAmt,
