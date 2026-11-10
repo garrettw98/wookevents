@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Tahquitz 2027 Budget</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: a working ledger. Verdict strip on top, controls left, chart + P&L right; stacks to one column on a phone. */
+:root {
+  --bg: #F3F6F4; --surface: #FFFFFF; --sunk: #E9EEEB;
+  --ink: #14211D; --ink-2: #47564F; --ink-3: #6E7C75; --rule: #D5DDD8;
+  --accent: #5A3FD0; --accent-soft: #ECE8FB;
+  --good: #1B7F52; --warn: #A2620B; --bad: #B8322A;
+  --good-soft: #E0F2E8; --warn-soft: #FBEFD9; --bad-soft: #FBE4E1;
+  --display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1513; --surface: #151F1C; --sunk: #1C2925;
+  --ink: #E7EEEA; --ink-2: #B3C0BA; --ink-3: #8A9992; --rule: #2B3A35;
+  --accent: #A796FF; --accent-soft: #272248;
+  --good: #5CCB93; --warn: #E3A94A; --bad: #F0857C;
+  --good-soft: #15322A; --warn-soft: #3A2D14; --bad-soft: #3E1F1D; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0D1513; --surface: #151F1C; --sunk: #1C2925;
+  --ink: #E7EEEA; --ink-2: #B3C0BA; --ink-3: #8A9992; --rule: #2B3A35;
+  --accent: #A796FF; --accent-soft: #272248;
+  --good: #5CCB93; --warn: #E3A94A; --bad: #F0857C;
+  --good-soft: #15322A; --warn-soft: #3A2D14; --bad-soft: #3E1F1D; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 22px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; line-height: 1.15; letter-spacing: -0.01em; }
+h2 { font-size: 17px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.lede { color: var(--ink-2); max-width: 68ch; margin: 6px 0 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+.verdict { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 10px; }
+.verdict > div { padding: 16px 18px; border-left: 1px solid var(--rule); min-width: 0; }
+.verdict > div:first-child { border-left: 0; }
+.verdict .big { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.verdict .sub { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-top: 6px; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.is-good { color: var(--good); } .is-bad { color: var(--bad); }
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.presets span { color: var(--ink-3); font-size: 13px; margin-right: 4px; }
+button.preset { font: 500 14px var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+button.preset:hover { border-color: var(--accent); }
+button.preset[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 22px; align-items: start; }
+.stack { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel > h2 { margin-bottom: 12px; }
+.panel .note { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; }
+
+.field { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 10px; align-items: center; padding: 6px 0; }
+.field label { color: var(--ink-2); font-size: 14px; }
+.field label small { display: block; color: var(--ink-3); font-size: 12px; }
+.field input[type="number"] { width: 100%; font: 500 14px var(--body); font-variant-numeric: tabular-nums; text-align: right;
+  color: var(--ink); background: var(--sunk); border: 1px solid transparent; border-radius: 6px; padding: 6px 8px; }
+.field.slider { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.field.slider .row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.field.slider output { font: 600 16px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0 0; color: var(--ink-2); font-size: 14px; }
+.check input { margin-top: 3px; accent-color: var(--accent); }
+
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--rule); font-size: 14px; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+tr.total td { font-weight: 600; border-bottom: 0; border-top: 2px solid var(--ink-3); }
+tr.head td { font-family: var(--display); font-weight: 600; color: var(--ink); padding-top: 14px; }
+td.muted, .muted { color: var(--ink-3); }
+.fees input { width: 76px; font: 500 14px var(--body); font-variant-numeric: tabular-nums; text-align: right; color: var(--ink);
+  background: var(--sunk); border: 1px solid transparent; border-radius: 6px; padding: 5px 6px; }
+.fees td, .fees th { padding: 5px 6px; }
+
+.chartbox { position: relative; }
+svg { display: block; width: 100%; height: auto; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.4;
+  padding: 7px 10px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -100%); font-variant-numeric: tabular-nums; }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.split .big { font: 700 24px var(--display); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 860px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .verdict { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .verdict > div:nth-child(3) { border-left: 0; }
+  .verdict > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  h1 { font-size: 25px; }
+}
+@media (max-width: 420px) { .verdict .big { font-size: 23px; } .field { grid-template-columns: minmax(0, 1fr) 92px; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Camp Tahquitz · Fri Apr 23 – Mon Apr 26, 2027</div>
+    <h1>Tahquitz 2027 budget model</h1>
+    <p class="lede">Move the ticket count, prices and costs to see profit, break-even and the split with Kinetic Desert. The permit and porto-potty thresholds are counted on people on site, so crew, artists and guests use up part of each limit.</p>
+  </header>
+
+  <section class="verdict" aria-live="polite">
+    <div><div class="eyebrow" id="v-profit-label">Profit</div><div class="big" id="v-profit"></div><div class="sub" id="v-profit-sub"></div></div>
+    <div><div class="eyebrow">Break-even</div><div class="big" id="v-be"></div><div class="sub" id="v-be-sub"></div></div>
+    <div><div class="eyebrow">People on site</div><div class="big" id="v-site"></div><div class="pill" id="v-site-pill"></div></div>
+    <div><div class="eyebrow">Your take</div><div class="big" id="v-you"></div><div class="sub" id="v-you-sub"></div></div>
+  </section>
+
+  <div class="presets" role="group" aria-label="Scenarios">
+    <span>Scenario</span>
+    <button class="preset" id="preset-plan" data-preset="plan">350 plan</button>
+    <button class="preset" id="preset-unlock" data-preset="unlock">500 unlock</button>
+    <button class="preset" id="preset-lean" data-preset="lean">Under 199, no permit</button>
+    <button class="preset" id="preset-outlined" data-preset="outlined">As first outlined</button>
+  </div>
+
+  <div class="cols">
+    <div class="stack" id="controls"></div>
+    <div class="stack">
+      <section class="panel">
+        <h2>Profit by tickets sold</h2>
+        <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 640 300" role="img" aria-label="Profit as paid tickets rise, with drops where the permit and porto-potty costs begin"></svg><div class="tip" id="tip" hidden></div></div>
+        <p class="note" id="chart-note"></p>
+      </section>
+      <section class="panel">
+        <h2>Profit and loss</h2>
+        <div class="scroll"><table id="pl"></table></div>
+      </section>
+      <section class="panel">
+        <h2>Artist fees by slot</h2>
+        <div class="scroll"><table class="fees" id="fees"></table></div>
+        <p class="note">The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight. Afters at the K Lodge and The Dome are unpaid open decks.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+// Pure budget model. Shared verbatim by the page and by the node check.
+const DEFAULTS = {
+  paid: 290, mixFull: 65, mixSat: 25,
+  pFull: 195, pSat: 155, pSun: 82,
+  carRate: 20, carSpots: 60, pCar: 50,
+  cabinsRented: 8, cabinCost: 250, cabinsSold: 7, pCabin: 850, otherPer: 10,
+  unticketed: 60,
+  venuePerDay: 10, domePer: 10, domeCap: 2000,
+  permit: 3000, permitOver: 199, portos: 2500, portoOver: 350, hardCap: 500,
+  kd: 2000, insurance: 750, chef: 1000, food: 2500, crewCount: 12, crewPay: 100,
+  art: 2500, marketing: 750, ops: 1200, medical: 600, travel: 1500, contingencyPct: 5,
+  artists: [
+    [75, 100, 150, 250, 400, 750, 1500, 3000],
+    [75, 100, 200, 300, 500, 1000, 2000, 3000],
+    [75, 100, 150, 200, 300, 600, 1250, 2250],
+  ],
+  kdShare: 50, recoup: false,
+};
+function compute(s) {
+  const nFull = s.paid * s.mixFull / 100;
+  const nSat = s.paid * s.mixSat / 100;
+  const nSun = Math.max(0, s.paid - nFull - nSat);
+  const tickets = nFull * s.pFull + nSat * s.pSat + nSun * s.pSun;
+  const carSold = Math.min(s.carSpots, s.paid * s.carRate / 100);
+  const car = carSold * s.pCar;
+  const cabinRev = Math.min(s.cabinsSold, s.cabinsRented) * s.pCabin;
+  const other = s.paid * s.otherPer;
+  const revenue = tickets + car + cabinRev + other;
+  const ticketDays = nFull * 3 + nSat * 2 + nSun;
+  const venue = ticketDays * s.venuePerDay;
+  const dome = Math.min(s.paid * s.domePer, s.domeCap);
+  const onSite = s.paid + s.unticketed;
+  const permit = onSite > s.permitOver ? s.permit : 0;
+  const portos = onSite > s.portoOver ? s.portos : 0;
+  const artistFees = s.artists.flat().reduce((a, b) => a + b, 0);
+  const cabins = s.cabinsRented * s.cabinCost;
+  const crew = s.crewCount * s.crewPay;
+  const fixedBase = artistFees + s.travel + s.kd + s.insurance + s.chef + s.food + crew
+    + s.art + s.marketing + s.ops + s.medical + cabins + permit + portos;
+  const contingency = fixedBase * s.contingencyPct / 100;
+  const costs = fixedBase + contingency + venue + dome;
+  const profit = revenue - costs;
+  let kdShareAmt;
+  if (s.recoup) kdShareAmt = Math.max(0, (profit + s.kd) * s.kdShare / 100 - s.kd);
+  else kdShareAmt = Math.max(0, profit) * s.kdShare / 100;
+  return { nFull, nSat, nSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, venue, dome,
+    onSite, permit, portos, artistFees, cabins, crew, contingency, costs, profit,
+    kdShareAmt, kdTotal: s.kd + kdShareAmt, yours: profit - kdShareAmt,
+    avgTicket: s.paid ? tickets / s.paid : 0 };
+}
+function breakEven(s) {
+  const max = Math.max(0, s.hardCap - s.unticketed);
+  for (let n = 0; n <= max; n++) if (compute({ ...s, paid: n }).profit >= 0) return n;
+  return null;
+}
+
+</script>
+<script>
+const SLOTS = ['2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:30 PM', '9:00 PM', '10:30 PM'];
+const DAYS = ['Fri', 'Sat', 'Sun'];
+const LEAN_FEES = [[75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 250, 500, 1000, 2000], [75, 75, 100, 150, 200, 400, 750, 1250]];
+const PRESETS = {
+  plan: {},
+  unlock: { paid: 440, carSpots: 80, ops: 2000, medical: 1000, food: 2800 },
+  lean: { paid: 139, artists: LEAN_FEES, cabinsRented: 5, cabinsSold: 5, food: 1800, art: 1500, travel: 800, medical: 300 },
+  outlined: { pFull: 180, pSat: 145, pSun: 75, cabinsSold: 6, otherPer: 0 },
+};
+const GROUPS = [
+  { title: 'Tickets sold', fields: [
+    { k: 'paid', label: 'Paid tickets', slider: true, min: 0, max: 440 },
+    { k: 'mixFull', label: 'Share buying Fri–Sun', slider: true, min: 0, max: 100, unit: '%' },
+    { k: 'mixSat', label: 'Share buying Sat–Sun', slider: true, min: 0, max: 100, unit: '%' },
+  ], note: 'mix' },
+  { title: 'Average ticket price', fields: [
+    { k: 'pFull', label: 'Fri–Sun', hint: 'Ladder $169 / $189 / $209 / $229' },
+    { k: 'pSat', label: 'Sat–Sun', hint: 'Ladder $139 / $155 / $169' },
+    { k: 'pSun', label: 'Sunday only', hint: 'Ladder $79 / $85' },
+  ] },
+  { title: 'Add-ons', fields: [
+    { k: 'pCar', label: 'Car camping pass' },
+    { k: 'carRate', label: 'Passes per 100 tickets' },
+    { k: 'carSpots', label: 'Car camping spots', hint: 'A guess. Replace with the real count.' },
+    { k: 'cabinsSold', label: 'Cabins sold to attendees', hint: 'Of the 8 shared cabins, 9 beds each' },
+    { k: 'pCabin', label: 'Price per cabin' },
+    { k: 'otherPer', label: 'Other net income per ticket', hint: 'Merch pre-orders, meal plan, vendor fees' },
+  ] },
+  { title: 'People on site', fields: [
+    { k: 'unticketed', label: 'Crew, artists and guests', hint: 'Everyone on site without a paid ticket' },
+  ] },
+  { title: 'Fixed costs', fields: [
+    { k: 'kd', label: 'Kinetic Desert guarantee' },
+    { k: 'travel', label: 'Artist travel and hospitality' },
+    { k: 'insurance', label: 'Insurance' },
+    { k: 'permit', label: 'Permit', hint: 'Charged at 200 or more on site' },
+    { k: 'portos', label: 'Porto-potties', hint: 'A guess. Charged above 350 on site.' },
+    { k: 'chef', label: 'Chef' },
+    { k: 'food', label: 'Groceries' },
+    { k: 'crewCount', label: 'Paid crew and gate' },
+    { k: 'crewPay', label: 'Pay per crew member' },
+    { k: 'cabinsRented', label: 'Cabins rented from camp' },
+    { k: 'cabinCost', label: 'Cost per cabin' },
+    { k: 'art', label: 'Art, projection, path lighting' },
+    { k: 'marketing', label: 'Marketing and design' },
+    { k: 'ops', label: 'Site supplies', hint: 'Wristbands, signage, radios, trash, firewood' },
+    { k: 'medical', label: 'Medic and harm reduction' },
+    { k: 'contingencyPct', label: 'Contingency, % of fixed costs' },
+  ] },
+  { title: 'Per-ticket costs', fields: [
+    { k: 'venuePerDay', label: 'Venue fee per ticket per day' },
+    { k: 'domePer', label: 'Dome fee per ticket' },
+    { k: 'domeCap', label: 'Dome fee cap' },
+  ] },
+  { title: 'Profit split', fields: [
+    { k: 'kdShare', label: 'Kinetic Desert share of profit, %' },
+  ], check: { k: 'recoup', label: 'Count the guarantee as an advance against Kinetic Desert\'s share' } },
+];
+
+let s = structuredClone(DEFAULTS);
+let active = 'plan';
+const $ = id => document.getElementById(id);
+const money = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
+const int = n => Math.round(n).toLocaleString('en-US');
+
+function buildControls() {
+  const root = $('controls');
+  root.innerHTML = GROUPS.map(g => {
+    const rows = g.fields.map(f => f.slider
+      ? `<div class="field slider"><div class="row"><label for="f-${f.k}">${f.label}</label><output id="o-${f.k}"></output></div>
+           <input type="range" id="f-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="1"></div>`
+      : `<div class="field"><label for="f-${f.k}">${f.label}${f.hint ? `<small>${f.hint}</small>` : ''}</label>
+           <input type="number" id="f-${f.k}" data-k="${f.k}" min="0" step="1" inputmode="numeric"></div>`).join('');
+    const check = g.check ? `<label class="check" for="f-${g.check.k}"><input type="checkbox" id="f-${g.check.k}" data-k="${g.check.k}"><span>${g.check.label}</span></label>` : '';
+    const note = g.note ? `<p class="note" id="note-${g.note}"></p>` : '';
+    return `<section class="panel"><h2>${g.title}</h2>${rows}${check}${note}</section>`;
+  }).join('');
+  root.addEventListener('input', e => {
+    const k = e.target.dataset.k;
+    if (!k) return;
+    s[k] = e.target.type === 'checkbox' ? e.target.checked : Math.max(0, Number(e.target.value) || 0);
+    if (k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
+    if (k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
+    active = null;
+    render(e.target);
+  });
+}
+
+function buildFees() {
+  $('fees').innerHTML = `<thead><tr><th>Set time</th>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>` +
+    SLOTS.map((t, i) => `<tr><td>${t}</td>${DAYS.map((d, j) =>
+      `<td><input type="number" id="fee-${j}-${i}" data-day="${j}" data-slot="${i}" min="0" step="25" inputmode="numeric" aria-label="${d} ${t} fee"></td>`).join('')}</tr>`).join('') +
+    `</tbody><tfoot><tr class="total"><td>Day total</td>${DAYS.map((d, j) => `<td id="fee-total-${j}"></td>`).join('')}</tr></tfoot>`;
+  $('fees').addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.day === undefined) return;
+    s.artists[+t.dataset.day][+t.dataset.slot] = Math.max(0, Number(t.value) || 0);
+    active = null;
+    render(t);
+  });
+}
+
+function syncInputs(skip) {
+  const maxPaid = Math.max(0, s.hardCap - s.unticketed);
+  if (s.paid > maxPaid) s.paid = maxPaid;
+  $('f-paid').max = maxPaid;
+  for (const g of GROUPS) {
+    for (const f of g.fields) {
+      const el = $('f-' + f.k);
+      if (el !== skip) el.value = s[f.k];
+      if (f.slider) $('o-' + f.k).textContent = int(s[f.k]) + (f.unit || '');
+    }
+    if (g.check) $('f-' + g.check.k).checked = s[g.check.k];
+  }
+  s.artists.forEach((day, j) => {
+    day.forEach((v, i) => { const el = $(`fee-${j}-${i}`); if (el !== skip) el.value = v; });
+    $('fee-total-' + j).textContent = money(day.reduce((a, b) => a + b, 0));
+  });
+  document.querySelectorAll('button.preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === active)));
+}
+
+function renderVerdict(r, be, maxPaid) {
+  $('v-profit-label').textContent = r.profit >= 0 ? 'Profit' : 'Loss';
+  $('v-profit').textContent = money(r.profit);
+  $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
+  $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.costs)} out`;
+  if (be === null) { $('v-be').textContent = 'None'; $('v-be-sub').textContent = 'No ticket count up to 500 on site covers these costs'; }
+  else {
+    const cap350 = Math.max(1, s.portoOver - s.unticketed);
+    $('v-be').textContent = int(be) + ' tickets';
+    $('v-be-sub').textContent = be <= cap350 ? `${Math.round(be / cap350 * 100)}% of the ${int(cap350)} you can sell at 350 on site` : `Needs more than the ${int(cap350)} you can sell at 350 on site`;
+  }
+  $('v-site').textContent = int(r.onSite);
+  const pill = $('v-site-pill');
+  if (r.onSite <= s.permitOver) { pill.textContent = 'No permit needed'; pill.className = 'pill good'; }
+  else if (r.onSite <= s.portoOver) { pill.textContent = 'Permit required'; pill.className = 'pill warn'; }
+  else if (r.onSite <= s.hardCap) { pill.textContent = 'Permit and porto-potties'; pill.className = 'pill warn'; }
+  else { pill.textContent = 'Over the 500 limit'; pill.className = 'pill bad'; }
+  $('v-you').textContent = money(r.yours);
+  $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
+  $('v-you-sub').textContent = `Kinetic Desert ${money(r.kdTotal)} with guarantee`;
+  $('note-mix').textContent = `Sunday only gets the rest: ${Math.max(0, 100 - s.mixFull - s.mixSat)}%. That is ${int(r.nFull)} Fri–Sun, ${int(r.nSat)} Sat–Sun and ${int(r.nSun)} Sunday tickets at ${money(r.avgTicket)} average.`;
+}
+
+function renderPL(r) {
+  const row = (a, b, c = '') => `<tr><td>${a}</td><td class="muted">${c}</td><td>${b}</td></tr>`;
+  const fixedLines = [
+    ['Artist fees', r.artistFees, '24 sets'], ['Artist travel and hospitality', s.travel], ['Kinetic Desert guarantee', s.kd],
+    ['Venue fee', r.venue, `${int(r.ticketDays)} ticket-days`], ['Dome', r.dome, r.dome >= s.domeCap ? 'at cap' : ''],
+    ['Permit', r.permit, r.permit ? '' : 'not needed'], ['Porto-potties', r.portos, r.portos ? '' : 'not needed'],
+    ['Cabin rental', r.cabins, `${int(s.cabinsRented)} cabins`], ['Chef and groceries', s.chef + s.food], ['Crew and gate pay', r.crew, `${int(s.crewCount)} people`],
+    ['Art, projection, path lighting', s.art], ['Insurance', s.insurance], ['Marketing and design', s.marketing],
+    ['Site supplies', s.ops], ['Medic and harm reduction', s.medical], ['Contingency', r.contingency, `${s.contingencyPct}%`],
+  ];
+  $('pl').innerHTML = `<tbody>
+    <tr class="head"><td colspan="3">Money in</td></tr>
+    ${row('Tickets', money(r.tickets), `${int(s.paid)} sold`)}
+    ${row('Car camping', money(r.car), `${int(r.carSold)} passes`)}
+    ${row('Cabins', money(r.cabinRev), `${int(Math.min(s.cabinsSold, s.cabinsRented))} sold`)}
+    ${row('Merch, meals, vendors', money(r.other))}
+    <tr class="total"><td>Total in</td><td></td><td>${money(r.revenue)}</td></tr>
+    <tr class="head"><td colspan="3">Money out</td></tr>
+    ${fixedLines.map(([a, b, c]) => row(a, money(b), c || '')).join('')}
+    <tr class="total"><td>Total out</td><td></td><td>${money(r.costs)}</td></tr>
+    <tr class="head"><td colspan="3">Split</td></tr>
+    ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit))}
+    ${row('Kinetic Desert', money(r.kdTotal), `${money(s.kd)} guarantee + ${money(r.kdShareAmt)} share`)}
+    ${row('You', money(r.yours), r.profit < 0 ? 'assumes you carry the loss' : '')}
+  </tbody>`;
+}
+
+let curve = [];
+const C = { w: 640, h: 300, l: 54, r: 16, t: 34, b: 38 };
+function niceStep(range) { const raw = range / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
+function renderChart(maxPaid) {
+  curve = [];
+  for (let n = 0; n <= maxPaid; n++) curve.push(compute({ ...s, paid: n }).profit);
+  const lo = Math.min(0, ...curve), hi = Math.max(0, ...curve);
+  const step = niceStep((hi - lo) || 1000);
+  const y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step;
+  const X = n => C.l + (maxPaid ? n / maxPaid : 0) * (C.w - C.l - C.r);
+  const Y = v => C.t + (1 - (v - y0) / ((y1 - y0) || 1)) * (C.h - C.t - C.b);
+  renderChart.X = X; renderChart.Y = Y; renderChart.max = maxPaid;
+  let g = '';
+  for (let v = y0; v <= y1 + 1; v += step) {
+    const zero = Math.abs(v) < 1;
+    g += `<line x1="${C.l}" x2="${C.w - C.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(${zero ? '--ink-3' : '--rule'})" stroke-width="${zero ? 1.25 : 1}"/>`;
+    g += `<text x="${C.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${v < 0 ? '−' : ''}$${Math.abs(v) >= 1000 ? Math.abs(v) / 1000 + 'k' : Math.abs(v)}</text>`;
+  }
+  const xStep = maxPaid > 300 ? 100 : 50;
+  for (let n = 0; n <= maxPaid; n += xStep) g += `<text x="${X(n)}" y="${C.h - C.b + 18}" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">${n}</text>`;
+  g += `<text x="${C.w - C.r}" y="${C.h - 4}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">paid tickets</text>`;
+  const marks = [[s.permitOver - s.unticketed + 1, 'Permit starts'], [s.portoOver - s.unticketed + 1, 'Portos start']];
+  marks.forEach(([n, label]) => {
+    if (n <= 0 || n > maxPaid) return;
+    g += `<line x1="${X(n)}" x2="${X(n)}" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>`;
+    g += `<text x="${X(n)}" y="${C.t - 12}" text-anchor="middle" font-size="11.5" fill="var(--ink-2)">${label}</text>`;
+  });
+  g += `<path d="${curve.map((v, n) => (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  const p = Math.min(s.paid, maxPaid);
+  g += `<circle cx="${X(p)}" cy="${Y(curve[p])}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<g id="hover" hidden><line id="hx" y1="${C.t - 6}" y2="${C.h - C.b}" stroke="var(--ink-2)" stroke-width="1"/><circle id="hd" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/></g>`;
+  $('chart').innerHTML = g;
+  $('chart-note').textContent = `The dot is your current setting. Everything else is held fixed while the ticket count moves from 0 to ${int(maxPaid)}, the most you can sell with ${int(s.unticketed)} unticketed people and 500 on site.`;
+}
+function hover(e) {
+  const box = $('chart').getBoundingClientRect();
+  const sx = (e.clientX - box.left) / box.width * C.w;
+  const max = renderChart.max;
+  const n = Math.max(0, Math.min(max, Math.round((sx - C.l) / (C.w - C.l - C.r) * max)));
+  const x = renderChart.X(n), y = renderChart.Y(curve[n]);
+  const h = $('chart').querySelector('#hover');
+  h.removeAttribute('hidden');
+  h.querySelector('#hx').setAttribute('x1', x); h.querySelector('#hx').setAttribute('x2', x);
+  h.querySelector('#hd').setAttribute('cx', x); h.querySelector('#hd').setAttribute('cy', y);
+  const tip = $('tip');
+  tip.hidden = false;
+  tip.textContent = `${int(n)} tickets · ${int(n + s.unticketed)} on site · ${money(curve[n])}`;
+  const px = Math.max(110, Math.min(box.width - 110, x / C.w * box.width));
+  tip.style.left = px + 'px';
+  tip.style.top = Math.max(26, y / C.h * box.height - 12) + 'px';
+}
+function unhover() { $('tip').hidden = true; const h = $('chart').querySelector('#hover'); if (h) h.setAttribute('hidden', ''); }
+
+function render(skip) {
+  const maxPaid = Math.max(0, s.hardCap - s.unticketed);
+  syncInputs(skip);
+  const r = compute(s);
+  renderVerdict(r, breakEven(s), maxPaid);
+  renderPL(r);
+  renderChart(maxPaid);
+}
+
+document.querySelector('.presets').addEventListener('click', e => {
+  const b = e.target.closest('button.preset');
+  if (!b) return;
+  active = b.dataset.preset;
+  s = { ...structuredClone(DEFAULTS), ...structuredClone(PRESETS[active]) };
+  render();
+});
+$('chartbox').addEventListener('pointermove', hover);
+$('chartbox').addEventListener('pointerdown', hover);
+$('chartbox').addEventListener('pointerleave', unhover);
+
+buildControls();
+buildFees();
+render();
+</script>
+</body>
+</html>
