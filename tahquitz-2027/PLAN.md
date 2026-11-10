@@ -173,7 +173,7 @@ Each of these is an input in the budget model.
 | Assumption | Value used | Why it matters |
 |---|---|---|
 | Crew, artists and their guests | 58 up to 199 on site, 60 above | The base that every limit is counted from. The two extra are the medical team |
-| Medical at 199 or fewer | $500 venue medical rep and $200 for your own kit | Replaces the $1,800 medical team. I did not count the venue's rep as one of your people on site |
+| Medical at 199 or fewer | $500 venue medical rep and $200 for your own kit | Replaces the $1,800 medical team. Venue reps never count toward people on site. Your own medical team does |
 | Card fees | 2.9% + 30¢, all sales by card | About $1,700 at a sell-out, and eight tickets on break-even |
 | Permits | $3,000, charged at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
 | Extra cost above 350 | $2,500 porto-potties, $1,000 second chef, $2,500 more groceries, $800 supplies | The grocery and porto-potty figures are guesses. Get a porto-potty quote early because of Stagecoach |
@@ -450,7 +450,7 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 - **Cold.** The council lists the camp at 6,500 feet. Expect nights near freezing, and late-April snow is possible. You have October there for comparison. Tell ticket buyers plainly what to pack.
 - **Rain or snow at The Bowl.** There is no covered space for 350 people. The K Lodge holds 105. Decide the bad-weather plan and the refund terms before tickets go on sale.
 - **Medical above 199 on site.** Your own medical team at $600 a day, from Friday 10:00 AM to Monday 10:00 AM. The nearest hospital is a long drive down Highway 38, so agree with the team where an ambulance meets you and who calls. Add naloxone and a harm-reduction table.
-- **Medical at 199 or fewer.** No medical team. The venue requires its own medical rep when you bring no medic, for a $500 fee, and that rep only handles real emergencies. Everything short of that is yours, so the budget has $200 for your own kit. Name the crew member who carries it and has first-aid training, and make sure the rest of the crew know who that is.
+- **Medical at 199 or fewer.** No medical team. The venue requires its own medical rep when you bring no medic, for a $500 fee, and that rep only handles real emergencies. Everything short of that is yours, so the budget has $200 for your own kit. The kit lives at the cabin by The Bowl. You lead on it, with other crew helping to get it where it is needed and use it. Tell every crew member where it is and who to call, and put that on the crew sheet.
 - **Insurance.** Confirm the $3M/$1M policy can name the camp and, if asked, the county, covers overnight camping, and says what it does about alcohol people bring.
 - **Fire.** Ask the camp what the forest's April fire rules allow for fire pits and fire performance.
 - **Stagecoach.** Reserve porto-potties, generators, light towers and radios on a refundable hold now.
