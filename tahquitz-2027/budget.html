@@ -124,6 +124,8 @@ table.edit input.mid { min-width: 135px; }
 #crew td:first-child input { min-width: 200px; }
 #crew select { min-width: 128px; }
 #crew th { white-space: normal; }
+#stages th { white-space: normal; }
+#stages td.muted { min-width: 260px; }
 .fees input[type="number"] { width: 76px; }
 .tiers h3 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 14px 0 4px; }
 .tiers h3:first-child { margin-top: 0; }
@@ -232,7 +234,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
       <h2>Scale stages</h2>
       <div class="scroll"><table class="edit compact" id="stages"></table></div>
       <div class="jump"><button id="btn-add-stage">Add a stage</button><button id="btn-del-stage">Remove the last stage</button></div>
-      <p class="note">Each stage is a limit on people on site. Partners, crew and hard costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket. Stepping into a stage costs money before it earns any. No artist and no budget is paid less after a step than at the sell-out of the stage before, so the cost of the step comes out of your profit. "Worth it from" is the ticket count at which your take beats selling out the stage before.</p>
+      <p class="note">Each stage is a limit on people on site. Partners, crew and hard costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket. Stepping into a stage costs money before it earns any, so a larger stage is sold as one block. Buyers past a sell-out join a waitlist and are not charged until enough of them are waiting. "Worth it from" is the ticket count at which your take is no lower than at the sell-out of the stage before, and the planner releases the stage there. Type a count under "Release at" to set it yourself, or leave 0. No artist and no budget is paid less after a step.</p>
       <p class="note" id="note-steps"></p>
     </div>
     <div class="cols">
@@ -364,7 +366,10 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 //     above a ticket count.
 //  6. Stepping up a size never lowers a payment. At a larger size no budget, and no artist, gets less than it had
 //     reached at the sell-out of the size before. The cost of the step comes out of the profit instead.
-//  7. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
+//  7. A larger size is sold as one block. Tickets past a size's sell-out go on a waitlist and nobody is charged
+//     until the waitlist reaches the release count, the point where the organiser is no worse off than at the
+//     smaller size's sell-out. So the event never lands in the range where the step has cost more than it earned.
+//  8. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
 const SCHEMA = 8;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
@@ -373,8 +378,8 @@ const DEFAULTS = {
   v: SCHEMA,
   stages: [
     { name: 'Under the permit line', limit: 199 },
-    { name: 'Camp facilities', limit: 350 },
-    { name: 'With porto-potties and a second stage', limit: 500 },
+    { name: 'Camp facilities', limit: 350, release: 0 },
+    { name: 'With porto-potties and a second stage', limit: 500, release: 0 },
   ],
   sold: 0, paid: 275, mixFull: 65, mixSat: 25,
   tiers: {
@@ -462,8 +467,8 @@ const DEFAULTS = {
     { date: '2027-02-01', task: 'Update tickets sold. Agree the remaining night slots and pay their deposits before the full lineup', owner: 'You', done: false },
     { date: '2027-02-09', task: 'Full lineup. Art grants and merch pre-order open', owner: 'You', done: false },
     { date: '2027-03-01', task: 'Update tickets sold. Agree remaining artists and commit the art budget', owner: 'You', done: false },
-    { date: '2027-03-15', task: 'Decide on real sales whether to go past 141 tickets, and whether to go to 500', owner: 'You and Kinetic Desert', done: false },
-    { date: '2027-03-16', task: 'If going past 141 tickets: file the Temporary Use Permit, book the medical team, order porto-potties for 500', owner: 'You', done: false },
+    { date: '2027-03-15', task: 'Waitlist deadline. Release it if it has reached the count for the next size', owner: 'You and Kinetic Desert', done: false },
+    { date: '2027-03-16', task: 'If the waitlist was released: file the Temporary Use Permit, book the medical team, order porto-potties for 500', owner: 'You', done: false },
     { date: '2027-03-23', task: 'Set times out. Sunday tickets on sale. Fire permit application in, if going past 199 on site', owner: 'You', done: false },
     { date: '2027-04-09', task: 'Final ticket tier. Grocery and drinks order from the final budgets', owner: 'You', done: false },
     { date: '2027-04-21', task: 'Load-in begins', owner: 'Kinetic Desert', done: false },
@@ -519,8 +524,36 @@ function rise(s, money) {
   const H = sum(head), k = H > 0 ? Math.min(1, Math.max(0, money) / H) : 0;
   return { add: head.map(h => h * k), leftover: Math.max(0, money - H) };
 }
+// The ticket count at which each stage is released. A stage's own `release` if it has one, otherwise the first
+// count at which the organiser's take is at least what it was at the sell-out of the stage before.
+// Stage 0 is always open. null means the stage never gets there, and it is then left ungated.
+function releases(s, maxes) {
+  const mx = maxes || s.stages.map((_, L) => maxPaid(s, L));
+  const top = mx[mx.length - 1], raw = [], ctx = { maxes: mx, rel: [], held: {} };
+  for (let n = 0; n <= top; n++) raw.push(compute({ ...s, paid: n, _ctx: ctx }));
+  return s.stages.map((st, L) => {
+    if (L === 0) return 0;
+    const start = mx[L - 1] + 1, base = raw[mx[L - 1]];
+    if (n0(st.release) > 0) return Math.max(start, Math.min(top, Math.round(n0(st.release))));
+    for (let n = start; n <= top; n++) if (raw[n].yours >= base.yours) return n;
+    return null;
+  });
+}
+// The tickets actually sold for a number of buyers: buyers past a sell-out wait until the next stage is released.
+function soldFor(s, buyers, rel, maxes) {
+  const mx = maxes || s.stages.map((_, L) => maxPaid(s, L));
+  let n = buyers;
+  for (let L = s.stages.length - 1; L >= 1; L--) { const start = mx[L - 1] + 1; if (rel[L] && n >= start && n < rel[L]) n = start - 1; }
+  return n;
+}
+// Everything about the stages that is the same at every ticket count, worked out once.
+function context(s) {
+  const maxes = s.stages.map((_, L) => maxPaid(s, L));
+  return { maxes, rel: releases(s, maxes), held: {} };
+}
 function compute(s) {
-  const paid = n0(s.paid);
+  const ctx = s._ctx || context(s), rel = ctx.rel;
+  const buyers = n0(s.paid), paid = soldFor(s, buyers, rel, ctx.maxes);
   const nFull = paid * s.mixFull / 100, nSat = paid * s.mixSat / 100, nSun = Math.max(0, paid - nFull - nSat);
   const tFull = fillTiers(s.tiers.full, nFull), tSat = fillTiers(s.tiers.sat, nSat), tSun = fillTiers(s.tiers.sun, nSun);
   const tickets = tFull.rev + tSat.rev + tSun.rev;
@@ -557,8 +590,8 @@ function compute(s) {
   const artistMin = sum(s.slots.flat().map(x => n0(x.min)));
   const hard = guarantees + partnerFees + crewPay + crewFees + siteCosts + cabinCost + artistMin + processing;
   // Budgets that grow with sales. Past a size step each is held at what it reached at the smaller size's sell-out.
-  const heldAt = level > 0 ? maxPaid(s, level - 1) : null;
-  const held = heldAt === null ? null : compute({ ...s, paid: heldAt });
+  const heldAt = level > 0 ? ctx.maxes[level - 1] : null;
+  const held = heldAt === null ? null : (ctx.held[level] || (ctx.held[level] = compute({ ...s, paid: heldAt, _ctx: ctx })));
   const surplus = revenue - hard;
   const floors = sum(s.budgets.map(b => n0(b.floor)));
   const free = surplus - floors;
@@ -605,7 +638,7 @@ function compute(s) {
     if (!parts && i === youIdx) r.shareAmt = profit;
     r.total = r.guar + r.fee + r.shareAmt;
   });
-  return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
+  return { paid, buyers, waitlist: buyers - paid, rel, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
     level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, crewFees, siteCosts, processing, hard,
     riseUsed: sum(up.add), heldAt, heldCost: sum(budgetRows.map(b => Math.max(0, b.budget - Math.max(b.scaled, b.committed)))),
     cabinsSold, cabinsRented, cabinCost, artistMin, artistBudget, agreedExtra, agreedMin, artistPaid,
@@ -615,7 +648,7 @@ function compute(s) {
     yours: youIdx >= 0 ? partnerRows[youIdx].shareAmt : profit, avgTicket: paid ? tickets / paid : 0 };
 }
 // The plan at every ticket count that fits, computed once and reused by the charts and the checks.
-function series(s) { const out = []; for (let n = 0, max = maxPaid(s); n <= max; n++) out.push(compute({ ...s, paid: n })); return out; }
+function series(s) { const out = [], ctx = context(s); for (let n = 0, max = ctx.maxes[ctx.maxes.length - 1]; n <= max; n++) out.push(compute({ ...s, paid: n, _ctx: ctx })); return out; }
 // The fewest tickets at which sales cover everything that cannot be backed out of:
 // the hard costs (artist guarantees included), each budget's floor, and whatever is already committed.
 function coveredAt(s, all) { const i = (all || series(s)).findIndex(r => r.surplus - r.mustSpend >= 0); return i < 0 ? null : i; }
@@ -627,7 +660,7 @@ function stagePaysFrom(s, level, all) {
   const a = all || series(s);
   if (level <= 0) return { profit: 0, yours: 0 };
   const base = a[maxPaid(s, level - 1)], start = stageStart(s, level);
-  const find = f => { for (let n = start; n < a.length; n++) if (f(a[n]) >= f(base)) return n; return null; };
+  const find = f => { for (let n = start; n < a.length; n++) if (a[n].paid >= start && f(a[n]) >= f(base)) return n; return null; };
   return { profit: find(r => r.profit), yours: find(r => r.yours) };
 }
 // Each partner's share of a profit at a stage, in percent.
@@ -678,10 +711,10 @@ const delBtn = (list, i, label) => `<button class="ghost" data-del="${list}" dat
 
 /* ---------- builders: run when the structure changes ---------- */
 function buildStages() {
-  $('stages').innerHTML = `<thead><tr><th>Stage</th><th>Limit on site</th><th>Without a ticket</th><th>Tickets that fit</th><th>Starts at ticket</th><th>Worth it from</th><th class="l">Switches on</th></tr></thead><tbody>` +
+  $('stages').innerHTML = `<thead><tr><th>Stage</th><th>Limit on site</th><th>Without a ticket</th><th>Tickets that fit</th><th>Waitlist from ticket</th><th>Worth it from</th><th>Release at</th><th class="l">Switches on</th></tr></thead><tbody>` +
     s.stages.map((st, i) => `<tr><td>${cell('stages', i, 'name', st.name, 'text', 'aria-label="Stage name"')}</td>
       <td>${cell('stages', i, 'limit', st.limit, 'number', 'min="1" step="1" aria-label="Limit on site"')}</td>
-      <td id="st-unt-${i}"></td><td id="st-fit-${i}"></td><td id="st-start-${i}"></td><td id="st-pay-${i}"></td><td class="l muted" id="st-on-${i}"></td></tr>`).join('') + '</tbody>';
+      <td id="st-unt-${i}"></td><td id="st-fit-${i}"></td><td id="st-start-${i}"></td><td id="st-pay-${i}"></td><td>${i ? cell('stages', i, 'release', st.release ?? 0, 'number', 'min="0" step="1" aria-label="Release at"') : ''}</td><td class="l muted" id="st-on-${i}"></td></tr>`).join('') + '</tbody>';
   $('jump').innerHTML = `<button data-jump="sold">Sold so far</button>` + s.stages.map((st, i) => `<button data-jump="${i}">Sell out at ${int(st.limit)}</button>`).join('');
   $('btn-del-stage').disabled = s.stages.length < 2;
 }
@@ -788,7 +821,7 @@ function renderVerdict(r, cov) {
   $('v-profit-label').textContent = r.profit >= 0 ? `Profit at ${int(r.paid)} tickets` : `Loss at ${int(r.paid)} tickets`;
   $('v-profit').textContent = money(r.profit);
   $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
-  $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets`;
+  $('v-profit-sub').textContent = (r.waitlist > 0 ? `${int(r.waitlist)} more on the waitlist, sold at ${int(r.rel[r.level + 1])}. ` : '') + `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets`;
   const must = r.hard + r.mustSpend, pill = $('v-cov-pill');
   $('v-cov').textContent = cov === null ? 'Not covered' : tix(cov);
   $('v-cov-sub').textContent = `Hard costs with ${money(r.artistMin)} of artist minimums, and floors` + (sumCommitted(r) > 0.5 ? `, plus ${money(sumCommitted(r))} agreed or committed` : '');
@@ -812,15 +845,16 @@ function renderOverview(r, all, cov) {
     $('st-pay-' + i).textContent = i === 0 ? (cov === null ? 'not covered' : tix(cov)) : pf.profit === null ? 'never at this size' : tix(pf.profit) + (pf.yours !== pf.profit ? `, you from ${pf.yours === null ? 'never' : int(pf.yours)}` : '');
     $('st-unt-' + i).textContent = int(headcount(s, i).total);
     $('st-fit-' + i).textContent = int(maxPaid(s, i));
-    $('st-start-' + i).textContent = i === 0 ? 'first' : int(stageStart(s, i));
+    $('st-start-' + i).textContent = i === 0 ? 'open' : int(stageStart(s, i));
     const names = [...s.partners, ...s.crew, ...s.others, ...s.costs].filter(x => num(x.from) === i).map(x => x.name);
     $('st-on-' + i).textContent = i === 0 ? 'The base plan' : names.length ? names.join(', ') : 'Nothing extra yet';
   });
   $('note-steps').textContent = s.stages.slice(1).map((st, k) => {
-    const i = k + 1, before = all[maxPaid(s, i - 1)], first = all[stageStart(s, i)];
-    if (!before || !first) return '';
-    const zero = all.findIndex((x, n) => n >= stageStart(s, i) && x.yours >= 0);
-    return `At ticket ${int(stageStart(s, i))} your take goes from ${money(before.yours)} to ${money(first.yours)}` + (first.yours < 0 ? (zero < 0 ? ', and it does not get back above zero at this size.' : `, and it is back above zero at ${tix(zero)}.`) : '.');
+    const i = k + 1, start = stageStart(s, i), before = all[start - 1], rel = r.rel[i];
+    if (!before) return '';
+    if (!rel) { const first = all[start]; return first ? `${st.name} never beats stopping at ${int(start - 1)} tickets, so it is not gated: ticket ${int(start)} takes your take from ${money(before.yours)} to ${money(first.yours)}.` : ''; }
+    const after = all[rel];
+    return `Past ${int(start - 1)} tickets, buyers wait without being charged. When ${int(rel - start + 1)} are waiting they are all sold together and the event steps up at ${int(rel)} tickets, where your take goes from ${money(before.yours)} to ${money(after.yours)}.`;
   }).filter(Boolean).join(' ');
   const al = artistLine();
   $('o-paid').textContent = int(s.paid);
@@ -1160,7 +1194,7 @@ document.addEventListener('click', e => {
   else if (d.jump !== undefined) { s.paid = d.jump === 'sold' ? Math.min(num(s.sold), maxPaid(s)) : maxPaid(s, +d.jump); render(); }
   else if (b.id === 'btn-add-stage') {
     const last = s.stages[s.stages.length - 1];
-    s.stages.push({ name: 'New stage', limit: Math.round(num(last.limit) * 1.5 / 50) * 50 });
+    s.stages.push({ name: 'New stage', limit: Math.round(num(last.limit) * 1.5 / 50) * 50, release: 0 });
     s.partners.forEach(p => p.people.push(num(p.people[p.people.length - 1])));
     rebuild();
   } else if (b.id === 'btn-del-stage') {

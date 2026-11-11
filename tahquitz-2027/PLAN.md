@@ -10,7 +10,7 @@ The numbers in this plan come from one planning model. Open [`budget.html`](budg
 
 | Section | What it holds |
 |---|---|
-| Overview | Tickets sold so far, the ticket count you are planning on, the artists' share, how every budget grows with sales, who gets what at each size, the scale stages with what each step costs you, and the full profit and loss |
+| Overview | Tickets sold so far, the ticket count you are planning on, the artists' share, how every budget grows with sales, who gets what at each size, the scale stages with the waitlist each step up needs, and the full profit and loss |
 | Tickets | Ticket mix, every price tier, add-ons and card fees |
 | Budgets | Every budget that grows with sales: its share of the surplus, floor, cap and what is committed |
 | Artists | The booking queue: each night slot's minimum, deposit and full fee, the ticket count at which sales cover it, and the terms once an artist agrees |
@@ -34,7 +34,7 @@ Partners, crew roles, budgets, hard costs, stages and timeline rows can all be a
 7. **A flat deal saves you the rise.** A 10:30 headliner on a flat $1,500 costs nothing extra at low sales and leaves you $1,500 more at a 275-ticket sell-out.
 8. **Neither production partner shares the profit.** Kinetic Desert has agreed to $2,000 plus $15 for every ticket above 75. Project Seismic is on $3,000 plus $10 for every ticket above 275.
 9. **141 tickets is home base.** That is a sell-out under the permit line: artists receive about $10,100 and you take about $900.
-10. **Stepping up a size never lowers anyone's pay. The cost comes out of your profit.** At ticket 142 your take goes from $919 to −$4,237. It is back above zero at 172 tickets and beats stopping at 141 from 178.
+10. **A larger size is sold as one block, so nobody is paid less and you never go negative.** Past 141 tickets buyers join a waitlist and are not charged. When 37 are waiting they are all sold together and the event steps up at 178 tickets.
 11. **At a 275-ticket sell-out artists receive their full $18,325 and your profit is about $6,100.**
 12. **Stay on Stripe for the ticket site and list all-in prices.** The permit is a Temporary Use Permit, and tickets can go on sale before it is issued.
 13. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
@@ -85,6 +85,7 @@ If 30% of sales went by bank, fees would drop by about $370.
 
 ### Build notes
 
+- **Waitlist at a sell-out.** When the current size sells out, switch to a waitlist that saves a card without charging it, and charge the whole list together when you release the next size.
 - **Enforce the caps in code.** The site should stop sales at 141, 275 or 384 depending on the level you are operating at, and issue crew, artist and partner guest places as $0 tickets from the same system. Then the on-site count is always known.
 - **Tier inventory.** Use conditional writes so two buyers cannot take the last ticket in a tier, and release held tickets when a checkout session expires.
 - **Issue tickets from Stripe's webhook**, verified and safe to receive twice. Do not issue from the browser redirect.
@@ -146,7 +147,7 @@ The camp itself sets no rules beyond the law and its bathroom capacity: 350 peop
 2. **Mandatory hard costs come off first.** The venue fee, permits, insurance, medical, what the production partners are owed, the artist minimums, crew pay, cabin rental, the chef, groceries for crew and artists, site supplies and card fees. These are owed whatever sells.
 3. **What is left is the surplus.** Every other budget takes a fixed share of it.
 4. **The share nobody takes is your profit.**
-5. **A step up in size never lowers a payment.** Past 141 and past 275 tickets, artists and every budget are held at what they had reached until their own share catches up. The cost of the step comes out of your profit.
+5. **A larger size is sold as one block.** Buyers past a sell-out wait, uncharged, until enough are waiting that the step has paid for itself. Nobody is paid less after a step, and you do not go negative.
 
 ### The shares
 
@@ -198,13 +199,11 @@ For everyone but you these are payments, not profit after their own costs. Your 
 
 **200 to 350 on site, with the permit and the medical team**
 
+Tickets 142 to 177 are the waitlist. Nobody is charged and nothing changes for anyone until it is released.
+
 | Tickets | Camp | Kinetic Desert | The Dome | Artists, all 24 sets | Each paid crew | You |
 |---|---|---|---|---|---|---|
-| **142, first ticket of the step** | $4,871 | $3,005 | $1,420 | $10,082 | $128 | **−$4,237** |
-| 150 | $5,075 | $3,125 | $1,500 | $10,082 | $136 | −$3,086 |
-| 160 | $5,330 | $3,275 | $1,600 | $10,082 | $146 | −$1,642 |
-| **172, you are back above zero** | $5,636 | $3,455 | $1,720 | $10,082 | $158 | **$91** |
-| **178, beats stopping at 141** | $5,789 | $3,545 | $1,780 | $10,103 | $164 | **$927** |
+| **178, released as a block** | $5,789 | $3,545 | $1,780 | $10,103 | $164 | **$927** |
 | 200 | $6,600 | $3,875 | $2,000 | $12,167 | $186 | $1,715 |
 | 225 | $7,488 | $4,250 | $2,000 | $14,773 | $211 | $2,710 |
 | 250 | $8,125 | $4,625 | $2,000 | $17,117 | $236 | $3,605 |
@@ -212,19 +211,17 @@ For everyone but you these are payments, not profit after their own costs. Your 
 
 **351 to 500 on site, with porto-potties and the second stage**
 
+Tickets 276 to 336 are the waitlist.
+
 | Tickets | Camp | Kinetic Desert | The Dome | Project Seismic | Artists, all 24 sets | Each paid crew | You |
 |---|---|---|---|---|---|---|---|
-| **276, first ticket of the step** | $9,038 | $5,015 | $2,000 | $3,010 | $18,325 | $262 | **−$3,567** |
-| 290 | $9,395 | $5,225 | $2,000 | $3,150 | $18,325 | $276 | −$1,321 |
-| **299, you are back above zero** | $9,625 | $5,360 | $2,000 | $3,240 | $18,325 | $285 | **$123** |
-| 325 | $10,288 | $5,750 | $2,000 | $3,500 | $18,325 | $311 | $4,294 |
-| **337, beats stopping at 275** | $10,594 | $5,930 | $2,000 | $3,620 | $18,325 | $323 | **$6,184** |
+| **337, released as a block** | $10,594 | $5,930 | $2,000 | $3,620 | $18,325 | $323 | **$6,184** |
 | 350 | $10,925 | $6,125 | $2,000 | $3,750 | $18,325 | $336 | $7,769 |
 | **384, sell-out** | $11,792 | $6,635 | $2,000 | $4,090 | $18,325 | $370 | **$11,914** |
 
-- **You are the only one who can lose money.** Everyone else is paid at every level.
-- **Nobody is paid less after a step up.** Artists and budgets hold at what they had reached until their share catches up, at about 178 tickets and again at about 337.
-- **Camp** is the venue fee plus cabin rental, plus the $500 medical rep at the small size only, which is why it dips at 142.
+- **You are the only one who can lose money, and only below 114 tickets.** Everyone else is paid at every level.
+- **Nobody is paid less after a step up, and that now includes you.**
+- **Camp** is the venue fee plus cabin rental, plus the $500 medical rep at the small size only.
 - **Not shown:** the chef is paid $1,000 at every level, with a second chef at $1,000 above 350 on site.
 
 ### The crew
@@ -309,29 +306,35 @@ Kinetic Desert earns $2,225 at 90 tickets, $2,990 at 141, $5,000 at 275 and $6,6
 | Cabins rented as they sell | One 9-bed cabin sells per 45 tickets, up to six. You rent what sells plus two for artists and staff |
 | Smaller grocery and supply orders at the small size | $2,000 and $800 up to 199 on site, $2,800 and $1,200 above |
 
-### 141 is home base, and what a step costs
+### 141 is home base, and how a step up works
 
-A sell-out under the permit line is 141 tickets. At 142 the permit, the medical team, the larger grocery and supply orders and 15 more Kinetic Desert guests all come in.
+A sell-out under the permit line is 141 tickets. Ticket 142 brings in the permit, the medical team, the larger grocery and supply orders and 15 more Kinetic Desert guests, about $5,200 at once.
 
-**Nobody's pay goes down at a step.** Artists and every budget stay at what they had reached, and the whole cost comes out of your profit.
+**That cost cannot be divided away.** At 141 tickets the event has $5,427 left after hard costs to share between the artists, the budgets and you. At 142 it has $271. If ticket 142 were sold on its own, somebody would be paid less, and with the artists protected that would be you: −$4,237.
+
+**So the larger size is sold as one block.**
+
+1. At 141 tickets the site sells out and switches to a waitlist. Buyers save a card and are not charged.
+2. When 37 are waiting, they are all charged together and the event steps up at 178 tickets.
+3. If the waitlist has not reached 37 by the deadline, nobody is charged and the event runs at 141.
 
 | | Past 141 tickets | Past 275 tickets |
 |---|---|---|
 | New cost at the step | about $5,200 | about $9,600 |
-| Your take before the step | $919 | $6,072 |
-| Your take on the first ticket after | −$4,237 | −$3,567 |
-| You are back above zero at | 172 tickets | 299 tickets |
-| Beats stopping at the smaller size from | 178 tickets | 337 tickets |
-| Artists and budgets start rising again at | about 178 tickets | about 337 tickets |
+| Waitlist needed | 37 buyers | 62 buyers |
+| Sold together at | 178 tickets | 337 tickets |
+| Your take before and after | $919 → $927 | $6,072 → $6,184 |
+| Artists before and after | $10,082 → $10,103 | $18,325 → $18,325 |
 
-The profit you have at 141 tickets does not cover the step. It pays $919 of about $5,200, and the rest is a loss you carry until sales reach 172. If the event finishes between 142 and 171 tickets, that loss is yours and the artists keep what they had.
+**Ways to make the block smaller:**
 
-**You can decide this late.** The Temporary Use Permit can be filed close to the event, so the permit money is only spent once sales show the larger size is worth it.
+- **Release as soon as you are above zero.** That is 31 buyers (172 tickets), but your take drops from $919 to $91. For the 500 size it is 24 buyers (299 tickets) and a drop to $123. Type the count under Release at on the Overview tab.
+- **Get the real permit fee.** At the county's listed $2,108 the block is 31 buyers.
+- **Price the later tickets higher.** $20 more on Fri–Sun Tier 2 and Final and on Sat–Sun Final makes it 34.
 
-- Cap ticket sales at 141 until you decide. Selling ticket 142 is what commits you to the permit, the medical team and the larger orders.
-- Go past 141 when sales show 178 tickets are in reach, and to the 500 size when 337 are.
-- I put the decision at March 15. County Fire asks for its application 30 days ahead, which is March 24. Porto-potties and the medical team also need booking, and Stagecoach is the same weekend.
-- Move it later if the county's turnaround and your vendors allow.
+**On the ticket site.** Stripe can save a card without charging it and charge it later. My understanding is that there is no fee until the charge. A few saved cards will be declined when charged, so release when the list is a few over the count.
+
+**Set the waitlist deadline at March 15.** County Fire asks for its application 30 days ahead, which is March 24, and the permit, porto-potties and medical team all need lead time with Stagecoach on the same weekend. Move it later if the county's turnaround and your vendors allow.
 
 ### Working with it
 
@@ -368,7 +371,7 @@ I could not verify current booking fees for Pando!, Chmura, Huck.Jorris or Ferro
 
 Every limit is counted on people on site. Guest lists grow as the event does, so the number of tickets you can sell steps at each stage.
 
-| People on site | Without a ticket | Tickets that fit | Worth stepping into from | What switches on |
+| People on site | Without a ticket | Tickets that fit | Sold as a block at | What switches on |
 |---|---|---|---|---|
 | Up to 199 | 58 | 141 | 114 tickets cover it | The base plan, with the venue's medical rep and your own kit |
 | 200 to 350 | 75 | 275 | 178 tickets | Permits, the medical team, larger grocery and supply orders, 15 Kinetic Desert guests |
@@ -380,11 +383,11 @@ The main stage moves to a larger area with Kinetic Desert's production, and The 
 
 Their deal: **$3,000 guaranteed, plus $10 for every ticket sold above 275, and no share of the profit.**
 
-| Deal | They earn at 300 / 350 / 384 tickets | You at 384 | Pays you from |
+| Deal | They earn at 340 / 360 / 384 tickets | You at 384 | Released at |
 |---|---|---|---|
 | $3,000 flat | $3,000 / $3,000 / $3,000 | $12,743 | 333 tickets |
-| **$3,000 plus $10 a ticket above 275** | **$3,250 / $3,750 / $4,090** | **$11,914** | **337** |
-| $3,000 plus 10% of profit | $3,053 / $3,834 / $4,274 | $11,469 | 338 |
+| **$3,000 plus $10 a ticket above 275** | **$3,650 / $3,850 / $4,090** | **$11,914** | **337** |
+| $3,000 plus 10% of profit | $3,704 / $3,963 / $4,274 | $11,469 | 338 |
 
 - **Their rentals are covered for certain.**
 - **Their upside is tied to the tickets the bigger event adds**, which is the thing they are there to help sell.
@@ -392,9 +395,9 @@ Their deal: **$3,000 guaranteed, plus $10 for every ticket sold above 275, and n
 
 Their guest list is 30. Cutting it to 20 would free ten tickets and add about $1,200 to your take at a sell-out.
 
-Your take at the 500 size is $283 at 300 tickets, $7,769 at 350 and $11,914 at 384.
+Your take at the 500 size is $6,184 at 337 tickets, $7,769 at 350 and $11,914 at 384.
 
-The 500 size costs about $9,900 more in hard costs before the per-ticket fees, and 41 more places that cannot be sold. Afters still hold 145 people indoors, so at 500 on site that needs a third space or a late slot on one of the two stages.
+The 500 size costs about $0 more in hard costs before the per-ticket fees, and 41 more places that cannot be sold. Afters still hold 145 people indoors, so at 500 on site that needs a third space or a late slot on one of the two stages.
 
 ## Tickets
 
@@ -432,7 +435,7 @@ Tiers sell in order. Averages are at a 275-ticket sell-out. These are the prices
 | Dec 1–15 | Reeguez Rocks alumni presale: 25 Fri–Sun at $179, then $199, plus cabins. The first sales figure to enter in the planner |
 | Jan 12 | First lineup announcement. Tier 1 opens, Sat–Sun tickets open |
 | Feb 9 | Full lineup. Tier 2 opens when Tier 1 sells through |
-| Mar 15 | Decide on real sales whether to go past 141 tickets, and whether to go to 500 |
+| Mar 15 | Waitlist deadline. Release it if it has reached the count for the next size |
 | Mar 23 | Set times out. Sunday-only tickets open |
 | Apr 9 | Final tier |
 
@@ -654,7 +657,7 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 | Feb 1 | Enter sales. Agree the remaining night slots and pay their deposits before the full lineup |
 | Feb 9 | Full lineup. Art grants and merch pre-order open |
 | Mar 1 | Enter sales. Agree the daytime artists and commit the art budget |
-| Mar 15 | Decide on real sales whether to go past 141 tickets, and whether to go to 500. If so, file the Temporary Use Permit, book the medical team and order porto-potties |
+| Mar 15 | Waitlist deadline. If it has reached the count, charge it and step up: file the Temporary Use Permit, book the medical team, and order porto-potties for 500 |
 | Mar 23 | Set times. Sunday-only tickets. Fire permit application in by now at the latest, if going past 199 on site |
 | Apr 9 | Final tier. Grocery and drinks order from the final budgets. Shift schedule |
 | Apr 21 | Load-in |
