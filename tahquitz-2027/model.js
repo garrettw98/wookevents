@@ -14,19 +14,23 @@
 //     above a ticket count.
 //  6. Stepping up a size never lowers a payment. At a larger size no budget, and no artist, gets less than it had
 //     reached at the sell-out of the size before. The cost of the step comes out of the profit instead.
-//  7. A larger size is sold as one block. Tickets past a size's sell-out go on a waitlist and nobody is charged
-//     until the waitlist reaches the release count, the point where the organiser is no worse off than at the
-//     smaller size's sell-out. So the event never lands in the range where the step has cost more than it earned.
-//  8. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
-const SCHEMA = 8;
+//  7. Each size holds back a step fund: a slice of everything above the floors, taken from every share alike. It
+//     pays for the step up to the next size. If the step is never taken it stays in the profit.
+//  8. A larger size is sold as one block. Tickets past a size's sell-out go on a waitlist and nobody is charged
+//     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, the
+//     organiser is not left with a loss.
+//  9. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
+const SCHEMA = 9;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
 const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
 const DEFAULTS = {
   v: SCHEMA,
   stages: [
-    { name: 'Under the permit line', limit: 199 },
-    { name: 'Camp facilities', limit: 350, release: 0 },
+    // fund is the percent of the surplus above floors held back at this size to pay for the step to the next.
+    // release is the ticket count at which the size is sold as a block; 0 lets the model set it.
+    { name: 'Under the permit line', limit: 199, fund: 50 },
+    { name: 'Camp facilities', limit: 350, fund: 0, release: 0 },
     { name: 'With porto-potties and a second stage', limit: 500, release: 0 },
   ],
   sold: 0, paid: 275, mixFull: 65, mixSat: 25,
@@ -173,7 +177,7 @@ function rise(s, money) {
   return { add: head.map(h => h * k), leftover: Math.max(0, money - H) };
 }
 // The ticket count at which each stage is released. A stage's own `release` if it has one, otherwise the first
-// count at which the organiser's take is at least what it was at the sell-out of the stage before.
+// count at which the organiser is not left with a loss (or, if the stage before already ended in one, no deeper one).
 // Stage 0 is always open. null means the stage never gets there, and it is then left ungated.
 function releases(s, maxes) {
   const mx = maxes || s.stages.map((_, L) => maxPaid(s, L));
@@ -183,7 +187,8 @@ function releases(s, maxes) {
     if (L === 0) return 0;
     const start = mx[L - 1] + 1, base = raw[mx[L - 1]];
     if (n0(st.release) > 0) return Math.max(start, Math.min(top, Math.round(n0(st.release))));
-    for (let n = start; n <= top; n++) if (raw[n].yours >= base.yours) return n;
+    const target = Math.min(0, base.yours);
+    for (let n = start; n <= top; n++) if (raw[n].yours >= target) return n;
     return null;
   });
 }
@@ -244,10 +249,12 @@ function compute(s) {
   const floors = sum(s.budgets.map(b => n0(b.floor)));
   const free = surplus - floors;
   const shareTotal = sum(s.budgets.map(b => n0(b.share)));
+  const fundPct = level < s.stages.length - 1 ? Math.min(100, Math.max(0, n0(s.stages[level].fund))) / 100 : 0;
+  const fund = Math.max(0, free) * fundPct;
   const budgetRows = s.budgets.map((b, i) => {
     const committed = b.id ? 0 : n0(b.committed);
     const hold = held && held.budgetRows[i] ? held.budgetRows[i].budget : 0;
-    let scaled = n0(b.floor) + Math.max(0, free) * n0(b.share) / 100;
+    let scaled = n0(b.floor) + Math.max(0, free) * (1 - fundPct) * n0(b.share) / 100;
     if (n0(b.cap) > 0) scaled = Math.min(scaled, n0(b.cap));
     const budget = Math.max(scaled, committed, hold);
     return { scaled, committed, budget, hold, held: hold > Math.max(scaled, committed) + 0.5, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
@@ -286,7 +293,7 @@ function compute(s) {
     if (!parts && i === youIdx) r.shareAmt = profit;
     r.total = r.guar + r.fee + r.shareAmt;
   });
-  return { paid, buyers, waitlist: buyers - paid, rel, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
+  return { paid, buyers, waitlist: buyers - paid, rel, fund, fundPct, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
     level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, crewFees, siteCosts, processing, hard,
     riseUsed: sum(up.add), heldAt, heldCost: sum(budgetRows.map(b => Math.max(0, b.budget - Math.max(b.scaled, b.committed)))),
     cabinsSold, cabinsRented, cabinCost, artistMin, artistBudget, agreedExtra, agreedMin, artistPaid,
@@ -309,7 +316,7 @@ function stagePaysFrom(s, level, all) {
   if (level <= 0) return { profit: 0, yours: 0 };
   const base = a[maxPaid(s, level - 1)], start = stageStart(s, level);
   const find = f => { for (let n = start; n < a.length; n++) if (a[n].paid >= start && f(a[n]) >= f(base)) return n; return null; };
-  return { profit: find(r => r.profit), yours: find(r => r.yours) };
+  return { profit: find(r => r.profit), yours: find(r => r.yours), whole: find(r => r.surplus) };
 }
 // Each partner's share of a profit at a stage, in percent.
 function sharePct(s, level) {
