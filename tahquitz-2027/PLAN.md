@@ -27,7 +27,7 @@ Partners, crew roles, budgets, hard costs, stages and timeline rows can all be a
 
 1. **Break-even is 114 tickets.** That covers every hard cost, including the minimums for all nine 90-minute slots and $100 for each of the 12 paid crew. Reeguez Rocks sold 90, so the event has to sell about a quarter more before anyone is ahead.
 2. **The nine artist minimums are hard costs: $7,675.** Those artists are announced with the ticket sales and their deposits are paid first, so the plan treats them as owed whatever sells.
-3. **Most sales come late, so the early money comes from you.** Deposits at 50% are $3,838, and the permit is about $3,000. Both are due before most tickets have sold.
+3. **Most sales come late, so the artist deposits come from you first.** At 50% they are $3,838. The permit can wait: a Temporary Use Permit can be filed close to the event, once sales show which size you are running.
 4. **Crew pay is $100 each in the break-even, plus $1 each for every ticket sold above 114.** That is $127 each at 141 tickets, $261 at 275 and $370 at 384.
 5. **Below break-even the loss is yours.** At 90 tickets it is about $3,300, and at 75 about $6,000.
 6. **Above break-even, every artist rises from their minimum toward their full fee at the same pace.** Everyone is at their full fee by about 263 tickets.
@@ -112,7 +112,7 @@ From the county's Temporary Use Permit information sheet, revised June 4, 2025:
 - **What to submit:** a letter of intent describing the temporary use, a site plan, supporting material such as drawings and pictures, and bond paperwork if a bond is required.
 - **How it runs:** you apply through the county's EZOP portal and are invoiced once the application is complete. A planner reviews it and may route it to other agencies, then approves it "as quickly as possible" once the standards are met.
 - **Standards:** access, heights, parking, setbacks, signs and utilities, plus removal of everything and restoration of the site. The county can ask for a performance bond.
-- **Deadline:** the sheet states none. You were told 90 days, which makes the last working day Friday, January 22.
+- **Deadline:** the sheet states none, and you can file close to the event. That lets you decide on real sales whether you need the permit at all. Ask the planner how long they take to issue one and work back from that.
 - **Ticket sales:** tickets can go on sale before the permit is issued. The sheet has no hold on sales or advertising, and the county confirmed that to you last year.
 - **Fee:** the 2025–26 county fee schedule lists a Major Temporary Use Permit at a flat $2,108. I could not find the minor fee or the 2026–27 figure. Your $3,000 ballpark is a reasonable budget until the county quotes it.
 
@@ -130,7 +130,7 @@ These come from other agencies' own pages, so ask whether the Temporary Use Perm
 Land Use Services, 909.387.8311.
 
 1. Which type of Temporary Use Permit this is, and the fee.
-2. The filing deadline for this year.
+2. How long before the event the application should go in.
 3. Whether the stage, truss and Dome need a separate structure permit or engineered plans.
 4. Whether the application is routed to County Fire or you apply there yourself.
 5. Whether the permit is needed at all below 200 people.
@@ -281,18 +281,18 @@ A sell-out under the permit line is 141 tickets. At 142 the permit, the medical 
 - Selling 142 to 177 tickets leaves you less than stopping at 141.
 - The same thing happens at 276. That size pays from 337 tickets.
 
-**The permit has to be filed by January 22, and most of your sales will still be ahead of you.** You will be deciding on a forecast, not a count.
+**You can decide this late.** The Temporary Use Permit can be filed close to the event, so the permit money is only spent once sales show the larger size is worth it.
 
-- Filing keeps the larger sizes open, and the permit money is then spent whatever sells.
-- If you file and still finish at 141 or fewer, break-even is 135 tickets and a 141-ticket sell-out leaves you about $300.
-- To see this in the planner, set Permits to start "Always" on the Hard costs tab.
-- Ask the county when the fee is due and whether any of it comes back if you stay under 200 on site.
+- Cap ticket sales at 141 until you decide. Selling ticket 142 is what commits you to the permit, the medical team and the larger orders.
+- Go past 141 when sales show 178 tickets are in reach, and to the 500 size when 337 are.
+- I put the decision at March 15. County Fire asks for its application 30 days ahead, which is March 24. Porto-potties and the medical team also need booking, and Stagecoach is the same weekend.
+- Move it later if the county's turnaround and your vendors allow.
 
 ### Working with it
 
 - **Enter tickets sold after every sales push.** The top bar shows how many tickets still stand between you and break-even, and the queue shows which minimums sales have covered.
 - **Book in queue order.** Friday's headliner first, so the name is on the poster while the rest is confirmed.
-- **Have the early money ready:** $750 for Friday's headliner, $3,838 for all nine deposits, and about $3,000 for the permit if you file.
+- **Have the deposit money ready:** $750 for Friday's headliner and $3,838 for all nine. The permit is not an early cost. It is paid close to the event, and only if you go past 141 tickets.
 - **Push for flat deals at the top.** Every headliner on a flat minimum is money that stays with the other artists and with you.
 - **Commit art, drinks and marketing late**, from the final figures.
 
@@ -604,22 +604,20 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 | This week | Put the five questions to the county planner. Ask your target artists for a full fee, their lowest minimum and whether they would take it flat. Start the ticket site |
 | November | Kinetic Desert's agreed deal and Project Seismic's deal in writing. Stage, truss and Dome dimensions. Draft the letter of intent and site plan |
 | Dec 1–15 | Alumni presale on the new site |
-| By Dec 11 | Submit the Temporary Use Permit application |
 | Mid-December | Enter presale sales. Agree Friday's headliner and pay the deposit, so the name is on the first lineup. Agree the others in queue order as cash allows |
 | Jan 12 | First lineup. Tier 1 and Sat–Sun tickets open |
-| Jan 22 | Last day to file the permit. Most sales are still ahead, so decide on your forecast whether to plan past 141 tickets |
 | Feb 1 | Enter sales. Agree the remaining night slots and pay their deposits before the full lineup |
 | Feb 9 | Full lineup. Art grants and merch pre-order open |
 | Mar 1 | Enter sales. Agree the daytime artists and commit the art budget |
-| Mar 15 | 500 decision. Order porto-potties |
-| Mar 23 | Set times. Sunday-only tickets. Fire permit application in by now at the latest |
+| Mar 15 | Decide on real sales whether to go past 141 tickets, and whether to go to 500. If so, file the Temporary Use Permit, book the medical team and order porto-potties |
+| Mar 23 | Set times. Sunday-only tickets. Fire permit application in by now at the latest, if going past 199 on site |
 | Apr 9 | Final tier. Grocery and drinks order from the final budgets. Shift schedule |
 | Apr 21 | Load-in |
 
 ## Questions that would change this plan
 
 1. **Is the crew's $1 a ticket paid to each crew member, and from which ticket?** I counted it for each of the 12, on tickets above 114. From the first ticket, break-even is 124.
-2. **When is the permit fee due, and does any of it come back** if you file and stay under 200 on site?
+2. **How long does the county take to issue the Temporary Use Permit?** That sets how late you can decide to go past 141 tickets.
 3. **Will headliners take a flat minimum?** It does not change break-even, and it is worth $1,500 to you at a sell-out for each $3,000 slot.
 4. **Will flown-in headliners take half their fee as the minimum** when they pay their own flights?
 5. **Does The Dome have a minimum?** It earns $900 at 90 tickets for travel and setup.
