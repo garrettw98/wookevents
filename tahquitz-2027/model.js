@@ -10,9 +10,10 @@
 //     paid first, so break-even has to cover them. The artist budget then lifts every open slot from its minimum
 //     toward its full fee, all at the same pace. An agreed slot is paid on its own terms: its minimum, plus a rate
 //     per ticket above a ticket count, up to the full fee. A rate of 0 is a flat fee.
-//  5. Cabins are rented as they sell, and crew stipends come from a budget capped at what the crew are owed.
+//  5. Cabins are rented as they sell. Crew pay is a hard cost: a fixed amount each, plus a rate per ticket sold
+//     above a ticket count.
 //  6. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
-const SCHEMA = 7;
+const SCHEMA = 8;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
 const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
@@ -48,7 +49,6 @@ const DEFAULTS = {
     { id: 'artists', name: 'Artists, above their minimums', share: 55, floor: 0, cap: 0, committed: 0 },
     { name: 'Art, projection and lighting', share: 9, floor: 500, cap: 0, committed: 0 },
     { name: 'Drinks for everyone', share: 7, floor: 0, cap: 0, committed: 0 },
-    { id: 'crew', name: 'Crew stipends', share: 6, floor: 0, cap: 0, committed: 0 },
     { name: 'Reserve for surprises', share: 4, floor: 0, cap: 0, committed: 0 },
     { name: 'Marketing and design', share: 2, floor: 250, cap: 0, committed: 0 },
     { name: 'Artist hospitality and airport runs', share: 2, floor: 300, cap: 0, committed: 0 },
@@ -63,19 +63,20 @@ const DEFAULTS = {
     // Project Seismic: rentals covered up front, then a fee on every ticket the bigger event adds. No profit share.
     { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 275, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
   ],
-  // pay is a hard cost. stipend is paid from the crew stipend budget as sales allow, up to this amount each.
+  // pay is fixed and owed whatever sells. perTicket is paid to each person for every ticket sold above `above`.
+  // Both are hard costs.
   // shifts is what each person works, need is how many shifts the job takes. Zero need means not shift-based.
   crew: [
-    { name: 'Chef', people: 1, pay: 1000, stipend: 0, shifts: 0, need: 0, from: 0 },
-    { name: 'Second chef', people: 1, pay: 1000, stipend: 0, shifts: 0, need: 0, from: 2 },
-    { name: 'Setup and strike', people: 5, pay: 0, stipend: 100, shifts: 3, need: 16, from: 0 },
-    { name: 'Runners: airport and errands', people: 3, pay: 0, stipend: 100, shifts: 3, need: 10, from: 0 },
-    { name: 'Gate', people: 4, pay: 0, stipend: 100, shifts: 3, need: 12, from: 0 },
-    { name: 'Second gate and parking', people: 3, pay: 0, stipend: 0, shifts: 3, need: 8, from: 0 },
-    { name: 'Artist hospitality and check-in', people: 3, pay: 0, stipend: 0, shifts: 3, need: 9, from: 0 },
-    { name: 'Informal security: K Lodge door and night rounds', people: 2, pay: 0, stipend: 0, shifts: 3, need: 6, from: 0 },
-    { name: 'Kitchen help', people: 2, pay: 0, stipend: 0, shifts: 3, need: 6, from: 0 },
-    { name: 'Site upkeep: trash, bathrooms, firewood', people: 2, pay: 0, stipend: 0, shifts: 3, need: 6, from: 0 },
+    { name: 'Chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 0 },
+    { name: 'Second chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 2 },
+    { name: 'Setup and strike', people: 5, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 16, from: 0 },
+    { name: 'Runners: airport and errands', people: 3, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 10, from: 0 },
+    { name: 'Gate', people: 4, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 12, from: 0 },
+    { name: 'Second gate and parking', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 8, from: 0 },
+    { name: 'Artist hospitality and check-in', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 9, from: 0 },
+    { name: 'Informal security: K Lodge door and night rounds', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
+    { name: 'Kitchen help', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
+    { name: 'Site upkeep: trash, bathrooms, firewood', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
   ],
   others: [
     { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
@@ -189,8 +190,10 @@ function compute(s) {
     const raw = active ? n0(p.perTicket) * Math.max(0, paid - n0(p.feeAbove)) : 0;
     return { active, guar: active ? n0(p.guarantee) : 0, fee: n0(p.cap) > 0 ? Math.min(raw, n0(p.cap)) : raw };
   });
-  const crewRows = s.crew.map(c => ({ active: on(c, level), pay: on(c, level) ? n0(c.people) * n0(c.pay) : 0, owed: on(c, level) ? n0(c.people) * n0(c.stipend) : 0 }));
-  const stipendsOwed = sum(crewRows.map(c => c.owed));
+  const crewRows = s.crew.map(c => {
+    const active = on(c, level), each = active ? n0(c.perTicket) * Math.max(0, paid - n0(c.above)) : 0;
+    return { active, pay: active ? n0(c.people) * n0(c.pay) : 0, fee: n0(c.people) * each, each: active ? n0(c.pay) + each : 0 };
+  });
   const costRows = s.costs.map(c => {
     const active = on(c, level), amt = n0(c.amount);
     return { active, value: !active ? 0 : c.basis === 'ticket' ? amt * paid : c.basis === 'ticketday' ? amt * ticketDays : c.basis === 'person' ? amt * onSite : amt };
@@ -199,9 +202,9 @@ function compute(s) {
   const bank = Math.min(100, n0(s.proc.bankShare)) / 100;
   const processing = online * ((1 - bank) * n0(s.proc.pct) + bank * n0(s.proc.bankPct)) / 100 + paid * (1 - bank) * n0(s.proc.fixed);
   const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
-  const crewPay = sum(crewRows.map(c => c.pay)), siteCosts = sum(costRows.map(c => c.value));
+  const crewPay = sum(crewRows.map(c => c.pay)), crewFees = sum(crewRows.map(c => c.fee)), siteCosts = sum(costRows.map(c => c.value));
   const artistMin = sum(s.slots.flat().map(x => n0(x.min)));
-  const hard = guarantees + partnerFees + crewPay + siteCosts + cabinCost + artistMin + processing;
+  const hard = guarantees + partnerFees + crewPay + crewFees + siteCosts + cabinCost + artistMin + processing;
   // Budgets that grow with sales.
   const surplus = revenue - hard;
   const floors = sum(s.budgets.map(b => n0(b.floor)));
@@ -210,8 +213,7 @@ function compute(s) {
   const budgetRows = s.budgets.map(b => {
     const committed = b.id ? 0 : n0(b.committed);
     let scaled = n0(b.floor) + Math.max(0, free) * n0(b.share) / 100;
-    if (b.id === 'crew') scaled = Math.min(scaled, stipendsOwed);
-    else if (n0(b.cap) > 0) scaled = Math.min(scaled, n0(b.cap));
+    if (n0(b.cap) > 0) scaled = Math.min(scaled, n0(b.cap));
     const budget = Math.max(scaled, committed);
     return { scaled, committed, budget, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
   });
@@ -234,8 +236,6 @@ function compute(s) {
   const per = s.slots[0].length;
   const slotNow = s.slots.map((d, j) => pays.slice(j * per, j * per + per));
   const slotStatus = s.slots.map(d => d.map(x => x.agreed ? 'agreed' : 'open'));
-  const ci = s.budgets.findIndex(b => b.id === 'crew');
-  const stipendsPaid = ci >= 0 ? budgetRows[ci].budget : 0;
   const spend = sum(budgetRows.map(b => b.budget));
   const mustSpend = sum(budgetRows.map(b => b.must));
   const profit = surplus - spend;
@@ -251,8 +251,8 @@ function compute(s) {
     r.total = r.guar + r.fee + r.shareAmt;
   });
   return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
-    level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, siteCosts, processing, hard,
-    cabinsSold, cabinsRented, cabinCost, artistMin, artistBudget, agreedExtra, agreedMin, artistPaid, stipendsOwed, stipendsPaid,
+    level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, crewFees, siteCosts, processing, hard,
+    cabinsSold, cabinsRented, cabinCost, artistMin, artistBudget, agreedExtra, agreedMin, artistPaid,
     campTotal: cabinCost + sum(s.costs.map((c, i) => c.camp ? costRows[i].value : 0)),
     surplus, floors, free, shareTotal, profitShare: 100 - shareTotal, budgetRows, spend, mustSpend, profit,
     agreedCount: agreedSlots(s).length, slotNow, slotStatus,
