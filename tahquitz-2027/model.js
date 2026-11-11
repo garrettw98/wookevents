@@ -22,7 +22,7 @@
 //     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, nobody
 //     is paid less than at the smaller size's sell-out, the organiser included.
 //  9. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
-const SCHEMA = 9;
+const SCHEMA = 10;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
 const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
@@ -33,36 +33,35 @@ const DEFAULTS = {
     // release is the ticket count at which the size is sold as a block; 0 lets the model set it.
     { name: 'Under the permit line', limit: 199, fund: 50 },
     { name: 'Camp facilities', limit: 350, fund: 0, release: 0 },
-    { name: 'With porto-potties and a second stage', limit: 500, release: 0 },
+    { name: 'Stretch: porto-potties and a second stage', limit: 500, release: 0 },
   ],
-  sold: 0, paid: 275, mixFull: 65, mixSat: 25,
+  sold: 0, paid: 285, mixFull: 65, mixSat: 25,
   tiers: {
-    full: [{ name: 'Presale', price: 179, qty: 25 }, { name: 'Tier 1', price: 199, qty: 60 }, { name: 'Tier 2', price: 219, qty: 50 }, { name: 'Final', price: 239, qty: 0 }],
-    sat: [{ name: 'Tier 1', price: 149, qty: 20 }, { name: 'Tier 2', price: 165, qty: 30 }, { name: 'Final', price: 179, qty: 0 }],
-    sun: [{ name: 'Tier 1', price: 89, qty: 15 }, { name: 'Final', price: 95, qty: 0 }],
+    full: [{ name: 'Presale', price: 179, qty: 25 }, { name: 'Tier 1', price: 199, qty: 60 }, { name: 'Tier 2', price: 239, qty: 50 }, { name: 'Final', price: 259, qty: 0 }],
+    sat: [{ name: 'Tier 1', price: 149, qty: 20 }, { name: 'Tier 2', price: 165, qty: 30 }, { name: 'Final', price: 199, qty: 0 }],
+    sun: [{ name: 'Tier 1', price: 89, qty: 15 }, { name: 'Final', price: 115, qty: 0 }],
   },
   // One 9-bed cabin sells per cabinPer tickets, up to cabinsMax. Cabins are rented only as they sell, plus cabinsHeld for artists and staff.
   addons: { carRate: 20, carSpots: 120, pCar: 50, cabinPer: 45, cabinsMax: 6, cabinsHeld: 2, cabinCost: 250, pCabin: 850, otherPer: 10 },
   proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
   // Full fees set the shape of the lineup: Friday carries the most, then Saturday, then Sunday.
-  // Minimums are half the full fee for the nine 90-minute slots, which is the usual deposit. The queue runs
-  // headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots. Daytime slots have
-  // no minimum: they are paid from the artist budget once sales pass break-even.
+  // Minimums are a percent of the full fee by slot: headliners (10:30) the most, because they sell the tickets,
+  // then direct support (9:00) and the 7:30 slots. minPct holds those percents; each slot's own min is what counts.
+  // The queue runs headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots.
+  // Daytime slots have no minimum: they are paid from the artist budget once sales pass break-even.
+  minPct: { head: 75, support: 50, opener: 50, day: 0 },
   slots: [
-    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 1500], [20, 20, 20, 20, 20, 7, 4, 1]),
-    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 1500], [20, 20, 20, 20, 20, 8, 5, 2]),
-    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1125], [20, 20, 20, 20, 20, 9, 6, 3]),
+    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 2250], [20, 20, 20, 20, 20, 7, 4, 1]),
+    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 2250], [20, 20, 20, 20, 20, 8, 5, 2]),
+    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1700], [20, 20, 20, 20, 20, 9, 6, 3]),
   ],
   // The share of each minimum that is due up front, before the artist can be announced.
   depositPct: 50,
   // share is a percent of the surplus left after floors. committed is money already promised on that line.
   budgets: [
     { id: 'artists', name: 'Artists, above their minimums', share: 55, floor: 0, cap: 0, committed: 0 },
-    { name: 'Art, projection and lighting', share: 9, floor: 500, cap: 0, committed: 0 },
-    { name: 'Drinks for everyone', share: 7, floor: 0, cap: 0, committed: 0 },
-    { name: 'Reserve for surprises', share: 4, floor: 0, cap: 0, committed: 0 },
-    { name: 'Marketing and design', share: 2, floor: 250, cap: 0, committed: 0 },
-    { name: 'Artist hospitality and airport runs', share: 2, floor: 300, cap: 0, committed: 0 },
+    // One bucket for everything else that grows with sales: art, drinks, hospitality, marketing and a reserve.
+    { name: 'Event: art, drinks, hospitality, marketing, reserve', share: 24, floor: 1050, cap: 0, committed: 0 },
   ],
   // share is in parts: 2 / 2 / 1 means 40% / 40% / 20% among the partners active at that stage.
   // people is the number on site at each stage, crew and guest list together.
@@ -72,7 +71,7 @@ const DEFAULTS = {
     { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 15, feeAbove: 75, cap: 0, share: 0, sharesLoss: false, people: [4, 19, 29] },
     { name: 'The Dome', role: '24-foot dome with sound, decks, travel, setup and takedown', from: 0, guarantee: 0, perTicket: 10, feeAbove: 0, cap: 2000, share: 0, sharesLoss: false, people: [2, 2, 2] },
     // Project Seismic: rentals covered up front, then a fee on every ticket the bigger event adds. No profit share.
-    { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 275, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
+    { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 285, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
   ],
   // pay is fixed and owed whatever sells. perTicket is paid to each person for every ticket sold above `above`.
   // Both are hard costs.
@@ -80,9 +79,9 @@ const DEFAULTS = {
   crew: [
     { name: 'Chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 0 },
     { name: 'Second chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 2 },
-    { name: 'Setup and strike', people: 5, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 16, from: 0 },
-    { name: 'Runners: airport and errands', people: 3, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 10, from: 0 },
-    { name: 'Gate', people: 4, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 12, from: 0 },
+    { name: 'Setup and strike', people: 5, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 16, from: 0 },
+    { name: 'Runners: airport and errands', people: 3, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 10, from: 0 },
+    { name: 'Gate', people: 4, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 12, from: 0 },
     { name: 'Second gate and parking', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 8, from: 0 },
     { name: 'Artist hospitality and check-in', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 9, from: 0 },
     { name: 'Informal security: K Lodge door and night rounds', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
@@ -90,7 +89,7 @@ const DEFAULTS = {
     { name: 'Site upkeep: trash, bathrooms, firewood', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
   ],
   others: [
-    { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
+    { name: 'Artists and their guests, at the peak', people: 16, from: 0 },
     { name: 'Medical team', people: 2, from: 1 },
   ],
   // Mandatory hard costs only. basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site).
@@ -103,12 +102,13 @@ const DEFAULTS = {
     { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 1 },
     { name: 'Venue medical rep, required without our own medic', amount: 500, basis: 'flat', from: 0, until: 0, camp: true },
     { name: 'Our own medical kit', amount: 200, basis: 'flat', from: 0, until: 0 },
-    { name: 'Groceries for crew and artists, small event', amount: 2000, basis: 'flat', from: 0, until: 0 },
-    { name: 'Groceries for crew and artists', amount: 2800, basis: 'flat', from: 1 },
-    { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
-    { name: 'Site supplies, small event', amount: 800, basis: 'flat', from: 0, until: 0 },
-    { name: 'Site supplies', amount: 1200, basis: 'flat', from: 1 },
-    { name: 'Extra site supplies', amount: 800, basis: 'flat', from: 2 },
+    // Groceries and supplies are budgeted per ticket, so they grow with the event instead of jumping at each size.
+    { name: 'Groceries for crew and artists', amount: 1350, basis: 'flat', from: 0 },
+    { name: 'Groceries, per ticket sold', amount: 5.4, basis: 'ticket', from: 0 },
+    { name: 'Groceries to feed partners and all artists', amount: 2000, basis: 'flat', from: 2 },
+    { name: 'Site supplies', amount: 550, basis: 'flat', from: 0 },
+    { name: 'Site supplies, per ticket sold', amount: 2.2, basis: 'ticket', from: 0 },
+    { name: 'Site supplies for the second stage', amount: 400, basis: 'flat', from: 2 },
   ],
   timeline: [
     { date: '2026-11-13', task: 'Put the five permit questions to the county planner', owner: 'You', done: false },
@@ -120,9 +120,9 @@ const DEFAULTS = {
     { date: '2027-01-12', task: 'First lineup. Tier 1 and Sat–Sun tickets on sale', owner: 'You', done: false },
     { date: '2027-02-01', task: 'Update tickets sold. Agree the remaining night slots and pay their deposits before the full lineup', owner: 'You', done: false },
     { date: '2027-02-09', task: 'Full lineup. Art grants and merch pre-order open', owner: 'You', done: false },
-    { date: '2027-03-01', task: 'Update tickets sold. Agree remaining artists and commit the art budget', owner: 'You', done: false },
+    { date: '2027-03-01', task: 'Update tickets sold. Agree remaining artists and commit the event budget. Open the 500 waitlist only if the middle size has sold out', owner: 'You', done: false },
     { date: '2027-03-15', task: 'Waitlist deadline. Release it if it has reached the count for the next size', owner: 'You and Kinetic Desert', done: false },
-    { date: '2027-03-16', task: 'If the waitlist was released: file the Temporary Use Permit, book the medical team, order porto-potties for 500', owner: 'You', done: false },
+    { date: '2027-03-16', task: 'If the waitlist was released: file the Temporary Use Permit and book the medical team. For 500, order porto-potties', owner: 'You', done: false },
     { date: '2027-03-23', task: 'Set times out. Sunday tickets on sale. Fire permit application in, if going past 199 on site', owner: 'You', done: false },
     { date: '2027-04-09', task: 'Final ticket tier. Grocery and drinks order from the final budgets', owner: 'You', done: false },
     { date: '2027-04-21', task: 'Load-in begins', owner: 'Kinetic Desert', done: false },

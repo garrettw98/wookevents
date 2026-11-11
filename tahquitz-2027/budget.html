@@ -125,6 +125,11 @@ table.edit input.mid { min-width: 135px; }
 #crew select { min-width: 128px; }
 #crew th { white-space: normal; }
 #stages th { white-space: normal; }
+.payhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+.payhead label { color: var(--ink-2); font-size: 14px; }
+.payhead select { max-width: 100%; min-width: 0; }
+#pay-table td, #pay-table th { white-space: nowrap; }
+@media print { body.print-pay * { visibility: hidden; } body.print-pay #pay-panel, body.print-pay #pay-panel * { visibility: visible; } body.print-pay #pay-panel { position: absolute; left: 0; top: 0; width: 100%; border: 0; } body.print-pay .payhead { display: none; } }
 #stages td.muted { min-width: 260px; }
 #stages td[id^="st-pay"] { min-width: 170px; }
 .fees input[type="number"] { width: 76px; }
@@ -183,7 +188,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 
   <nav class="tabs" aria-label="Sections">
     <a href="#overview">Overview</a><a href="#tickets">Tickets</a><a href="#budgets">Budgets</a><a href="#artists">Artists</a>
-    <a href="#production">Production</a><a href="#crew">Crew</a><a href="#hardcosts">Hard costs</a><a href="#timeline">Timeline</a>
+    <a href="#production">Production</a><a href="#crew">Crew</a><a href="#hardcosts">Hard costs</a><a href="#pay">Pay tables</a><a href="#timeline">Timeline</a>
   </nav>
 
   <section class="verdict" aria-live="polite">
@@ -285,7 +290,8 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
           <li><span>The minimums are owed whatever sells, and count toward break-even.</span></li>
           <li><span>Past break-even, every open slot rises toward its full fee at the same pace, so they all get there together.</span></li>
           <li><span>Daytime slots have no minimum. They are paid from break-even on.</span></li>
-          <li><span>An agreed slot is paid on its own terms. A rate of 0 is a flat fee, and what it saves goes to the other slots and then to profit.</span></li>
+          <li><span>Headliners carry the highest minimums, because their names sell the tickets. Each minimum adds tickets to the break-even, shown in the queue.</span></li>
+          <li><span>An agreed slot is paid on its own terms. A rate of 0 is a flat fee. What it saves goes to the other slots, then into the step fund, and at the final size to you.</span></li>
         </ul>
         <div id="ladder-settings"></div>
       </div>
@@ -293,7 +299,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
     <div class="panel">
       <h2>The booking queue</h2>
       <div class="scroll"><table id="ladder"></table></div>
-      <p class="note">The order to book and announce in. "Covered at" is the ticket count at which sales pay for the hard costs plus every minimum down to that row. The last row is the break-even for the whole lineup.</p>
+      <p class="note">The order to book and announce in. "Tickets it adds" is how many more tickets have to sell to pay for that minimum. "Covered at" is the ticket count at which sales pay for the hard costs plus every minimum down to that row. The last row is the break-even for the whole lineup.</p>
     </div>
     <div class="panel">
       <h2>Slots and deals</h2>
@@ -341,6 +347,17 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
     </div>
   </section>
 
+  <section class="tab" id="tab-pay" hidden>
+    <p class="intro">Everyone is paid once, after the event, on the final ticket count. Before the event only minimums and deposits go out. Pick a name to get the one table they need: tickets sold on the left, what they are paid on the right.</p>
+    <div class="panel" id="pay-panel">
+      <div class="payhead"><label for="pay-who">Pay table for</label><select id="pay-who"></select><button id="btn-print">Print this table</button></div>
+      <h2 id="pay-title"></h2>
+      <p class="note" id="pay-terms"></p>
+      <div class="scroll"><table id="pay-table"></table></div>
+      <p class="note" id="pay-foot"></p>
+    </div>
+  </section>
+
   <section class="tab" id="tab-timeline" hidden>
     <div class="panel">
       <h2>Timeline</h2>
@@ -375,7 +392,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 //     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, nobody
 //     is paid less than at the smaller size's sell-out, the organiser included.
 //  9. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
-const SCHEMA = 9;
+const SCHEMA = 10;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
 const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
@@ -386,36 +403,35 @@ const DEFAULTS = {
     // release is the ticket count at which the size is sold as a block; 0 lets the model set it.
     { name: 'Under the permit line', limit: 199, fund: 50 },
     { name: 'Camp facilities', limit: 350, fund: 0, release: 0 },
-    { name: 'With porto-potties and a second stage', limit: 500, release: 0 },
+    { name: 'Stretch: porto-potties and a second stage', limit: 500, release: 0 },
   ],
-  sold: 0, paid: 275, mixFull: 65, mixSat: 25,
+  sold: 0, paid: 285, mixFull: 65, mixSat: 25,
   tiers: {
-    full: [{ name: 'Presale', price: 179, qty: 25 }, { name: 'Tier 1', price: 199, qty: 60 }, { name: 'Tier 2', price: 219, qty: 50 }, { name: 'Final', price: 239, qty: 0 }],
-    sat: [{ name: 'Tier 1', price: 149, qty: 20 }, { name: 'Tier 2', price: 165, qty: 30 }, { name: 'Final', price: 179, qty: 0 }],
-    sun: [{ name: 'Tier 1', price: 89, qty: 15 }, { name: 'Final', price: 95, qty: 0 }],
+    full: [{ name: 'Presale', price: 179, qty: 25 }, { name: 'Tier 1', price: 199, qty: 60 }, { name: 'Tier 2', price: 239, qty: 50 }, { name: 'Final', price: 259, qty: 0 }],
+    sat: [{ name: 'Tier 1', price: 149, qty: 20 }, { name: 'Tier 2', price: 165, qty: 30 }, { name: 'Final', price: 199, qty: 0 }],
+    sun: [{ name: 'Tier 1', price: 89, qty: 15 }, { name: 'Final', price: 115, qty: 0 }],
   },
   // One 9-bed cabin sells per cabinPer tickets, up to cabinsMax. Cabins are rented only as they sell, plus cabinsHeld for artists and staff.
   addons: { carRate: 20, carSpots: 120, pCar: 50, cabinPer: 45, cabinsMax: 6, cabinsHeld: 2, cabinCost: 250, pCabin: 850, otherPer: 10 },
   proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
   // Full fees set the shape of the lineup: Friday carries the most, then Saturday, then Sunday.
-  // Minimums are half the full fee for the nine 90-minute slots, which is the usual deposit. The queue runs
-  // headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots. Daytime slots have
-  // no minimum: they are paid from the artist budget once sales pass break-even.
+  // Minimums are a percent of the full fee by slot: headliners (10:30) the most, because they sell the tickets,
+  // then direct support (9:00) and the 7:30 slots. minPct holds those percents; each slot's own min is what counts.
+  // The queue runs headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots.
+  // Daytime slots have no minimum: they are paid from the artist budget once sales pass break-even.
+  minPct: { head: 75, support: 50, opener: 50, day: 0 },
   slots: [
-    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 1500], [20, 20, 20, 20, 20, 7, 4, 1]),
-    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 1500], [20, 20, 20, 20, 20, 8, 5, 2]),
-    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1125], [20, 20, 20, 20, 20, 9, 6, 3]),
+    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 2250], [20, 20, 20, 20, 20, 7, 4, 1]),
+    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 2250], [20, 20, 20, 20, 20, 8, 5, 2]),
+    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1700], [20, 20, 20, 20, 20, 9, 6, 3]),
   ],
   // The share of each minimum that is due up front, before the artist can be announced.
   depositPct: 50,
   // share is a percent of the surplus left after floors. committed is money already promised on that line.
   budgets: [
     { id: 'artists', name: 'Artists, above their minimums', share: 55, floor: 0, cap: 0, committed: 0 },
-    { name: 'Art, projection and lighting', share: 9, floor: 500, cap: 0, committed: 0 },
-    { name: 'Drinks for everyone', share: 7, floor: 0, cap: 0, committed: 0 },
-    { name: 'Reserve for surprises', share: 4, floor: 0, cap: 0, committed: 0 },
-    { name: 'Marketing and design', share: 2, floor: 250, cap: 0, committed: 0 },
-    { name: 'Artist hospitality and airport runs', share: 2, floor: 300, cap: 0, committed: 0 },
+    // One bucket for everything else that grows with sales: art, drinks, hospitality, marketing and a reserve.
+    { name: 'Event: art, drinks, hospitality, marketing, reserve', share: 24, floor: 1050, cap: 0, committed: 0 },
   ],
   // share is in parts: 2 / 2 / 1 means 40% / 40% / 20% among the partners active at that stage.
   // people is the number on site at each stage, crew and guest list together.
@@ -425,7 +441,7 @@ const DEFAULTS = {
     { name: 'Kinetic Desert', role: 'Production for The Bowl, the K Lodge and the main stage', from: 0, guarantee: 2000, perTicket: 15, feeAbove: 75, cap: 0, share: 0, sharesLoss: false, people: [4, 19, 29] },
     { name: 'The Dome', role: '24-foot dome with sound, decks, travel, setup and takedown', from: 0, guarantee: 0, perTicket: 10, feeAbove: 0, cap: 2000, share: 0, sharesLoss: false, people: [2, 2, 2] },
     // Project Seismic: rentals covered up front, then a fee on every ticket the bigger event adds. No profit share.
-    { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 275, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
+    { name: 'Project Seismic', role: 'Side stage at The Bowl with their own artists', from: 2, guarantee: 3000, perTicket: 10, feeAbove: 285, cap: 0, share: 0, sharesLoss: false, people: [0, 0, 30] },
   ],
   // pay is fixed and owed whatever sells. perTicket is paid to each person for every ticket sold above `above`.
   // Both are hard costs.
@@ -433,9 +449,9 @@ const DEFAULTS = {
   crew: [
     { name: 'Chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 0 },
     { name: 'Second chef', people: 1, pay: 1000, perTicket: 0, above: 0, shifts: 0, need: 0, from: 2 },
-    { name: 'Setup and strike', people: 5, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 16, from: 0 },
-    { name: 'Runners: airport and errands', people: 3, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 10, from: 0 },
-    { name: 'Gate', people: 4, pay: 100, perTicket: 1, above: 114, shifts: 3, need: 12, from: 0 },
+    { name: 'Setup and strike', people: 5, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 16, from: 0 },
+    { name: 'Runners: airport and errands', people: 3, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 10, from: 0 },
+    { name: 'Gate', people: 4, pay: 100, perTicket: 1, above: 129, shifts: 3, need: 12, from: 0 },
     { name: 'Second gate and parking', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 8, from: 0 },
     { name: 'Artist hospitality and check-in', people: 3, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 9, from: 0 },
     { name: 'Informal security: K Lodge door and night rounds', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
@@ -443,7 +459,7 @@ const DEFAULTS = {
     { name: 'Site upkeep: trash, bathrooms, firewood', people: 2, pay: 0, perTicket: 0, above: 0, shifts: 3, need: 6, from: 0 },
   ],
   others: [
-    { name: 'Artists and their guests, at the peak', people: 26, from: 0 },
+    { name: 'Artists and their guests, at the peak', people: 16, from: 0 },
     { name: 'Medical team', people: 2, from: 1 },
   ],
   // Mandatory hard costs only. basis: flat, ticket (per paid ticket), ticketday (per ticket per day), person (per person on site).
@@ -456,12 +472,13 @@ const DEFAULTS = {
     { name: 'Medical team, 3 days at $600', amount: 1800, basis: 'flat', from: 1 },
     { name: 'Venue medical rep, required without our own medic', amount: 500, basis: 'flat', from: 0, until: 0, camp: true },
     { name: 'Our own medical kit', amount: 200, basis: 'flat', from: 0, until: 0 },
-    { name: 'Groceries for crew and artists, small event', amount: 2000, basis: 'flat', from: 0, until: 0 },
-    { name: 'Groceries for crew and artists', amount: 2800, basis: 'flat', from: 1 },
-    { name: 'Extra groceries to feed partners and all artists', amount: 2500, basis: 'flat', from: 2 },
-    { name: 'Site supplies, small event', amount: 800, basis: 'flat', from: 0, until: 0 },
-    { name: 'Site supplies', amount: 1200, basis: 'flat', from: 1 },
-    { name: 'Extra site supplies', amount: 800, basis: 'flat', from: 2 },
+    // Groceries and supplies are budgeted per ticket, so they grow with the event instead of jumping at each size.
+    { name: 'Groceries for crew and artists', amount: 1350, basis: 'flat', from: 0 },
+    { name: 'Groceries, per ticket sold', amount: 5.4, basis: 'ticket', from: 0 },
+    { name: 'Groceries to feed partners and all artists', amount: 2000, basis: 'flat', from: 2 },
+    { name: 'Site supplies', amount: 550, basis: 'flat', from: 0 },
+    { name: 'Site supplies, per ticket sold', amount: 2.2, basis: 'ticket', from: 0 },
+    { name: 'Site supplies for the second stage', amount: 400, basis: 'flat', from: 2 },
   ],
   timeline: [
     { date: '2026-11-13', task: 'Put the five permit questions to the county planner', owner: 'You', done: false },
@@ -473,9 +490,9 @@ const DEFAULTS = {
     { date: '2027-01-12', task: 'First lineup. Tier 1 and Sat–Sun tickets on sale', owner: 'You', done: false },
     { date: '2027-02-01', task: 'Update tickets sold. Agree the remaining night slots and pay their deposits before the full lineup', owner: 'You', done: false },
     { date: '2027-02-09', task: 'Full lineup. Art grants and merch pre-order open', owner: 'You', done: false },
-    { date: '2027-03-01', task: 'Update tickets sold. Agree remaining artists and commit the art budget', owner: 'You', done: false },
+    { date: '2027-03-01', task: 'Update tickets sold. Agree remaining artists and commit the event budget. Open the 500 waitlist only if the middle size has sold out', owner: 'You', done: false },
     { date: '2027-03-15', task: 'Waitlist deadline. Release it if it has reached the count for the next size', owner: 'You and Kinetic Desert', done: false },
-    { date: '2027-03-16', task: 'If the waitlist was released: file the Temporary Use Permit, book the medical team, order porto-potties for 500', owner: 'You', done: false },
+    { date: '2027-03-16', task: 'If the waitlist was released: file the Temporary Use Permit and book the medical team. For 500, order porto-potties', owner: 'You', done: false },
     { date: '2027-03-23', task: 'Set times out. Sunday tickets on sale. Fire permit application in, if going past 199 on site', owner: 'You', done: false },
     { date: '2027-04-09', task: 'Final ticket tier. Grocery and drinks order from the final budgets', owner: 'You', done: false },
     { date: '2027-04-21', task: 'Load-in begins', owner: 'Kinetic Desert', done: false },
@@ -688,7 +705,7 @@ function sharePct(s, level) {
 const SLOTS = ['2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:30 PM', '9:00 PM', '10:30 PM'];
 const DAYS = ['Friday', 'Saturday', 'Sunday'];
 const TYPES = [['full', 'Fri–Sun', 'tFull'], ['sat', 'Sat–Sun', 'tSat'], ['sun', 'Sunday only', 'tSun']];
-const TABS = ['overview', 'tickets', 'budgets', 'artists', 'production', 'crew', 'hardcosts', 'timeline'];
+const TABS = ['overview', 'tickets', 'budgets', 'artists', 'production', 'crew', 'hardcosts', 'pay', 'timeline'];
 const BASIS = [['flat', 'Flat amount'], ['ticket', 'Per paid ticket'], ['ticketday', 'Per ticket per day'], ['person', 'Per person on site']];
 const BLANK = {
   partners: () => ({ name: 'New partner', role: '', from: 0, guarantee: 0, perTicket: 0, feeAbove: 0, cap: 0, share: 0, sharesLoss: false, people: s.stages.map(() => 0) }),
@@ -770,7 +787,7 @@ function buildSlots() {
         <td class="l"><input type="checkbox" id="slot-${j}-${i}-agreed" data-day="${j}" data-slot="${i}" data-f="agreed"${x.agreed ? ' checked' : ''} aria-label="${DAYS[j]} ${SLOTS[i]} agreed"></td>
         <td>${inp(j, i, 'rate', x.rate || '', 0.5, 'rate per ticket')}</td><td>${inp(j, i, 'above', x.above || '', 1, 'tickets the rate starts above')}</td>
         <td id="slot-now-${j}-${i}"></td><td class="l muted" id="slot-terms-${j}-${i}"></td></tr>`).join('')).join('') + '</tbody>';
-  $('ladder-settings').innerHTML = numField('depositPct', 'Deposit due before an artist is announced, % of the minimum');
+  $('ladder-settings').innerHTML = numField('minPct.head', 'Headliner minimum, % of the full fee', '10:30 PM slots') + numField('minPct.support', 'Direct support minimum, %', '9:00 PM slots') + numField('minPct.opener', '7:30 PM minimum, %') + numField('minPct.day', 'Daytime minimum, %', 'Changing a percent resets those minimums, except agreed slots') + numField('depositPct', 'Deposit due before an artist is announced, % of the minimum');
 }
 function buildPartners() {
   $('partners').innerHTML = s.partners.map((p, i) => `<div class="panel">
@@ -826,7 +843,22 @@ function buildTimeline() {
       <td class="l"><input type="checkbox" id="timeline-${i}-done" data-list="timeline" data-i="${i}" data-f="done"${t.done ? ' checked' : ''} aria-label="Done"></td>
       <td class="l" id="tl-status-${i}"></td><td>${delBtn('timeline', i, t.task)}</td></tr>`).join('') + '</tbody>';
 }
-function buildAll() { buildStages(); buildTickets(); buildBudgets(); buildSlots(); buildPartners(); buildCrew(); buildCosts(); buildTimeline(); }
+let payWho = '';
+function payOptions() {
+  const out = [];
+  s.partners.forEach((p, i) => { if (!p.you) out.push(['p' + i, p.name]); });
+  s.crew.forEach((c, i) => { if (num(c.pay) || num(c.perTicket)) out.push(['c' + i, (num(c.people) > 1 ? 'Each of the ' + int(c.people) + ': ' : '') + c.name]); });
+  out.push(['artists', 'Artists, all ' + s.slots.flat().length + ' sets']);
+  s.slots.forEach((day, j) => day.forEach((x, i) => out.push(['s' + j + '-' + i, slotName(j, i) + (x.name ? ' · ' + x.name : '')])));
+  out.push(['you', 'You']);
+  return out;
+}
+function buildPay() {
+  const opts = payOptions();
+  if (!opts.some(o => o[0] === payWho)) payWho = opts[0] ? opts[0][0] : '';
+  $('pay-who').innerHTML = opts.map(([k, label]) => `<option value="${k}"${k === payWho ? ' selected' : ''}>${esc(label)}</option>`).join('');
+}
+function buildAll() { buildStages(); buildTickets(); buildBudgets(); buildSlots(); buildPartners(); buildCrew(); buildCosts(); buildTimeline(); buildPay(); }
 
 /* ---------- derived output: runs on every change ---------- */
 function setVal(el, v, skip) { if (el && el !== skip && el.value !== String(v)) el.value = v; }
@@ -938,6 +970,47 @@ function renderBudgets(r, all) {
     : `The shares add up to ${pct(r.shareTotal)}. The other ${pct(r.profitShare)} of the surplus is profit. At ${int(r.paid)} tickets the surplus is ${money(r.surplus)}.` + (r.fundPct > 0 ? ` At this size ${pct(r.fundPct * 100)} of what is above the floors is held in the step fund, ${money(r.fund)} so far, so every share is paying ${pct(100 - r.fundPct * 100)} of its rate.` : '');
 }
 const slotName = (j, i) => `${DAYS[j]} ${SLOTS[i]}`;
+function renderPay(r, all, cov) {
+  const opts = payOptions(), opt = opts.find(o => o[0] === payWho) || opts[0];
+  if (!opt) return;
+  const key = opt[0], top = all.length - 1;
+  let f, terms;
+  if (key[0] === 'p') {
+    const i = +key.slice(1), p = s.partners[i];
+    f = c => c.partnerRows[i].total;
+    terms = (num(p.guarantee) ? `${money(p.guarantee)} guaranteed` : 'No guarantee') + (num(p.perTicket) ? `, plus ${money(p.perTicket)} for every ticket sold${num(p.feeAbove) ? ' above ' + int(p.feeAbove) : ''}${num(p.cap) ? ', up to ' + money(p.cap) : ''}` : '') + (num(p.from) ? `. Comes in ${stageLabel(num(p.from)).toLowerCase()}` : '') + '.';
+  } else if (key[0] === 'c') {
+    const i = +key.slice(1), c = s.crew[i];
+    f = x => x.crewRows[i].each;
+    terms = `${money(c.pay)} whatever sells` + (num(c.perTicket) ? `, plus ${money(c.perTicket)} for every ticket sold above ${int(c.above)}` : '') + '. Also a ticket and a car camping pass.';
+  } else if (key === 'artists') {
+    f = c => c.artistPaid;
+    terms = `${money(r.artistMin)} in minimums whatever sells. Above break-even every slot rises toward its full fee.`;
+  } else if (key[0] === 's') {
+    const [j, i] = key.slice(1).split('-').map(Number), x = s.slots[j][i], m = num(x.min), full = Math.max(num(x.target), m);
+    f = c => c.slotNow[j][i];
+    terms = x.agreed ? (num(x.rate) ? `${money(m)} whatever sells, plus ${money(x.rate)} for every ticket sold above ${int(x.above)}, up to ${money(full)}.` : `A flat ${money(m)}, whatever sells.`)
+      : m > 0 ? `${money(m)} whatever sells, rising with ticket sales to ${money(full)}. Not agreed yet: these figures follow the plan.` : `Paid from break-even on, rising with ticket sales to ${money(full)}. Not agreed yet: these figures follow the plan.`;
+  } else {
+    f = c => c.yours;
+    terms = 'What is left after everyone else is paid and the step fund is set aside. Below break-even this is the loss.';
+  }
+  const marks = {};
+  if (cov !== null && cov >= 0) marks[cov] = 'break-even';
+  s.stages.forEach((st, L) => { const mx = maxPaid(s, L); marks[mx] = (marks[mx] ? marks[mx] + ', ' : '') + 'sell-out at ' + int(st.limit) + ' on site'; if (L && r.rel[L]) marks[r.rel[L]] = 'next size sold as a block'; });
+  const counts = new Set(Object.keys(marks).map(Number));
+  for (let n = 50; n <= top; n += 25) counts.add(n);
+  const rows = [...counts].filter(n => n >= 0 && n <= top && all[n].paid === n).sort((a, b) => a - b);
+  let prev = null;
+  $('pay-title').textContent = opt[1];
+  $('pay-terms').textContent = terms;
+  $('pay-table').innerHTML = '<thead><tr><th class="l">Tickets sold</th><th>Paid</th><th>For each ticket since the row above</th><th class="l"></th></tr></thead><tbody>' + rows.map(n => {
+    const v = f(all[n]), per = prev ? (v - prev.v) / (n - prev.n) : null;
+    prev = { n, v };
+    return `<tr class="${marks[n] ? 'total' : ''}"><td class="l">${int(n)}</td><td>${money(v)}</td><td>${per === null ? '' : (per < 0 ? '−$' : '$') + Math.abs(per).toFixed(2)}</td><td class="l muted">${marks[n] || ''}</td></tr>`;
+  }).join('') + '</tbody>';
+  $('pay-foot').textContent = 'Paid once, after the event, on the final ticket count. Ticket counts between a sell-out and the next block are a waitlist, so they do not appear.';
+}
 // The ticket counts at which a slot starts to rise and reaches its full fee, and a per-ticket rate between them.
 function slotPath(all, j, i) {
   const x = s.slots[j][i], m = num(x.min), full = Math.max(num(x.target), m), top = all.length - 1;
@@ -976,14 +1049,15 @@ function renderArtists(r, all) {
   let cum = 0;
   const dep = num(s.depositPct) / 100;
   const rows = queue.map((q, k) => {
+    const before = k ? queue[k - 1].at : all.findIndex(c => c.surplus - c.mustSpend + c.artistMin >= 0);
     cum += q.m;
     const need = cum, at = all.findIndex(c => c.surplus - c.mustSpend + c.artistMin - need >= 0);
     const pill = at < 0 ? '<span class="pill bad">not at any size</span>' : sold >= at ? '<span class="pill good">covered by sales so far</span>' : `<span class="pill ${k === 0 || sold >= queue[k - 1].at ? 'warn' : 'plain'}">${tix(at - sold)} to go</span>`;
     q.at = at;
     return `<tr class="${q.x.agreed ? 'locked' : ''}"><td>${k + 1}</td><td class="l">${slotName(q.j, q.i)}</td><td class="l">${esc(q.x.name) || '<span class="muted">open</span>'}${q.x.agreed ? ' <span class="pill good">agreed</span>' : ''}</td>
-      <td>${money(q.m)}</td><td>${money(q.m * dep)}</td><td>${money(q.full)}</td><td>${money(cum)}</td><td>${at < 0 ? 'never' : tix(at)}</td><td>${money(r25(q.now))}</td><td class="l">${pill}</td></tr>`;
+      <td>${money(q.m)}</td><td>${money(q.m * dep)}</td><td>${money(q.full)}</td><td>${money(cum)}</td><td>${at < 0 || before < 0 ? '–' : '+' + int(at - before)}</td><td>${at < 0 ? 'never' : tix(at)}</td><td>${money(r25(q.now))}</td><td class="l">${pill}</td></tr>`;
   });
-  $('ladder').innerHTML = `<thead><tr><th>Queue</th><th class="l">Slot</th><th class="l">Artist</th><th>Minimum</th><th>Deposit</th><th>Full fee</th><th>Minimums so far</th><th>Covered at</th><th>Paid at ${int(r.paid)} tickets</th><th class="l">Against the ${int(sold)} sold</th></tr></thead><tbody>` + rows.join('') + '</tbody>';
+  $('ladder').innerHTML = `<thead><tr><th>Queue</th><th class="l">Slot</th><th class="l">Artist</th><th>Minimum</th><th>Deposit</th><th>Full fee</th><th>Minimums so far</th><th>Tickets it adds</th><th>Covered at</th><th>Paid at ${int(r.paid)} tickets</th><th class="l">Against the ${int(sold)} sold</th></tr></thead><tbody>` + rows.join('') + '</tbody>';
   const cov = all.findIndex(c => c.surplus - c.mustSpend >= 0), fullAt = all.findIndex(c => c.artistPaid >= fullTotal - 1);
   const facts = [
     [`Minimums, owed whatever sells, ${queue.length} slots`, money(r.artistMin)],
@@ -1168,8 +1242,10 @@ function render(skip) {
   const all = lastAll = series(s), r = all[Math.min(s.paid, all.length - 1)], cov = coveredAt(s, all);
   s.slots.forEach((day, j) => day.forEach((x, i) => { setVal($(`slot-${j}-${i}-rate`), x.rate || '', skip); setVal($(`slot-${j}-${i}-above`), x.above || '', skip); }));
   setVal($('f-depositPct'), s.depositPct, skip);
+  if (!s.minPct) s.minPct = { head: 75, support: 50, opener: 50, day: 0 };
+  for (const k of ['head', 'support', 'opener', 'day']) setVal($('f-minPct-' + k), s.minPct[k], skip);
   renderVerdict(r, cov);
-  renderOverview(r, all, cov); renderTickets(r); renderBudgets(r, all); renderArtists(r, all); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderCharts(r, all);
+  renderOverview(r, all, cov); renderTickets(r); renderBudgets(r, all); renderArtists(r, all); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderPay(r, all, cov); renderCharts(r, all);
   renderSave();
 }
 function rebuild() { buildAll(); render(); }
@@ -1189,7 +1265,13 @@ document.addEventListener('input', e => {
   else if (d.tier) s.tiers[d.tier][+d.i][d.f] = val;
   else if (d.list) { if (d.j !== undefined) s[d.list][+d.i][d.f][+d.j] = val; else s[d.list][+d.i][d.f] = val; }
   else if (d.k) {
+    if (d.k.startsWith('minPct.') && !s.minPct) s.minPct = { head: 75, support: 50, opener: 50, day: 0 };
     setPath(s, d.k, val);
+    // A minimum percent rewrites the minimums of its slots, leaving agreed slots alone.
+    if (d.k.startsWith('minPct.')) {
+      const which = { head: [7], support: [6], opener: [5], day: [0, 1, 2, 3, 4] }[d.k.slice(7)] || [];
+      s.slots.forEach((day, j) => which.forEach(i => { const x = day[i]; if (!x || x.agreed) return; x.min = r25(num(x.target) * Math.min(100, val) / 100); setVal($(`slot-${j}-${i}-min`), x.min || '', t); }));
+    }
     if (d.k === 'mixFull' && s.mixFull + s.mixSat > 100) s.mixSat = 100 - s.mixFull;
     if (d.k === 'mixSat' && s.mixFull + s.mixSat > 100) s.mixFull = 100 - s.mixSat;
   } else return;
@@ -1197,7 +1279,7 @@ document.addEventListener('input', e => {
   render(t);
 });
 // Stage names and limits label every "starts" control, and dates order the timeline, so those rebuild once the field is left.
-document.addEventListener('change', e => { const d = e.target.dataset; if (d.list === 'stages' || (d.list === 'timeline' && d.f === 'date')) rebuild(); });
+document.addEventListener('change', e => { if (e.target.id === 'pay-who') { payWho = e.target.value; render(); return; } const d = e.target.dataset; if (d.list === 'stages' || (d.list === 'timeline' && d.f === 'date')) rebuild(); });
 document.addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
@@ -1223,6 +1305,7 @@ document.addEventListener('click', e => {
     rebuild();
   } else if (b.id === 'btn-save') save();
   else if (b.id === 'btn-revert') load(savedJSON);
+  else if (b.id === 'btn-print') { document.body.classList.add('print-pay'); try { window.print(); } catch (err) {} setTimeout(() => document.body.classList.remove('print-pay'), 500); }
   else if (b.id === 'btn-reset') {
     if (b.dataset.armed) { delete b.dataset.armed; b.textContent = 'Starting plan'; load(JSON.stringify(DEFAULTS)); }
     else { b.dataset.armed = '1'; b.textContent = 'Click again to load it'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Starting plan'; }, 4000); }
