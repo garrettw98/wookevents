@@ -12,7 +12,9 @@
 //     per ticket above a ticket count, up to the full fee. A rate of 0 is a flat fee.
 //  5. Cabins are rented as they sell. Crew pay is a hard cost: a fixed amount each, plus a rate per ticket sold
 //     above a ticket count.
-//  6. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
+//  6. Stepping up a size never lowers a payment. At a larger size no budget, and no artist, gets less than it had
+//     reached at the sell-out of the size before. The cost of the step comes out of the profit instead.
+//  7. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
 const SCHEMA = 8;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
 // rate and above are the terms once agreed: rate per ticket sold above that many tickets.
@@ -204,27 +206,31 @@ function compute(s) {
   const crewPay = sum(crewRows.map(c => c.pay)), crewFees = sum(crewRows.map(c => c.fee)), siteCosts = sum(costRows.map(c => c.value));
   const artistMin = sum(s.slots.flat().map(x => n0(x.min)));
   const hard = guarantees + partnerFees + crewPay + crewFees + siteCosts + cabinCost + artistMin + processing;
-  // Budgets that grow with sales.
+  // Budgets that grow with sales. Past a size step each is held at what it reached at the smaller size's sell-out.
+  const heldAt = level > 0 ? maxPaid(s, level - 1) : null;
+  const held = heldAt === null ? null : compute({ ...s, paid: heldAt });
   const surplus = revenue - hard;
   const floors = sum(s.budgets.map(b => n0(b.floor)));
   const free = surplus - floors;
   const shareTotal = sum(s.budgets.map(b => n0(b.share)));
-  const budgetRows = s.budgets.map(b => {
+  const budgetRows = s.budgets.map((b, i) => {
     const committed = b.id ? 0 : n0(b.committed);
+    const hold = held && held.budgetRows[i] ? held.budgetRows[i].budget : 0;
     let scaled = n0(b.floor) + Math.max(0, free) * n0(b.share) / 100;
     if (n0(b.cap) > 0) scaled = Math.min(scaled, n0(b.cap));
-    const budget = Math.max(scaled, committed);
-    return { scaled, committed, budget, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
+    const budget = Math.max(scaled, committed, hold);
+    return { scaled, committed, budget, hold, held: hold > Math.max(scaled, committed) + 0.5, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
   });
   // Artists: the minimums are already in the hard costs. The artist budget pays what is above them. Any per-ticket
   // rate you have agreed comes out of it first, and the rest lifts the open slots toward their full fees.
   // If the agreed rates come to more than the budget holds, the difference comes out of the profit.
   const ai = s.budgets.findIndex(b => b.id === 'artists');
   const flatSlots = s.slots.flat();
-  const artistBudget = ai >= 0 ? budgetRows[ai].scaled : 0;
+  const artistBudget = ai >= 0 ? Math.max(budgetRows[ai].scaled, budgetRows[ai].hold) : 0;
   const agreedExtra = sum(flatSlots.map(x => x.agreed ? dealPay(x, paid) - n0(x.min) : 0));
   const agreedMin = sum(flatSlots.map(x => x.agreed ? n0(x.min) : 0));
-  const up = rise(s, artistBudget - agreedExtra);
+  // Open slots never get less than they had at the smaller size's sell-out, even while agreed rates keep growing.
+  const up = rise(s, Math.max(artistBudget - agreedExtra, held ? held.riseUsed : 0));
   const pays = flatSlots.map((x, i) => x.agreed ? dealPay(x, paid) : n0(x.min) + up.add[i]);
   const artistPaid = sum(pays);
   if (ai >= 0) {
@@ -251,6 +257,7 @@ function compute(s) {
   });
   return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
     level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, crewFees, siteCosts, processing, hard,
+    riseUsed: sum(up.add), heldAt, heldCost: sum(budgetRows.map(b => Math.max(0, b.budget - Math.max(b.scaled, b.committed)))),
     cabinsSold, cabinsRented, cabinCost, artistMin, artistBudget, agreedExtra, agreedMin, artistPaid,
     campTotal: cabinCost + sum(s.costs.map((c, i) => c.camp ? costRows[i].value : 0)),
     surplus, floors, free, shareTotal, profitShare: 100 - shareTotal, budgetRows, spend, mustSpend, profit,
