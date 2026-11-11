@@ -6,12 +6,16 @@
 //  2. Mandatory hard costs come off the top. What sales leave over is the surplus.
 //  3. Every other budget is a share of that surplus, so it grows with each ticket sold. A budget can have
 //     a floor (the least the event can run on) and a cap, and it never drops below what is already committed.
-//  4. Artist slots share the artist money in proportion to their full fees. An agreed slot is paid at least its
-//     guarantee, which is a hard cost, and at most its full fee. Open slots simply follow the budget.
+//  4. The artist budget builds up in order. Each priority slot has a minimum, and minimums unlock one after another
+//     as the budget grows. A share of every new artist dollar raises the slots already unlocked toward their full
+//     fees. Once every minimum is unlocked, the daytime slots start to be paid. An agreed slot leaves the ladder and
+//     is paid on its own terms: a minimum, plus a rate per ticket above a ticket count, up to the full fee.
 //  5. Cabins are rented as they sell, and crew stipends come from a budget capped at what the crew are owed.
-//  6. Whatever share is not given to a budget is the partners' profit, split by parts.
-const SCHEMA = 5;
-const T = (target) => ({ target, name: '', agreed: false, guarantee: 0 });
+//  6. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
+const SCHEMA = 6;
+// target is the full fee, min the minimum that has to be unlocked, order the place in the queue.
+// rate and above are the terms once agreed: rate per ticket sold above that many tickets.
+const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
 const DEFAULTS = {
   v: SCHEMA,
   stages: [
@@ -29,15 +33,21 @@ const DEFAULTS = {
   addons: { carRate: 20, carSpots: 120, pCar: 50, cabinPer: 45, cabinsMax: 6, cabinsHeld: 2, cabinCost: 250, pCabin: 850, otherPer: 10 },
   proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
   // Full fees set the shape of the lineup: Friday carries the most, then Saturday, then Sunday.
-  // target is the full fee. An agreed slot is paid between its guarantee and its full fee as sales grow.
+  // Minimums are half the full fee for the nine 90-minute slots, which is the usual deposit. The queue runs
+  // headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots. Daytime slots have
+  // no minimum: they share what comes in once every minimum is unlocked.
   slots: [
-    [75, 100, 200, 300, 500, 1000, 2000, 3000].map(T),
-    [75, 100, 150, 250, 400, 750, 1500, 3000].map(T),
-    [75, 100, 150, 200, 300, 600, 1250, 2250].map(T),
+    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 1500], [20, 20, 20, 20, 20, 7, 4, 1]),
+    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 1500], [20, 20, 20, 20, 20, 8, 5, 2]),
+    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1125], [20, 20, 20, 20, 20, 9, 6, 3]),
   ],
+  // Of each new artist dollar, the percent that raises slots already unlocked. The rest saves toward the next minimum.
+  raiseShare: 25,
+  // The share of an agreed minimum that is due up front.
+  depositPct: 50,
   // share is a percent of the surplus left after floors. committed is money already promised on that line.
   budgets: [
-    { id: 'artists', name: 'Artists, on top of guarantees', share: 55, floor: 1800, cap: 0, committed: 0 },
+    { id: 'artists', name: 'Artists', share: 55, floor: 0, cap: 0, committed: 0 },
     { name: 'Art, projection and lighting', share: 9, floor: 500, cap: 0, committed: 0 },
     { name: 'Drinks for everyone', share: 7, floor: 0, cap: 0, committed: 0 },
     { id: 'crew', name: 'Crew stipends', share: 6, floor: 0, cap: 0, committed: 0 },
@@ -148,18 +158,44 @@ function maxPaid(s, level) {
 // The first paid ticket at which a stage begins.
 function stageStart(s, level) { return level <= 0 ? 0 : maxPaid(s, level - 1) + 1; }
 const agreedSlots = s => s.slots.flat().filter(x => x.agreed);
-const guaranteeTotal = s => sum(agreedSlots(s).map(x => n0(x.guarantee)));
-// What each slot is paid when the artists have `money` to share. Slots share by full fee. An agreed slot never
-// falls below its guarantee or rises above its full fee; an open slot simply follows the money.
-function paySlots(s, money) {
+// What an agreed slot is paid at a ticket count: its minimum, plus its rate on every ticket above its threshold,
+// never more than the full fee.
+const dealPay = (x, n) => { const m = n0(x.min); return Math.min(Math.max(n0(x.target), m), m + n0(x.rate) * Math.max(0, n - n0(x.above))); };
+// Shares `money` among the slots that are not agreed yet, in queue order.
+//   1. Minimums unlock one at a time. While one is being saved for, raiseShare of each dollar goes to the slots
+//      already unlocked, in proportion to how far each is from its full fee.
+//   2. When every minimum is unlocked, the daytime slots share the saving side, in proportion to their full fees.
+//   3. Nothing is paid past a full fee. Money beyond that is left over.
+function ladder(s, money) {
   const flat = s.slots.flat();
-  const pay = phi => flat.map(x => { const v = n0(x.target) * phi; return x.agreed ? Math.max(n0(x.guarantee), Math.min(v, Math.max(n0(x.target), n0(x.guarantee)))) : v; });
-  let lo = 0, hi = 1;
-  while (sum(pay(hi)) < money && hi < 1e6) hi *= 2;
-  for (let i = 0; i < 50; i++) { const mid = (lo + hi) / 2; if (sum(pay(mid)) < money) lo = mid; else hi = mid; }
-  const phi = sum(pay(hi)) <= money + 0.5 ? hi : lo;
-  const out = pay(phi), per = s.slots[0].length;
-  return { phi, slotNow: s.slots.map((d, j) => out.slice(j * per, j * per + per)), paid: sum(out) };
+  const pay = flat.map(() => 0);
+  const status = flat.map(x => x.agreed ? 'agreed' : n0(x.min) > 0 ? 'waiting' : 'pool');
+  const open = flat.map((x, i) => i).filter(i => !flat[i].agreed);
+  const pending = open.filter(i => n0(flat[i].min) > 0).sort((a, b) => n0(flat[a].order) - n0(flat[b].order) || a - b);
+  const pool = open.filter(i => !(n0(flat[i].min) > 0));
+  const head = i => Math.max(0, Math.max(n0(flat[i].target), n0(flat[i].min)) - pay[i]);
+  const give = (list, amount) => { const hs = list.map(head), H = sum(hs); if (H > 0) list.forEach((i, k) => { pay[i] += amount * hs[k] / H; }); };
+  const sigma = Math.min(0.95, Math.max(0, n0(s.raiseShare) / 100));
+  const unlocked = [];
+  let R = Math.max(0, money), saved = 0;
+  for (let guard = 0; R > 1e-6 && guard < 500; guard++) {
+    const H = sum(unlocked.map(head));
+    if (pending.length) {
+      const k = pending[0], sg = H > 1e-6 ? sigma : 0;
+      const D = Math.min(R, (n0(flat[k].min) - saved) / (1 - sg), sg > 0 ? H / sg : Infinity);
+      saved += (1 - sg) * D; if (sg > 0) give(unlocked, sg * D); R -= D;
+      if (saved >= n0(flat[k].min) - 1e-6) { pay[k] = n0(flat[k].min); status[k] = 'unlocked'; unlocked.push(k); pending.shift(); saved = 0; }
+    } else {
+      const P = sum(pool.map(head));
+      if (H <= 1e-6 && P <= 1e-6) break;
+      const sg = H > 1e-6 ? (P > 1e-6 ? sigma : 1) : 0;
+      const D = Math.min(R, sg > 0 ? H / sg : Infinity, sg < 1 ? P / (1 - sg) : Infinity);
+      if (sg > 0) give(unlocked, sg * D); if (sg < 1) give(pool, (1 - sg) * D); R -= D;
+    }
+  }
+  const next = pending.length ? pending[0] : -1;
+  if (next >= 0) { pay[next] = saved; status[next] = 'saving'; }
+  return { pay, status, next, saved, leftover: R };
 }
 function compute(s) {
   const paid = n0(s.paid);
@@ -194,8 +230,7 @@ function compute(s) {
   const processing = online * ((1 - bank) * n0(s.proc.pct) + bank * n0(s.proc.bankPct)) / 100 + paid * (1 - bank) * n0(s.proc.fixed);
   const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
   const crewPay = sum(crewRows.map(c => c.pay)), siteCosts = sum(costRows.map(c => c.value));
-  const artistGuarantees = guaranteeTotal(s);
-  const hard = guarantees + partnerFees + crewPay + siteCosts + cabinCost + artistGuarantees + processing;
+  const hard = guarantees + partnerFees + crewPay + siteCosts + cabinCost + processing;
   // Budgets that grow with sales.
   const surplus = revenue - hard;
   const floors = sum(s.budgets.map(b => n0(b.floor)));
@@ -209,19 +244,29 @@ function compute(s) {
     const budget = Math.max(scaled, committed);
     return { scaled, committed, budget, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
   });
-  // Artists: the guarantees are already in the hard costs. The artist budget goes on top, and the two together
-  // are shared across the slots. If every slot is agreed and at its full fee, the rest of the budget is not spent.
+  // Artists: agreed slots are paid on their own terms and come out of the artist budget first. What is left
+  // runs down the ladder. If more is agreed than the budget holds, the difference comes out of the profit.
   const ai = s.budgets.findIndex(b => b.id === 'artists');
-  const artistPool = ai >= 0 ? budgetRows[ai].budget : 0;
-  const slotPay = paySlots(s, artistGuarantees + artistPool);
-  const artistPaid = slotPay.paid;
-  if (ai >= 0) { budgetRows[ai].budget = Math.max(0, artistPaid - artistGuarantees); budgetRows[ai].left = budgetRows[ai].budget; }
+  const flatSlots = s.slots.flat();
+  const artistBudget = ai >= 0 ? budgetRows[ai].scaled : 0;
+  const agreedCost = sum(flatSlots.map(x => x.agreed ? dealPay(x, paid) : 0));
+  const agreedMin = sum(flatSlots.map(x => x.agreed ? n0(x.min) : 0));
+  const lad = ladder(s, artistBudget - agreedCost);
+  const pays = flatSlots.map((x, i) => x.agreed ? dealPay(x, paid) : lad.pay[i]);
+  const artistPaid = sum(pays);
+  if (ai >= 0) {
+    const b = budgetRows[ai];
+    b.committed = agreedCost; b.budget = artistPaid; b.over = Math.max(0, agreedCost - b.scaled);
+    b.left = artistPaid - agreedCost; b.must = Math.max(n0(s.budgets[ai].floor), agreedCost);
+  }
+  const per = s.slots[0].length;
+  const slotNow = s.slots.map((d, j) => pays.slice(j * per, j * per + per));
+  const slotStatus = s.slots.map((d, j) => lad.status.slice(j * per, j * per + per));
   const ci = s.budgets.findIndex(b => b.id === 'crew');
   const stipendsPaid = ci >= 0 ? budgetRows[ci].budget : 0;
   const spend = sum(budgetRows.map(b => b.budget));
   const mustSpend = sum(budgetRows.map(b => b.must));
   const profit = surplus - spend;
-  const slotNow = slotPay.slotNow, factor = slotPay.phi;
   // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
   const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
   const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
@@ -235,10 +280,10 @@ function compute(s) {
   });
   return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
     level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, siteCosts, processing, hard,
-    cabinsSold, cabinsRented, cabinCost, artistGuarantees, artistPool, artistPaid, stipendsOwed, stipendsPaid,
+    cabinsSold, cabinsRented, cabinCost, artistBudget, agreedCost, agreedMin, artistPaid, ladderNext: lad.next, ladderSaved: lad.saved, stipendsOwed, stipendsPaid,
     campTotal: cabinCost + sum(s.costs.map((c, i) => c.camp ? costRows[i].value : 0)),
     surplus, floors, free, shareTotal, profitShare: 100 - shareTotal, budgetRows, spend, mustSpend, profit,
-    agreedCount: agreedSlots(s).length, factor, slotNow,
+    agreedCount: agreedSlots(s).length, slotNow, slotStatus,
     yours: youIdx >= 0 ? partnerRows[youIdx].shareAmt : profit, avgTicket: paid ? tickets / paid : 0 };
 }
 // The plan at every ticket count that fits, computed once and reused by the charts and the checks.
@@ -262,4 +307,4 @@ function sharePct(s, level) {
   const parts = sum(s.partners.map(p => on(p, level) ? n0(p.share) : 0));
   return s.partners.map(p => on(p, level) && parts ? n0(p.share) / parts * 100 : 0);
 }
-if (typeof module !== 'undefined') module.exports = { SCHEMA, DEFAULTS, compute, series, coveredAt, lineCoveredAt, stagePaysFrom, people, maxPaid, stageStart, headcount, sharePct, guaranteeTotal, paySlots };
+if (typeof module !== 'undefined') module.exports = { SCHEMA, DEFAULTS, compute, series, coveredAt, lineCoveredAt, stagePaysFrom, people, maxPaid, stageStart, headcount, sharePct, dealPay, ladder };

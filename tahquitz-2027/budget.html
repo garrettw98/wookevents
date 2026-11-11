@@ -260,21 +260,33 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
       <div class="scroll"><table class="edit" id="budgets"></table></div>
       <button class="add" data-add="budgets">Add a budget</button>
       <p class="note" id="note-budgets"></p>
-      <p class="note">The floor is the least the event can run on, and it counts as committed from the start. A cap of 0 means no cap. Artist guarantees are hard costs set on the Artists tab, and this artist budget is paid on top of them. Crew stipends stop at what the crew are owed.</p>
+      <p class="note">The floor is the least the event can run on, and it counts as committed from the start. A cap of 0 means no cap. Agreed artist deals are paid from the artist budget first. If they come to more than the budget holds, the difference comes out of the profit until sales catch up. Crew stipends stop at what the crew are owed.</p>
     </div>
   </section>
 
   <section class="tab" id="tab-artists" hidden>
-    <div class="cols">
-      <div class="stack">
-        <div class="panel">
-          <h2>Artist budget</h2>
-          <ul class="plain" id="artist-facts"></ul>
-          <p class="note">Every slot shares the artist money in proportion to its full fee, so what you can offer rises as tickets sell. When an artist agrees, enter the least you have guaranteed them and tick Agreed. The guarantee becomes a hard cost, and their pay then rises with sales from the guarantee up to the full fee. For a flat fee, set the guarantee equal to the full fee.</p>
-          <p class="note">Full fees set the shape: Friday carries the most, then Saturday, then Sunday, to pull buyers toward the longer tickets. The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
-        </div>
+    <p class="intro">The artist budget builds up in order. Each of the nine 90-minute slots has a minimum, and the minimums unlock one after another as tickets sell, headliners first. Slots already unlocked keep rising toward their full fee. Once every minimum is unlocked, the daytime slots start to be paid.</p>
+    <div class="cols even">
+      <div class="panel">
+        <h2>Where the artist budget stands</h2>
+        <ul class="plain" id="artist-facts"></ul>
       </div>
-      <div class="panel"><h2>Slots</h2><div class="scroll"><table class="edit fees" id="slots"></table></div></div>
+      <div class="panel">
+        <h2>How the ladder runs</h2>
+        <div id="ladder-settings"></div>
+        <p class="note">The rest of each new artist dollar saves toward the next minimum in the queue. A higher raise share lifts the artists you already have faster and unlocks the next one later.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>The unlock ladder</h2>
+      <div class="scroll"><table id="ladder"></table></div>
+      <p class="note">Ticket counts assume the plan as it stands. "Unlocks at" is when sales have paid for that slot's minimum, so booking it then carries no risk. Booking earlier is your call: tick Agreed below and the top bar shows how many tickets cover it.</p>
+    </div>
+    <div class="panel">
+      <h2>Slots and deals</h2>
+      <div class="scroll"><table class="edit fees" id="slots"></table></div>
+      <p class="note">Queue sets the order minimums unlock in. A slot with no minimum is a daytime slot and shares what comes in after the queue. When an artist agrees, tick Agreed: the minimum is then owed whatever sells, and they earn the per-ticket rate on every ticket above the count shown, up to the full fee. The planner fills in terms that follow the ladder. Change them to what you actually agreed, and set the rate to 0 for a flat fee.</p>
+      <p class="note">The Bowl runs five 1-hour sets from 2:00, a sunset changeover at 7:00, then three 90-minute sets to midnight.</p>
     </div>
   </section>
 
@@ -334,12 +346,16 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 //  2. Mandatory hard costs come off the top. What sales leave over is the surplus.
 //  3. Every other budget is a share of that surplus, so it grows with each ticket sold. A budget can have
 //     a floor (the least the event can run on) and a cap, and it never drops below what is already committed.
-//  4. Artist slots share the artist money in proportion to their full fees. An agreed slot is paid at least its
-//     guarantee, which is a hard cost, and at most its full fee. Open slots simply follow the budget.
+//  4. The artist budget builds up in order. Each priority slot has a minimum, and minimums unlock one after another
+//     as the budget grows. A share of every new artist dollar raises the slots already unlocked toward their full
+//     fees. Once every minimum is unlocked, the daytime slots start to be paid. An agreed slot leaves the ladder and
+//     is paid on its own terms: a minimum, plus a rate per ticket above a ticket count, up to the full fee.
 //  5. Cabins are rented as they sell, and crew stipends come from a budget capped at what the crew are owed.
-//  6. Whatever share is not given to a budget is the partners' profit, split by parts.
-const SCHEMA = 5;
-const T = (target) => ({ target, name: '', agreed: false, guarantee: 0 });
+//  6. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
+const SCHEMA = 6;
+// target is the full fee, min the minimum that has to be unlocked, order the place in the queue.
+// rate and above are the terms once agreed: rate per ticket sold above that many tickets.
+const day = (targets, mins, orders) => targets.map((target, i) => ({ target, min: mins[i], order: orders[i], name: '', agreed: false, rate: 0, above: 0 }));
 const DEFAULTS = {
   v: SCHEMA,
   stages: [
@@ -357,15 +373,21 @@ const DEFAULTS = {
   addons: { carRate: 20, carSpots: 120, pCar: 50, cabinPer: 45, cabinsMax: 6, cabinsHeld: 2, cabinCost: 250, pCabin: 850, otherPer: 10 },
   proc: { pct: 2.9, fixed: 0.3, bankShare: 0, bankPct: 0.8 },
   // Full fees set the shape of the lineup: Friday carries the most, then Saturday, then Sunday.
-  // target is the full fee. An agreed slot is paid between its guarantee and its full fee as sales grow.
+  // Minimums are half the full fee for the nine 90-minute slots, which is the usual deposit. The queue runs
+  // headliners first (Friday, Saturday, Sunday), then direct support, then the 7:30 slots. Daytime slots have
+  // no minimum: they share what comes in once every minimum is unlocked.
   slots: [
-    [75, 100, 200, 300, 500, 1000, 2000, 3000].map(T),
-    [75, 100, 150, 250, 400, 750, 1500, 3000].map(T),
-    [75, 100, 150, 200, 300, 600, 1250, 2250].map(T),
+    day([75, 100, 200, 300, 500, 1000, 2000, 3000], [0, 0, 0, 0, 0, 500, 1000, 1500], [20, 20, 20, 20, 20, 7, 4, 1]),
+    day([75, 100, 150, 250, 400, 750, 1500, 3000], [0, 0, 0, 0, 0, 375, 750, 1500], [20, 20, 20, 20, 20, 8, 5, 2]),
+    day([75, 100, 150, 200, 300, 600, 1250, 2250], [0, 0, 0, 0, 0, 300, 625, 1125], [20, 20, 20, 20, 20, 9, 6, 3]),
   ],
+  // Of each new artist dollar, the percent that raises slots already unlocked. The rest saves toward the next minimum.
+  raiseShare: 25,
+  // The share of an agreed minimum that is due up front.
+  depositPct: 50,
   // share is a percent of the surplus left after floors. committed is money already promised on that line.
   budgets: [
-    { id: 'artists', name: 'Artists, on top of guarantees', share: 55, floor: 1800, cap: 0, committed: 0 },
+    { id: 'artists', name: 'Artists', share: 55, floor: 0, cap: 0, committed: 0 },
     { name: 'Art, projection and lighting', share: 9, floor: 500, cap: 0, committed: 0 },
     { name: 'Drinks for everyone', share: 7, floor: 0, cap: 0, committed: 0 },
     { id: 'crew', name: 'Crew stipends', share: 6, floor: 0, cap: 0, committed: 0 },
@@ -476,18 +498,44 @@ function maxPaid(s, level) {
 // The first paid ticket at which a stage begins.
 function stageStart(s, level) { return level <= 0 ? 0 : maxPaid(s, level - 1) + 1; }
 const agreedSlots = s => s.slots.flat().filter(x => x.agreed);
-const guaranteeTotal = s => sum(agreedSlots(s).map(x => n0(x.guarantee)));
-// What each slot is paid when the artists have `money` to share. Slots share by full fee. An agreed slot never
-// falls below its guarantee or rises above its full fee; an open slot simply follows the money.
-function paySlots(s, money) {
+// What an agreed slot is paid at a ticket count: its minimum, plus its rate on every ticket above its threshold,
+// never more than the full fee.
+const dealPay = (x, n) => { const m = n0(x.min); return Math.min(Math.max(n0(x.target), m), m + n0(x.rate) * Math.max(0, n - n0(x.above))); };
+// Shares `money` among the slots that are not agreed yet, in queue order.
+//   1. Minimums unlock one at a time. While one is being saved for, raiseShare of each dollar goes to the slots
+//      already unlocked, in proportion to how far each is from its full fee.
+//   2. When every minimum is unlocked, the daytime slots share the saving side, in proportion to their full fees.
+//   3. Nothing is paid past a full fee. Money beyond that is left over.
+function ladder(s, money) {
   const flat = s.slots.flat();
-  const pay = phi => flat.map(x => { const v = n0(x.target) * phi; return x.agreed ? Math.max(n0(x.guarantee), Math.min(v, Math.max(n0(x.target), n0(x.guarantee)))) : v; });
-  let lo = 0, hi = 1;
-  while (sum(pay(hi)) < money && hi < 1e6) hi *= 2;
-  for (let i = 0; i < 50; i++) { const mid = (lo + hi) / 2; if (sum(pay(mid)) < money) lo = mid; else hi = mid; }
-  const phi = sum(pay(hi)) <= money + 0.5 ? hi : lo;
-  const out = pay(phi), per = s.slots[0].length;
-  return { phi, slotNow: s.slots.map((d, j) => out.slice(j * per, j * per + per)), paid: sum(out) };
+  const pay = flat.map(() => 0);
+  const status = flat.map(x => x.agreed ? 'agreed' : n0(x.min) > 0 ? 'waiting' : 'pool');
+  const open = flat.map((x, i) => i).filter(i => !flat[i].agreed);
+  const pending = open.filter(i => n0(flat[i].min) > 0).sort((a, b) => n0(flat[a].order) - n0(flat[b].order) || a - b);
+  const pool = open.filter(i => !(n0(flat[i].min) > 0));
+  const head = i => Math.max(0, Math.max(n0(flat[i].target), n0(flat[i].min)) - pay[i]);
+  const give = (list, amount) => { const hs = list.map(head), H = sum(hs); if (H > 0) list.forEach((i, k) => { pay[i] += amount * hs[k] / H; }); };
+  const sigma = Math.min(0.95, Math.max(0, n0(s.raiseShare) / 100));
+  const unlocked = [];
+  let R = Math.max(0, money), saved = 0;
+  for (let guard = 0; R > 1e-6 && guard < 500; guard++) {
+    const H = sum(unlocked.map(head));
+    if (pending.length) {
+      const k = pending[0], sg = H > 1e-6 ? sigma : 0;
+      const D = Math.min(R, (n0(flat[k].min) - saved) / (1 - sg), sg > 0 ? H / sg : Infinity);
+      saved += (1 - sg) * D; if (sg > 0) give(unlocked, sg * D); R -= D;
+      if (saved >= n0(flat[k].min) - 1e-6) { pay[k] = n0(flat[k].min); status[k] = 'unlocked'; unlocked.push(k); pending.shift(); saved = 0; }
+    } else {
+      const P = sum(pool.map(head));
+      if (H <= 1e-6 && P <= 1e-6) break;
+      const sg = H > 1e-6 ? (P > 1e-6 ? sigma : 1) : 0;
+      const D = Math.min(R, sg > 0 ? H / sg : Infinity, sg < 1 ? P / (1 - sg) : Infinity);
+      if (sg > 0) give(unlocked, sg * D); if (sg < 1) give(pool, (1 - sg) * D); R -= D;
+    }
+  }
+  const next = pending.length ? pending[0] : -1;
+  if (next >= 0) { pay[next] = saved; status[next] = 'saving'; }
+  return { pay, status, next, saved, leftover: R };
 }
 function compute(s) {
   const paid = n0(s.paid);
@@ -522,8 +570,7 @@ function compute(s) {
   const processing = online * ((1 - bank) * n0(s.proc.pct) + bank * n0(s.proc.bankPct)) / 100 + paid * (1 - bank) * n0(s.proc.fixed);
   const guarantees = sum(partnerRows.map(p => p.guar)), partnerFees = sum(partnerRows.map(p => p.fee));
   const crewPay = sum(crewRows.map(c => c.pay)), siteCosts = sum(costRows.map(c => c.value));
-  const artistGuarantees = guaranteeTotal(s);
-  const hard = guarantees + partnerFees + crewPay + siteCosts + cabinCost + artistGuarantees + processing;
+  const hard = guarantees + partnerFees + crewPay + siteCosts + cabinCost + processing;
   // Budgets that grow with sales.
   const surplus = revenue - hard;
   const floors = sum(s.budgets.map(b => n0(b.floor)));
@@ -537,19 +584,29 @@ function compute(s) {
     const budget = Math.max(scaled, committed);
     return { scaled, committed, budget, over: Math.max(0, committed - scaled), left: budget - committed, must: Math.max(n0(b.floor), committed) };
   });
-  // Artists: the guarantees are already in the hard costs. The artist budget goes on top, and the two together
-  // are shared across the slots. If every slot is agreed and at its full fee, the rest of the budget is not spent.
+  // Artists: agreed slots are paid on their own terms and come out of the artist budget first. What is left
+  // runs down the ladder. If more is agreed than the budget holds, the difference comes out of the profit.
   const ai = s.budgets.findIndex(b => b.id === 'artists');
-  const artistPool = ai >= 0 ? budgetRows[ai].budget : 0;
-  const slotPay = paySlots(s, artistGuarantees + artistPool);
-  const artistPaid = slotPay.paid;
-  if (ai >= 0) { budgetRows[ai].budget = Math.max(0, artistPaid - artistGuarantees); budgetRows[ai].left = budgetRows[ai].budget; }
+  const flatSlots = s.slots.flat();
+  const artistBudget = ai >= 0 ? budgetRows[ai].scaled : 0;
+  const agreedCost = sum(flatSlots.map(x => x.agreed ? dealPay(x, paid) : 0));
+  const agreedMin = sum(flatSlots.map(x => x.agreed ? n0(x.min) : 0));
+  const lad = ladder(s, artistBudget - agreedCost);
+  const pays = flatSlots.map((x, i) => x.agreed ? dealPay(x, paid) : lad.pay[i]);
+  const artistPaid = sum(pays);
+  if (ai >= 0) {
+    const b = budgetRows[ai];
+    b.committed = agreedCost; b.budget = artistPaid; b.over = Math.max(0, agreedCost - b.scaled);
+    b.left = artistPaid - agreedCost; b.must = Math.max(n0(s.budgets[ai].floor), agreedCost);
+  }
+  const per = s.slots[0].length;
+  const slotNow = s.slots.map((d, j) => pays.slice(j * per, j * per + per));
+  const slotStatus = s.slots.map((d, j) => lad.status.slice(j * per, j * per + per));
   const ci = s.budgets.findIndex(b => b.id === 'crew');
   const stipendsPaid = ci >= 0 ? budgetRows[ci].budget : 0;
   const spend = sum(budgetRows.map(b => b.budget));
   const mustSpend = sum(budgetRows.map(b => b.must));
   const profit = surplus - spend;
-  const slotNow = slotPay.slotNow, factor = slotPay.phi;
   // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
   const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
   const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
@@ -563,10 +620,10 @@ function compute(s) {
   });
   return { paid, nFull, nSat, nSun, tFull, tSat, tSun, tickets, carSold, car, cabinRev, other, revenue, ticketDays, online,
     level, unt, onSite, over, crewHead, partnerRows, crewRows, costRows, guarantees, partnerFees, crewPay, siteCosts, processing, hard,
-    cabinsSold, cabinsRented, cabinCost, artistGuarantees, artistPool, artistPaid, stipendsOwed, stipendsPaid,
+    cabinsSold, cabinsRented, cabinCost, artistBudget, agreedCost, agreedMin, artistPaid, ladderNext: lad.next, ladderSaved: lad.saved, stipendsOwed, stipendsPaid,
     campTotal: cabinCost + sum(s.costs.map((c, i) => c.camp ? costRows[i].value : 0)),
     surplus, floors, free, shareTotal, profitShare: 100 - shareTotal, budgetRows, spend, mustSpend, profit,
-    agreedCount: agreedSlots(s).length, factor, slotNow,
+    agreedCount: agreedSlots(s).length, slotNow, slotStatus,
     yours: youIdx >= 0 ? partnerRows[youIdx].shareAmt : profit, avgTicket: paid ? tickets / paid : 0 };
 }
 // The plan at every ticket count that fits, computed once and reused by the charts and the checks.
@@ -611,6 +668,7 @@ const STORE_KEY = 'tahquitz-2027-plan';
 let s = structuredClone(DEFAULTS);
 let savedJSON = JSON.stringify(DEFAULTS);
 let remote = null, remoteNote = '', readOnly = false;
+let lastAll = [];
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -661,21 +719,22 @@ function buildBudgets() {
       <td>${cell('budgets', i, 'share', b.share, 'number', 'min="0" max="100" step="0.5" aria-label="Share of surplus"')}</td>
       <td>${cell('budgets', i, 'floor', b.floor, 'number', 'min="0" step="50" aria-label="Floor"')}</td>
       <td>${b.id === 'crew' ? `<span class="muted" id="bud-cap-${i}"></span>` : cell('budgets', i, 'cap', b.cap, 'number', 'min="0" step="50" aria-label="Cap"')}</td>
-      <td>${b.id ? '<span class="muted">–</span>' : cell('budgets', i, 'committed', b.committed, 'number', 'min="0" step="25" aria-label="Committed"')}</td>
+      <td>${b.id === 'artists' ? '<span id="bud-art-com"></span>' : b.id ? '<span class="muted">–</span>' : cell('budgets', i, 'committed', b.committed, 'number', 'min="0" step="25" aria-label="Committed"')}</td>
       <td id="bud-now-${i}"></td><td id="bud-left-${i}"></td><td class="l" id="bud-st-${i}"></td>
       <td>${b.id ? '' : delBtn('budgets', i, b.name)}</td></tr>`).join('') +
     `</tbody><tfoot><tr class="total"><td>All budgets</td><td id="bud-t-share"></td><td id="bud-t-floor"></td><td></td><td id="bud-t-com"></td><td id="bud-t-now"></td><td id="bud-t-left"></td><td></td><td></td></tr></tfoot>`;
 }
 function buildSlots() {
-  $('slots').innerHTML = `<thead><tr><th>Set</th><th class="l">Artist</th><th>Full fee</th><th>Guarantee</th><th class="l">Agreed</th><th>Pays now</th></tr></thead><tbody>` +
-    s.slots.map((day, j) => `<tr class="head"><td colspan="5">${DAYS[j]} <span class="muted" id="day-share-${j}"></span></td><td id="day-now-${j}"></td></tr>` +
+  const inp = (j, i, f, v, step, label) => `<input type="number" id="slot-${j}-${i}-${f}" data-day="${j}" data-slot="${i}" data-f="${f}" min="0" step="${step}" value="${esc(v)}" aria-label="${DAYS[j]} ${SLOTS[i]} ${label}">`;
+  $('slots').innerHTML = `<thead><tr><th>Set</th><th class="l">Artist</th><th>Full fee</th><th>Minimum</th><th>Queue</th><th class="l">Agreed</th><th>Per ticket</th><th>Above tickets</th><th>Pays now</th><th class="l">Terms</th></tr></thead><tbody>` +
+    s.slots.map((day, j) => `<tr class="head"><td colspan="8">${DAYS[j]} <span class="muted" id="day-share-${j}"></span></td><td id="day-now-${j}"></td><td></td></tr>` +
       day.map((x, i) => `<tr id="slot-row-${j}-${i}"><td>${SLOTS[i]}</td>
         <td class="l"><input type="text" class="mid" id="slot-${j}-${i}-name" data-day="${j}" data-slot="${i}" data-f="name" value="${esc(x.name)}" placeholder="Open" aria-label="${DAYS[j]} ${SLOTS[i]} artist"></td>
-        <td><input type="number" id="slot-${j}-${i}-target" data-day="${j}" data-slot="${i}" data-f="target" min="0" step="25" value="${esc(x.target)}" aria-label="${DAYS[j]} ${SLOTS[i]} full fee"></td>
-        <td><input type="number" id="slot-${j}-${i}-guarantee" data-day="${j}" data-slot="${i}" data-f="guarantee" min="0" step="25" value="${esc(x.guarantee || '')}" aria-label="${DAYS[j]} ${SLOTS[i]} guarantee"></td>
+        <td>${inp(j, i, 'target', x.target, 25, 'full fee')}</td><td>${inp(j, i, 'min', x.min || '', 25, 'minimum')}</td><td>${inp(j, i, 'order', x.order, 1, 'place in the queue')}</td>
         <td class="l"><input type="checkbox" id="slot-${j}-${i}-agreed" data-day="${j}" data-slot="${i}" data-f="agreed"${x.agreed ? ' checked' : ''} aria-label="${DAYS[j]} ${SLOTS[i]} agreed"></td>
-        <td id="slot-now-${j}-${i}"></td></tr>
-        <tr class="sub" id="slot-sub-${j}-${i}" hidden><td></td><td colspan="5" class="l muted" id="slot-ladder-${j}-${i}"></td></tr>`).join('')).join('') + '</tbody>';
+        <td>${inp(j, i, 'rate', x.rate || '', 0.5, 'rate per ticket')}</td><td>${inp(j, i, 'above', x.above || '', 1, 'tickets the rate starts above')}</td>
+        <td id="slot-now-${j}-${i}"></td><td class="l muted" id="slot-terms-${j}-${i}"></td></tr>`).join('')).join('') + '</tbody>';
+  $('ladder-settings').innerHTML = numField('raiseShare', 'Share of each new artist dollar that raises slots already unlocked, %') + numField('depositPct', 'Deposit due up front on an agreed minimum, %');
 }
 function buildPartners() {
   $('partners').innerHTML = s.partners.map((p, i) => `<div class="panel">
@@ -717,7 +776,7 @@ function buildCosts() {
       <td class="l"><select id="costs-${i}-basis" data-list="costs" data-i="${i}" data-f="basis" aria-label="Charged">${BASIS.map(([v, l]) => `<option value="${v}"${v === c.basis ? ' selected' : ''}>${l}</option>`).join('')}</select></td>
       <td class="l">${fromSelect('costs', i, c.from)}</td><td class="l">${untilSelect('costs', i, c.until)}</td><td id="cost-now-${i}"></td><td>${delBtn('costs', i, c.name)}</td></tr>`).join('') +
     `</tbody><tfoot><tr class="total"><td>Site costs</td><td></td><td></td><td></td><td></td><td id="cost-total"></td><td></td></tr>
-    <tr><td class="muted">Plus cabin rental, artist guarantees, partner guarantees and fees, fixed crew pay and card fees</td><td></td><td></td><td></td><td></td><td class="muted" id="cost-rest"></td><td></td></tr>
+    <tr><td class="muted">Plus cabin rental, partner guarantees and fees, fixed crew pay and card fees</td><td></td><td></td><td></td><td></td><td class="muted" id="cost-rest"></td><td></td></tr>
     <tr class="total"><td>All mandatory hard costs</td><td></td><td></td><td></td><td></td><td id="cost-hard"></td><td></td></tr></tfoot>`;
 }
 function buildTimeline() {
@@ -742,7 +801,7 @@ function renderVerdict(r, cov) {
   $('v-profit-sub').textContent = `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets`;
   const must = r.hard + r.mustSpend, pill = $('v-cov-pill');
   $('v-cov').textContent = cov === null ? 'Not covered' : tix(cov);
-  $('v-cov-sub').textContent = `Hard costs and floors, including ${money(r.artistGuarantees + sumCommitted(r))} guaranteed or committed`;
+  $('v-cov-sub').textContent = `Hard costs, floors and ${money(sumCommitted(r))} agreed or committed`;
   if (cov === null) { pill.textContent = 'No ticket count that fits covers it'; pill.className = 'pill bad'; }
   else if (num(s.sold) >= cov) { pill.textContent = 'Covered by sales so far'; pill.className = 'pill good'; }
   else { pill.textContent = `${tix(cov - num(s.sold))} to go`; pill.className = 'pill warn'; }
@@ -814,6 +873,7 @@ function renderBudgets(r, all) {
   s.budgets.forEach((b, i) => {
     const x = r.budgetRows[i];
     const cp = $('bud-cap-' + i); if (cp) cp.textContent = money(r.stipendsOwed) + ' owed';
+    if (b.id === 'artists') $('bud-art-com').textContent = money(x.committed);
     $('bud-now-' + i).textContent = money(x.budget);
     $('bud-left-' + i).textContent = money(x.left);
     let st;
@@ -831,34 +891,66 @@ function renderBudgets(r, all) {
     ? `The shares add up to ${pct(r.shareTotal)}, which is more than the whole surplus. Bring them to 100% or less.`
     : `The shares add up to ${pct(r.shareTotal)}. The other ${pct(r.profitShare)} of the surplus is profit. At ${int(r.paid)} tickets the surplus is ${money(r.surplus)}.`;
 }
+const slotName = (j, i) => `${DAYS[j]} ${SLOTS[i]}`;
+// The ticket counts at which a slot unlocks and reaches its full fee, and terms that follow the ladder between them.
+function slotPath(all, j, i) {
+  const x = s.slots[j][i], m = num(x.min), full = Math.max(num(x.target), m), top = all.length - 1;
+  const un = all.findIndex(c => m > 0 ? (c.slotStatus[j][i] === 'unlocked' || c.slotStatus[j][i] === 'agreed') : c.slotNow[j][i] > 0.5);
+  const at = all.findIndex(c => c.slotNow[j][i] >= full - 1);
+  const end = at >= 0 ? at : top;
+  const rate = un >= 0 && end > un ? Math.max(0, Math.round((all[end].slotNow[j][i] - m) / (end - un) * 2) / 2) : 0;
+  return { un, at, rate };
+}
 function renderArtists(r, all) {
-  const targetTotal = s.slots.flat().reduce((a, x) => a + num(x.target), 0);
+  const sold = Math.min(num(s.sold), all.length - 1);
+  const fullTotal = s.slots.flat().reduce((a, x) => a + num(x.target), 0);
+  const queue = [];
   s.slots.forEach((day, j) => {
-    let dayNow = 0, dayTarget = 0;
+    let dayNow = 0, dayFull = 0;
     day.forEach((x, i) => {
-      const now = r.slotNow[j][i];
-      dayNow += now; dayTarget += num(x.target);
+      const now = r.slotNow[j][i], st = r.slotStatus[j][i], m = num(x.min), full = Math.max(num(x.target), m);
+      const path = slotPath(all, j, i);
+      dayNow += now; dayFull += num(x.target);
       $(`slot-row-${j}-${i}`).className = x.agreed ? 'locked' : '';
-      $(`slot-now-${j}-${i}`).innerHTML = x.agreed ? `${money(r25(now))} <span class="pill good">agreed</span>` : `<span class="muted">up to</span> ${money(r25(now))}`;
-      $(`slot-sub-${j}-${i}`).hidden = !x.agreed;
-      if (x.agreed) {
-        const g = num(x.guarantee), full = Math.max(num(x.target), g);
-        const rise = all.findIndex(c => c.slotNow[j][i] > g + 1), top = all.findIndex(c => c.slotNow[j][i] >= full - 1);
-        $(`slot-ladder-${j}-${i}`).textContent = g >= full ? `A flat ${money(g)}, owed whatever sells.`
-          : `${money(g)} is owed whatever sells. ` + (rise < 0 ? 'It does not rise at any size that fits.' : `It starts rising at ${tix(rise)}` + (top < 0 ? ' and does not reach the full fee at any size that fits.' : ` and reaches the full ${money(full)} at ${tix(top)}.`));
-      }
+      $(`slot-now-${j}-${i}`).innerHTML = x.agreed ? `${money(r25(now))} <span class="pill good">agreed</span>`
+        : st === 'unlocked' ? money(r25(now)) : st === 'saving' ? `<span class="muted">${money(now)} saved</span>` : now > 0.5 ? money(r25(now)) : '<span class="muted">not yet</span>';
+      const hint = $(`slot-${j}-${i}-rate`), hint2 = $(`slot-${j}-${i}-above`);
+      hint.placeholder = path.rate ? String(path.rate) : ''; hint2.placeholder = path.un > 0 ? String(path.un) : '';
+      let terms;
+      if (x.agreed) terms = num(x.rate) > 0 && full > m ? `${money(m)} whatever sells, plus $${num(x.rate)} a ticket above ${int(x.above)}, up to ${money(full)}` : `A flat ${money(m)}, owed whatever sells`;
+      else if (m > 0) terms = path.un < 0 ? 'Does not unlock at any size that fits' : `Unlocks at ${tix(path.un)}` + (path.at >= 0 ? `, full fee at ${int(path.at)}` : '');
+      else terms = path.un < 0 ? 'Not reached at any size that fits' : `Shares from ${tix(path.un)}` + (path.at >= 0 ? `, full fee at ${int(path.at)}` : '');
+      $(`slot-terms-${j}-${i}`).textContent = terms;
+      if (m > 0) queue.push({ j, i, x, m, full, now, st, path });
     });
     $('day-now-' + j).textContent = money(dayNow);
-    $('day-share-' + j).textContent = targetTotal ? `· ${Math.round(dayTarget / targetTotal * 100)}% of the full fees` : '';
+    $('day-share-' + j).textContent = fullTotal ? `· ${Math.round(dayFull / fullTotal * 100)}% of the full fees` : '';
   });
-  const open = s.slots.flat().filter(x => !x.agreed).length;
+  queue.sort((a, b) => num(a.x.order) - num(b.x.order) || a.j * 10 + a.i - (b.j * 10 + b.i));
+  const pill = q => q.x.agreed ? '<span class="pill good">agreed</span>'
+    : q.path.un < 0 ? '<span class="pill bad">out of reach</span>'
+    : sold >= q.path.un ? '<span class="pill good">unlocked by sales so far</span>'
+    : `<span class="pill ${q === firstWaiting ? 'warn' : 'plain'}">${tix(q.path.un - sold)} to go</span>`;
+  const firstWaiting = queue.find(q => !q.x.agreed && q.path.un >= 0 && sold < q.path.un);
+  const pool = []; s.slots.forEach((day, j) => day.forEach((x, i) => { if (!(num(x.min) > 0) && !x.agreed) pool.push(slotPath(all, j, i)); }));
+  const poolStart = pool.map(p => p.un).filter(v => v >= 0), poolFull = pool.map(p => p.at);
+  $('ladder').innerHTML = `<thead><tr><th>Queue</th><th class="l">Slot</th><th class="l">Artist</th><th>Minimum</th><th>Full fee</th><th>Unlocks at</th><th>Full fee at</th><th>At ${int(r.paid)} tickets</th><th class="l">Against the ${int(sold)} sold</th></tr></thead><tbody>` +
+    queue.map((q, k) => `<tr><td>${k + 1}</td><td class="l">${slotName(q.j, q.i)}</td><td class="l">${esc(q.x.name) || '<span class="muted">open</span>'}</td><td>${money(q.m)}</td><td>${money(q.full)}</td>
+      <td>${q.x.agreed ? 'agreed' : q.path.un < 0 ? 'never' : tix(q.path.un)}</td><td>${q.path.at < 0 ? 'not at this size' : tix(q.path.at)}</td><td>${q.now > 0.5 ? money(r25(q.now)) : '–'}</td><td class="l">${pill(q)}</td></tr>`).join('') +
+    (pool.length ? `<tr><td></td><td class="l">Daytime slots</td><td class="l muted">${pool.length} sets</td><td>–</td><td></td><td>${poolStart.length ? tix(Math.min(...poolStart)) : 'never'}</td><td>${poolFull.every(v => v >= 0) && poolFull.length ? tix(Math.max(...poolFull)) : 'not at this size'}</td><td></td>
+      <td class="l">${poolStart.length && sold >= Math.min(...poolStart) ? '<span class="pill good">being paid</span>' : '<span class="pill plain">after the queue</span>'}</td></tr>` : '') + '</tbody>';
+  const at = all[sold];
+  const unlockedSold = queue.filter(q => !q.x.agreed && q.path.un >= 0 && sold >= q.path.un).length;
   const facts = [
-    [`Artists are paid, at ${int(r.paid)} tickets`, money(r.artistPaid)],
-    [`Guaranteed whatever sells, ${r.agreedCount} of ${s.slots.flat().length} slots`, money(r.artistGuarantees)],
-    ['On top of guarantees, from the artist budget', money(r.artistPaid - r.artistGuarantees)],
-    [`The ${open} open slots are at this share of their full fees`, open ? Math.round(r.factor * 100) + '%' : 'all agreed'],
+    [`Artist budget at ${int(r.paid)} tickets`, money(r.artistBudget)],
+    [`Agreed deals cost, ${r.agreedCount} of ${s.slots.flat().length} slots`, money(r.agreedCost)],
+    ['Left to run down the ladder', money(Math.max(0, r.artistBudget - r.agreedCost))],
+    ['Next in the queue', firstWaiting ? `${slotName(firstWaiting.j, firstWaiting.i)}, at ${tix(firstWaiting.path.un)}` : 'every minimum is unlocked or agreed'],
+    [`At the ${int(sold)} sold so far`, `${unlockedSold} unlocked, ${money(at.artistBudget)} in the budget`],
+    [`Deposits due on agreed minimums, at ${pct(num(s.depositPct))}`, money(r.agreedMin * num(s.depositPct) / 100)],
+    ['Ticket and add-on money in so far', money(at.revenue)],
   ];
-  if (num(s.sold) > 0 && all[num(s.sold)]) facts.push([`Artists would be paid at the ${int(s.sold)} sold so far`, money(all[num(s.sold)].artistPaid)]);
+  if (r.agreedCost > r.artistBudget + 0.5) facts.push(['Agreed deals are ahead of the artist budget by', money(r.agreedCost - r.artistBudget)]);
   $('artist-facts').innerHTML = facts.map(([a, b]) => `<li><span>${a}</span><b>${b}</b></li>`).join('');
 }
 function renderProduction(r) {
@@ -927,7 +1019,6 @@ function renderPL(r) {
     ${row('Fixed crew pay', money(r.crewPay), 'chefs')}
     ${costLines}
     ${row('Cabin rental', money(r.cabinCost), `${int(r.cabinsRented)} cabins`)}
-    ${r.artistGuarantees ? row('Artist guarantees', money(r.artistGuarantees), `${r.agreedCount} agreed`) : ''}
     ${row('Payment processing', money(r.processing), pct(r.processing / Math.max(1, r.online) * 100) + ' of online sales')}
     <tr class="total"><td>Total hard costs</td><td></td><td>${money(r.hard)}</td></tr>
     <tr class="total"><td>Surplus to share</td><td></td><td>${money(r.surplus)}</td></tr>
@@ -982,11 +1073,11 @@ function drawChart(key, values, top, opts) {
 }
 function renderCharts(r, all) {
   const top = all.length - 1;
-  drawChart('artists', all.map(x => x.artistPaid), top, { label: 'to artists', hline: { v: r.artistGuarantees, label: `Guaranteed: ${money(r.artistGuarantees)}` } });
+  drawChart('artists', all.map(x => x.artistPaid), top, { label: 'to artists', hline: { v: r.agreedMin, label: `Agreed minimums: ${money(r.agreedMin)}` } });
   drawChart('profit', all.map(x => x.profit), top, { label: 'profit' });
-  $('note-artists-chart').textContent = r.artistGuarantees > 0
-    ? 'The dashed line is what you have guaranteed, which is owed at any size. Everything above it moves with sales.'
-    : 'Nothing is guaranteed yet, so all of it moves with sales. Agree a guarantee on the Artists tab and a dashed line shows what is owed whatever sells.';
+  $('note-artists-chart').textContent = r.agreedMin > 0
+    ? 'The dashed line is the minimums you have agreed, which are owed at any size. The line flattens once every slot is at its full fee.'
+    : 'Nothing is agreed yet, so all of it moves with sales. The line flattens once every slot is at its full fee.';
 }
 function bindHover(key) {
   const box = $('box-' + key), svg = $('chart-' + key), tip = $('tip-' + key);
@@ -1027,7 +1118,9 @@ function render(skip) {
   const ai = s.budgets.indexOf(al);
   if (ai >= 0) setVal($(`budgets-${ai}-share`), al.share, skip);
   setVal($('f-mixFull'), s.mixFull, skip); setVal($('f-mixSat'), s.mixSat, skip);
-  const all = series(s), r = all[Math.min(s.paid, all.length - 1)], cov = coveredAt(s, all);
+  const all = lastAll = series(s), r = all[Math.min(s.paid, all.length - 1)], cov = coveredAt(s, all);
+  s.slots.forEach((day, j) => day.forEach((x, i) => { setVal($(`slot-${j}-${i}-rate`), x.rate || '', skip); setVal($(`slot-${j}-${i}-above`), x.above || '', skip); }));
+  setVal($('f-raiseShare'), s.raiseShare, skip); setVal($('f-depositPct'), s.depositPct, skip);
   renderVerdict(r, cov);
   renderOverview(r, all, cov); renderTickets(r); renderBudgets(r, all); renderArtists(r, all); renderProduction(r); renderCrew(r); renderCosts(r); renderTimeline(); renderPL(r); renderCharts(r, all);
   renderSave();
@@ -1041,7 +1134,10 @@ document.addEventListener('input', e => {
   if (t.id === 'f-paid') s.paid = val;
   else if (t.id === 'f-ashare') { const al = artistLine(); if (al) al.share = val; }
   else if (d.day !== undefined) {
-    s.slots[+d.day][+d.slot][d.f] = val;
+    const slot = s.slots[+d.day][+d.slot];
+    // Agreeing a slot with no terms yet takes the terms that follow the ladder.
+    if (d.f === 'agreed' && val && !num(slot.rate) && !num(slot.above) && lastAll.length) { const path = slotPath(lastAll, +d.day, +d.slot); slot.rate = path.rate; slot.above = Math.max(0, path.un); }
+    slot[d.f] = val;
   }
   else if (d.tier) s.tiers[d.tier][+d.i][d.f] = val;
   else if (d.list) { if (d.j !== undefined) s[d.list][+d.i][d.f][+d.j] = val; else s[d.list][+d.i][d.f] = val; }
