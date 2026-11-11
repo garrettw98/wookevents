@@ -235,7 +235,7 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
       <h2>Scale stages</h2>
       <div class="scroll"><table class="edit compact" id="stages"></table></div>
       <div class="jump"><button id="btn-add-stage">Add a stage</button><button id="btn-del-stage">Remove the last stage</button></div>
-      <p class="note">Each stage is a limit on people on site. Partners, crew and hard costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket. Stepping into a stage costs money before it earns any. Two things cover that. The step fund holds back a percent of everything above the floors at a stage, from every share alike, and pays for the step. If the step is never taken, the fund stays in your profit. The rest is covered by selling the larger stage as one block: buyers past a sell-out join a waitlist and are not charged until enough are waiting that the step leaves you no loss. Type a count under "Release at" to set that yourself, or leave 0. No artist and no budget is paid less after a step. "Worth it from" is where the event as a whole, and then your own take, are back above the sell-out of the stage before.</p>
+      <p class="note">Each stage is a limit on people on site. Partners, crew and hard costs name the stage they start at, so the tickets that fit are whatever is left after everyone without a ticket. Stepping into a stage costs money before it earns any. Two things cover that. The step fund holds back a percent of everything above the floors at a stage, from every share alike, along with any share that has nowhere to go, such as the artists' share once every artist is at their full fee. The fund is not counted in your take. It pays for the step, and if the step is never taken it is carried forward. The rest is covered by selling the larger stage as one block: buyers past a sell-out join a waitlist and are not charged until enough are waiting that nobody, you included, is paid less after the step. Type a count under "Release at" to set that yourself, or leave 0.</p>
       <p class="note" id="note-steps"></p>
     </div>
     <div class="cols">
@@ -367,11 +367,13 @@ ul.plain li b { font-weight: 600; color: var(--ink); white-space: nowrap; font-v
 //     above a ticket count.
 //  6. Stepping up a size never lowers a payment. At a larger size no budget, and no artist, gets less than it had
 //     reached at the sell-out of the size before. The cost of the step comes out of the profit instead.
-//  7. Each size holds back a step fund: a slice of everything above the floors, taken from every share alike. It
-//     pays for the step up to the next size. If the step is never taken it stays in the profit.
+//  7. Each size holds back a step fund: a slice of everything above the floors, taken from every share alike,
+//     plus any share that has nowhere to go (artists already at full fees, a capped budget). The fund pays for the
+//     step up to the next size. It is not profit: if the step is never taken it is carried forward.
+//     The profit grows at its own share like every other line and is never less than at the size before.
 //  8. A larger size is sold as one block. Tickets past a size's sell-out go on a waitlist and nobody is charged
-//     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, the
-//     organiser is not left with a loss.
+//     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, nobody
+//     is paid less than at the smaller size's sell-out, the organiser included.
 //  9. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
 const SCHEMA = 9;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
@@ -530,7 +532,7 @@ function rise(s, money) {
   return { add: head.map(h => h * k), leftover: Math.max(0, money - H) };
 }
 // The ticket count at which each stage is released. A stage's own `release` if it has one, otherwise the first
-// count at which the organiser is not left with a loss (or, if the stage before already ended in one, no deeper one).
+// count at which the organiser's take is no lower than at the sell-out of the stage before.
 // Stage 0 is always open. null means the stage never gets there, and it is then left ungated.
 function releases(s, maxes) {
   const mx = maxes || s.stages.map((_, L) => maxPaid(s, L));
@@ -540,8 +542,7 @@ function releases(s, maxes) {
     if (L === 0) return 0;
     const start = mx[L - 1] + 1, base = raw[mx[L - 1]];
     if (n0(st.release) > 0) return Math.max(start, Math.min(top, Math.round(n0(st.release))));
-    const target = Math.min(0, base.yours);
-    for (let n = start; n <= top; n++) if (raw[n].yours >= target) return n;
+    for (let n = start; n <= top; n++) if (raw[n].yours >= base.yours - 0.005) return n;
     return null;
   });
 }
@@ -603,7 +604,6 @@ function compute(s) {
   const free = surplus - floors;
   const shareTotal = sum(s.budgets.map(b => n0(b.share)));
   const fundPct = level < s.stages.length - 1 ? Math.min(100, Math.max(0, n0(s.stages[level].fund))) / 100 : 0;
-  const fund = Math.max(0, free) * fundPct;
   const budgetRows = s.budgets.map((b, i) => {
     const committed = b.id ? 0 : n0(b.committed);
     const hold = held && held.budgetRows[i] ? held.budgetRows[i].budget : 0;
@@ -634,7 +634,13 @@ function compute(s) {
   const slotStatus = s.slots.map(d => d.map(x => x.agreed ? 'agreed' : 'open'));
   const spend = sum(budgetRows.map(b => b.budget));
   const mustSpend = sum(budgetRows.map(b => b.must));
-  const profit = surplus - spend;
+  // The profit takes its own share at the same pace as every other line, and never less than it had reached at the
+  // sell-out of the size before. What is left is the step fund. At the last size there is no step to fund, so
+  // everything left is profit. Below break-even the whole shortfall is the loss.
+  const left = surplus - spend;
+  const ownProfit = Math.max(0, free) * (1 - fundPct) * Math.max(0, 100 - shareTotal) / 100;
+  const profit = level >= s.stages.length - 1 ? left : Math.min(left, Math.max(ownProfit, held ? held.profit : -Infinity));
+  const fund = Math.max(0, left - profit);
   // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
   const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
   const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
@@ -719,7 +725,7 @@ const delBtn = (list, i, label) => `<button class="ghost" data-del="${list}" dat
 
 /* ---------- builders: run when the structure changes ---------- */
 function buildStages() {
-  $('stages').innerHTML = `<thead><tr><th>Stage</th><th>Limit on site</th><th>Step fund, %</th><th>Without a ticket</th><th>Tickets that fit</th><th>Waitlist from ticket</th><th>Worth it from</th><th>Release at</th><th class="l">Switches on</th></tr></thead><tbody>` +
+  $('stages').innerHTML = `<thead><tr><th>Stage</th><th>Limit on site</th><th>Step fund, %</th><th>Without a ticket</th><th>Tickets that fit</th><th>Waitlist from ticket</th><th>Covered at, or sold as a block at</th><th>Release at</th><th class="l">Switches on</th></tr></thead><tbody>` +
     s.stages.map((st, i) => `<tr><td>${cell('stages', i, 'name', st.name, 'text', 'aria-label="Stage name"')}</td>
       <td>${cell('stages', i, 'limit', st.limit, 'number', 'min="1" step="1" aria-label="Limit on site"')}</td>
       <td>${i < s.stages.length - 1 ? cell('stages', i, 'fund', st.fund ?? 0, 'number', 'min="0" max="100" step="5" aria-label="Step fund percent"') : ''}</td>
@@ -830,7 +836,7 @@ function renderVerdict(r, cov) {
   $('v-profit-label').textContent = r.profit >= 0 ? `Profit at ${int(r.paid)} tickets` : `Loss at ${int(r.paid)} tickets`;
   $('v-profit').textContent = money(r.profit);
   $('v-profit').className = 'big ' + (r.profit >= 0 ? 'is-good' : 'is-bad');
-  $('v-profit-sub').textContent = (r.waitlist > 0 ? `${int(r.waitlist)} more on the waitlist, sold at ${int(r.rel[r.level + 1])}. ` : '') + `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets`;
+  $('v-profit-sub').textContent = (r.waitlist > 0 ? `${int(r.waitlist)} more on the waitlist, sold at ${int(r.rel[r.level + 1])}. ` : '') + `${money(r.revenue)} in, ${money(r.hard)} hard costs, ${money(r.spend)} in budgets` + (r.fund > 0.5 ? `, ${money(r.fund)} in the step fund` : '');
   const must = r.hard + r.mustSpend, pill = $('v-cov-pill');
   $('v-cov').textContent = cov === null ? 'Not covered' : tix(cov);
   $('v-cov-sub').textContent = `Hard costs with ${money(r.artistMin)} of artist minimums, and floors` + (sumCommitted(r) > 0.5 ? `, plus ${money(sumCommitted(r))} agreed or committed` : '');
@@ -845,13 +851,13 @@ function renderVerdict(r, cov) {
   $('v-you').textContent = money(r.yours);
   $('v-you').className = 'big ' + (r.yours >= 0 ? '' : 'is-bad');
   const others = s.partners.map((p, i) => [p, r.partnerRows[i]]).filter(([p, x]) => !p.you && x.active && num(p.share) > 0);
-  $('v-you-sub').textContent = (r.fund > 0.5 ? `Includes ${money(r.fund)} held in the step fund. ` : '') + (others.length ? others.map(([p, x]) => `${p.name} ${money(x.total)}`).join(', ') + ', guarantees included' : 'No other partner shares the result');
+  $('v-you-sub').textContent = (r.fund > 0.5 ? `The step fund holds another ${money(r.fund)}, not counted here. ` : '') + (others.length ? others.map(([p, x]) => `${p.name} ${money(x.total)}`).join(', ') + ', guarantees included' : 'No other partner shares the result');
 }
 const sumCommitted = r => r.budgetRows.reduce((a, b) => a + b.committed, 0);
 function renderOverview(r, all, cov) {
   s.stages.forEach((st, i) => {
     const pf = stagePaysFrom(s, i, all);
-    $('st-pay-' + i).textContent = i === 0 ? (cov === null ? 'not covered' : tix(cov)) : pf.whole === null ? 'never at this size' : pf.yours === pf.whole ? tix(pf.whole) : `${int(pf.whole)} for the event, ${pf.yours === null ? 'never' : int(pf.yours)} for you`;
+    $('st-pay-' + i).textContent = i === 0 ? (cov === null ? 'not covered' : tix(cov)) : r.rel[i] ? `${int(r.rel[i])}, a block of ${int(r.rel[i] - stageStart(s, i) + 1)}` : 'never without a loss';
     $('st-unt-' + i).textContent = int(headcount(s, i).total);
     $('st-fit-' + i).textContent = int(maxPaid(s, i));
     $('st-start-' + i).textContent = i === 0 ? 'open' : int(stageStart(s, i));
@@ -862,9 +868,9 @@ function renderOverview(r, all, cov) {
     const i = k + 1, start = stageStart(s, i), before = all[start - 1], rel = r.rel[i];
     if (!before) return '';
     const fundText = before.fund > 0.5 ? `At ${int(start - 1)} tickets the step fund holds ${money(before.fund)}. ` : '';
-    if (!rel) { const first = all[start]; return first ? fundText + `${st.name} always leaves you a loss, so it is not gated: ticket ${int(start)} takes your take from ${money(before.yours)} to ${money(first.yours)}.` : ''; }
-    const after = all[rel];
-    return fundText + `Past ${int(start - 1)} tickets, buyers wait without being charged. When ${int(rel - start + 1)} ${rel - start + 1 === 1 ? 'is' : 'are'} waiting they are all sold together and the event steps up at ${int(rel)} tickets. ${before.fund > 0.5 ? 'The fund is spent on the step, and your' : 'Your'} take goes from ${money(before.yours)} to ${money(after.yours)}.`;
+    if (!rel) { const first = all[start]; return first ? fundText + `${st.name} never gets your take back to where it was, so it is not gated: ticket ${int(start)} takes your take from ${money(before.yours)} to ${money(first.yours)}.` : ''; }
+    const after = all[rel], need = rel - start + 1;
+    return fundText + `Past ${int(start - 1)} tickets, buyers wait without being charged. When ${int(need)} ${need === 1 ? 'is' : 'are'} waiting they are all sold together and the event steps up at ${int(rel)} tickets. ${before.fund > 0.5 ? 'The fund is spent on the step. ' : ''}Artists go from ${money(before.artistPaid)} to ${money(after.artistPaid)} and your take from ${money(before.yours)} to ${money(after.yours)}.`;
   }).filter(Boolean).join(' ');
   const al = artistLine();
   $('o-paid').textContent = int(s.paid);
@@ -896,7 +902,7 @@ function renderOverview(r, all, cov) {
     who('Camp Tahquitz: venue fee, cabins, medical rep', c => c.campTotal) +
     s.partners.map((p, i) => p.you ? '' : who(esc(p.name), c => c.partnerRows[i].total)).join('') +
     who('Artists, all 24 sets', c => c.artistPaid) + who('Crew and chefs', c => c.crewPay + c.crewFees) +
-    who('You', c => c.yours, 'total') + '</tbody>';
+    who('Step fund, held for the next size', c => c.fund) + who('You', c => c.yours, 'total') + '</tbody>';
   const open = s.timeline.filter(t => !t.done).sort((p, q) => String(p.date).localeCompare(String(q.date))).slice(0, 4);
   $('next').innerHTML = open.length ? open.map(t => `<li><span>${esc(t.task)}${t.date < today() ? ' <span class="pill bad">overdue</span>' : ''}</span><b>${fmtDate(t.date)}</b></li>`).join('') : '<li><span>Everything on the timeline is done.</span></li>';
 }
@@ -1068,8 +1074,8 @@ function renderPL(r) {
     ${budgetLines}
     <tr class="total"><td>Total budgets</td><td></td><td>${money(r.spend)}</td></tr>
     <tr class="head"><td colspan="3">${r.profit >= 0 ? 'Profit' : 'Loss'}, and what each partner takes home</td></tr>
-    ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit), r.profit >= 0 ? (r.fund > 0.5 ? 'what the budgets do not take' : pct(r.profitShare) + ' of the surplus after floors') : '')}
-    ${r.fund > 0.5 ? row('Of which held in the step fund', money(r.fund), 'spent if the event steps up a size') : ''}
+    ${r.fund > 0.5 ? row('Step fund', money(r.fund), 'pays for the step up, or is carried forward') : ''}
+    ${row(r.profit >= 0 ? 'Profit' : 'Loss', money(r.profit), r.profit >= 0 ? 'the share no budget takes' : '')}
     ${splitLines}
   </tbody>`;
 }

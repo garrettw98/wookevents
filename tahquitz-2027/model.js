@@ -14,11 +14,13 @@
 //     above a ticket count.
 //  6. Stepping up a size never lowers a payment. At a larger size no budget, and no artist, gets less than it had
 //     reached at the sell-out of the size before. The cost of the step comes out of the profit instead.
-//  7. Each size holds back a step fund: a slice of everything above the floors, taken from every share alike. It
-//     pays for the step up to the next size. If the step is never taken it stays in the profit.
+//  7. Each size holds back a step fund: a slice of everything above the floors, taken from every share alike,
+//     plus any share that has nowhere to go (artists already at full fees, a capped budget). The fund pays for the
+//     step up to the next size. It is not profit: if the step is never taken it is carried forward.
+//     The profit grows at its own share like every other line and is never less than at the size before.
 //  8. A larger size is sold as one block. Tickets past a size's sell-out go on a waitlist and nobody is charged
-//     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, the
-//     organiser is not left with a loss.
+//     until the waitlist reaches the release count: the first count at which, with the fund spent on the step, nobody
+//     is paid less than at the smaller size's sell-out, the organiser included.
 //  9. Whatever share is not given to a budget is the profit, split by parts among the partners who hold a share.
 const SCHEMA = 9;
 // target is the full fee, min the minimum owed whatever sells, order the place in the booking queue.
@@ -177,7 +179,7 @@ function rise(s, money) {
   return { add: head.map(h => h * k), leftover: Math.max(0, money - H) };
 }
 // The ticket count at which each stage is released. A stage's own `release` if it has one, otherwise the first
-// count at which the organiser is not left with a loss (or, if the stage before already ended in one, no deeper one).
+// count at which the organiser's take is no lower than at the sell-out of the stage before.
 // Stage 0 is always open. null means the stage never gets there, and it is then left ungated.
 function releases(s, maxes) {
   const mx = maxes || s.stages.map((_, L) => maxPaid(s, L));
@@ -187,8 +189,7 @@ function releases(s, maxes) {
     if (L === 0) return 0;
     const start = mx[L - 1] + 1, base = raw[mx[L - 1]];
     if (n0(st.release) > 0) return Math.max(start, Math.min(top, Math.round(n0(st.release))));
-    const target = Math.min(0, base.yours);
-    for (let n = start; n <= top; n++) if (raw[n].yours >= target) return n;
+    for (let n = start; n <= top; n++) if (raw[n].yours >= base.yours - 0.005) return n;
     return null;
   });
 }
@@ -250,7 +251,6 @@ function compute(s) {
   const free = surplus - floors;
   const shareTotal = sum(s.budgets.map(b => n0(b.share)));
   const fundPct = level < s.stages.length - 1 ? Math.min(100, Math.max(0, n0(s.stages[level].fund))) / 100 : 0;
-  const fund = Math.max(0, free) * fundPct;
   const budgetRows = s.budgets.map((b, i) => {
     const committed = b.id ? 0 : n0(b.committed);
     const hold = held && held.budgetRows[i] ? held.budgetRows[i].budget : 0;
@@ -281,7 +281,13 @@ function compute(s) {
   const slotStatus = s.slots.map(d => d.map(x => x.agreed ? 'agreed' : 'open'));
   const spend = sum(budgetRows.map(b => b.budget));
   const mustSpend = sum(budgetRows.map(b => b.must));
-  const profit = surplus - spend;
+  // The profit takes its own share at the same pace as every other line, and never less than it had reached at the
+  // sell-out of the size before. What is left is the step fund. At the last size there is no step to fund, so
+  // everything left is profit. Below break-even the whole shortfall is the loss.
+  const left = surplus - spend;
+  const ownProfit = Math.max(0, free) * (1 - fundPct) * Math.max(0, 100 - shareTotal) / 100;
+  const profit = level >= s.stages.length - 1 ? left : Math.min(left, Math.max(ownProfit, held ? held.profit : -Infinity));
+  const fund = Math.max(0, left - profit);
   // A profit is split by parts among active partners. A loss is split among those who agreed to share one.
   const inPool = (p, i) => partnerRows[i].active && n0(p.share) > 0 && (profit >= 0 || p.sharesLoss);
   const parts = sum(s.partners.map((p, i) => inPool(p, i) ? n0(p.share) : 0));
