@@ -26,20 +26,20 @@ Partners, crew roles, budgets, hard costs, stages and timeline rows can all be a
 
 ## The short version
 
-1. **Break-even is 124 tickets.** That covers every hard cost, including the minimums for all nine 90-minute slots and $100 for each of the 12 paid crew. Reeguez Rocks sold 90, so the event has to sell about 40% more before anyone is ahead.
-2. **Headliners are guaranteed 75% of their fee, because their names sell the tickets.** That is $6,200 of the $9,750 in minimums. It adds 15 tickets to the break-even compared with guaranteeing half.
+1. **Break-even is 141 tickets.** That covers every hard cost, including the minimums for all nine 90-minute slots and $100 for each of the 12 paid crew. Reeguez Rocks sold 90, so the event has to sell about 55% more before anyone is ahead. It assumes 30% of buyers take Fri–Sun, 40% Sat–Sun and 30% Sunday only, which puts the average ticket at about $161 at a 285-ticket sell-out.
+2. **Headliners are guaranteed 75% of their fee, because their names sell the tickets.** That is $6,200 of the $9,750 in minimums. It adds 12 tickets to the break-even compared with guaranteeing half.
 3. **Most sales come late, so the artist deposits come from you first.** At 50% they are $4,875. The permit can wait: a Temporary Use Permit can be filed close to the event, once sales show which size you are running.
 4. **Everyone is paid once, after the event, on the final ticket count.** Each artist and partner gets a one-page pay table from the planner: tickets sold on the left, their pay on the right.
 5. **Three buckets share what is left after hard costs:** Artists 55%, Event 24% and you 21%.
-6. **Crew pay is $100 each in the break-even, plus $1 each for every ticket sold above 124.** That is $127 each at 151 tickets, $261 at 285 and $370 at 394.
-7. **Below break-even the loss is yours.** At 90 tickets it is about $4,700, and at 75 about $7,400.
-8. **Above break-even, every artist rises from their minimum toward their full fee at the same pace.** Everyone is at their full fee by about 239 tickets.
+6. **Crew pay is $100 each in the break-even, plus $1 each for every ticket sold above 141.** That is $110 each at 151 tickets, $244 at 285 and $353 at 394.
+7. **Below break-even the loss is yours.** At 90 tickets it is about $6,800, and at 75 about $9,100.
+8. **Above break-even, every artist rises from their minimum toward their full fee at the same pace.** Everyone is at their full fee by about 284 tickets.
 9. **Neither production partner shares the profit.** Kinetic Desert has agreed to $2,000 plus $15 for every ticket above 75. Project Seismic is on $3,000 plus $10 for every ticket above 285.
-10. **151 tickets is home base.** That is a sell-out under the permit line: artists receive about $11,000, you take about $470, and $2,236 is in the step fund.
+10. **151 tickets is home base.** That is a sell-out under the permit line: artists receive about $10,100, you take about $140, and $645 is in the step fund.
 11. **The step fund is not your profit.** Half of everything above break-even at the small size goes into it, along with any share that has nowhere to go. It pays for the step up. If you never step up, it is carried forward.
-12. **Your take only ever rises with ticket sales.** The step past 151 tickets is sold as one block from a waitlist of 13. Nobody, you included, is paid less after a step.
-13. **Plan two sizes this year.** At a 285-ticket sell-out artists receive their full $18,325, you take about $5,100 and $4,908 is in the step fund.
-14. **The 500 size is a stretch.** Open its waitlist only if 285 has sold out by March 1. It needs a block of 24, and a 394-ticket sell-out pays you about $17,300.
+12. **Your take only ever rises with ticket sales.** The step past 151 tickets is sold as one block from a waitlist of 29. Nobody, you included, is paid less after a step.
+13. **Plan two sizes this year.** At a 285-ticket sell-out artists receive their full $18,325, you take about $3,300 and $125 is in the step fund.
+14. **The 500 size is a stretch.** Open its waitlist only if 285 has sold out by March 1. It needs a block of 69, and a 394-ticket sell-out pays you about $7,300.
 15. **Stay on Stripe for the ticket site and list all-in prices.** The permit is a Temporary Use Permit, and tickets can go on sale before it is issued.
 16. **Stagecoach is the same weekend (April 23–25) in Indio.** Porto-potties, generators and rental cars will be tight.
 
@@ -63,7 +63,7 @@ Stripe figures are from its pricing page. Stripe's hosted Checkout adds no fee.
 
 ### Recommendation
 
-**Stay on Stripe.** You have a working integration and an account with payment history. Total fees at a 285-ticket sell-out are about $2,000. Moving to an interchange-plus processor would save roughly $300 on this event and means rebuilding the checkout on a new account. Revisit it when you are running at 500 or several events a year.
+**Stay on Stripe.** You have a working integration and an account with payment history. Total fees at a 285-ticket sell-out are about $1,600. Moving to an interchange-plus processor would save roughly $300 on this event and means rebuilding the checkout on a new account. Revisit it when you are running at 500 or several events a year.
 
 **Spend the effort on a smooth checkout.** One abandoned sale loses $195. The fee on a completed one is $6. Turn on Apple Pay, Google Pay and Link, and keep the purchase to one screen.
 
@@ -73,7 +73,7 @@ Stripe figures are from its pricing page. Stripe's hosted Checkout adds no fee.
 - Third-party guides list a $4 fee for a failed payment and $1.50 for instant bank verification. Neither is on Stripe's pricing page, so check your account.
 - Stop offering it about ten days before the event.
 
-If 30% of sales went by bank, fees would drop by about $430.
+If 30% of sales went by bank, fees would drop by about $370.
 
 **List all-in prices.** California's honest pricing law covers event tickets. The Attorney General's guidance says the listed price must be the full price, and that adding a percentage or variable service fee later in the purchase is not allowed. You can show a breakdown of what is inside the price, and you can offer discounts. That makes a "save $20 paying by bank" offer on cabins fine, and a "plus 3% card fee" line not.
 
@@ -168,18 +168,18 @@ Up to 151 tickets each bucket pays half its rate, because half of what is above 
 
 ### What each ticket count buys
 
-| Tickets sold | 90 | 124 | 151 | 200 | 285 | 394 |
+| Tickets sold | 90 | 141 | 151 | 200 | 285 | 394 |
 |---|---|---|---|---|---|---|
-| People on site | 138 | 172 | 199 | 265 | 350 | 500 |
-| Money in | $19,292 | $26,239 | $33,003 | $44,920 | $67,439 | $94,263 |
-| Mandatory hard costs | $22,964 | $25,142 | $27,481 | $35,612 | $41,874 | $59,194 |
-| **Surplus to share** | **−$3,673** | **$1,098** | **$5,523** | **$9,308** | **$25,564** | **$35,069** |
-| Artists above their minimums | $0 | $13 | $1,230 | $4,542 | $8,575 | $8,575 |
-| Event | $1,050 | $1,056 | $1,587 | $3,032 | $6,933 | $9,215 |
-| Step fund, not counted in your profit |  | $24 | $2,236 |  | $4,908 |  |
-| **Your profit** | **−$4,723** | **$5** | **$470** | **$1,734** | **$5,148** | **$17,280** |
+| People on site | 138 | 189 | 199 | 265 | 350 | 500 |
+| Money in | $16,638 | $26,762 | $28,660 | $38,810 | $56,658 | $78,327 |
+| Mandatory hard costs | $22,392 | $25,619 | $26,320 | $34,130 | $39,790 | $56,361 |
+| **Surplus to share** | **−$5,754** | **$1,143** | **$2,340** | **$4,680** | **$16,868** | **$21,966** |
+| Artists above their minimums | $0 | $25 | $355 | $1,996 | $8,575 | $8,575 |
+| Event | $1,050 | $1,061 | $1,205 | $1,921 | $4,846 | $6,070 |
+| Step fund, not counted in your profit |  | $46 | $645 |  | $125 |  |
+| **Your profit** | **−$6,804** | **$10** | **$135** | **$762** | **$3,322** | **$7,321** |
 
-From about 239 tickets every artist is at their full fee, and the artists' share goes into the step fund. At the 500 size there is no further step, so everything left is your profit. That is why your take climbs fastest there.
+From about 284 tickets every artist is at their full fee, and the artists' share goes into the step fund. At the 500 size there is no further step, so everything left is your profit. That is why your take climbs fastest there.
 
 ### Who gets what, at every size
 
@@ -189,38 +189,37 @@ For everyone but you these are payments, not profit after their own costs. Your 
 
 | Tickets | Camp | Kinetic Desert | The Dome | Artists, all 24 sets | Each paid crew | Step fund | You |
 |---|---|---|---|---|---|---|---|
-| 50 | $2,525 | $2,000 | $500 | $9,750 | $100 |  | −$11,177 |
-| 75 | $3,163 | $2,000 | $750 | $9,750 | $100 |  | −$7,385 |
-| 90 | $3,795 | $2,225 | $900 | $9,750 | $100 |  | −$4,723 |
-| 100 | $4,050 | $2,375 | $1,000 | $9,750 | $100 |  | −$3,320 |
-| 115 | $4,433 | $2,600 | $1,150 | $9,750 | $100 |  | −$1,215 |
-| **124, break-even** | $4,662 | $2,735 | $1,240 | $9,763 | $100 | $24 | **$5** |
-| 140 | $5,320 | $2,975 | $1,400 | $10,534 | $116 | $1,425 | $299 |
-| **151, sell-out** | $5,601 | $3,140 | $1,510 | $10,980 | $127 | $2,236 | **$470** |
+| 50 | $2,250 | $2,000 | $500 | $9,750 | $100 |  | −$12,377 |
+| 75 | $2,750 | $2,000 | $750 | $9,750 | $100 |  | −$9,138 |
+| 90 | $3,300 | $2,225 | $900 | $9,750 | $100 |  | −$6,804 |
+| 100 | $3,500 | $2,375 | $1,000 | $9,750 | $100 |  | −$5,600 |
+| 125 | $4,000 | $2,750 | $1,250 | $9,750 | $100 |  | −$2,590 |
+| **141, break-even** | $4,570 | $2,990 | $1,410 | $9,775 | $100 | $46 | **$10** |
+| **151, sell-out** | $4,770 | $3,140 | $1,510 | $10,105 | $110 | $645 | **$135** |
 
 **200 to 350 on site, with the permit and the medical team**
 
-Tickets 152 to 163 are the waitlist. Nobody is charged and nothing changes for anyone until it is released.
+Tickets 152 to 179 are the waitlist. Nobody is charged and nothing changes for anyone until it is released.
 
 | Tickets | Camp | Kinetic Desert | The Dome | Artists, all 24 sets | Each paid crew | Step fund | You |
 |---|---|---|---|---|---|---|---|
-| **164, released as a block** | $5,432 | $3,335 | $1,640 | $11,022 | $140 |  | **$486** |
-| 200 | $6,600 | $3,875 | $2,000 | $14,292 | $176 |  | $1,734 |
-| 225 | $7,488 | $4,250 | $2,000 | $17,014 | $201 |  | $2,774 |
-| 250 | $8,125 | $4,625 | $2,000 | $18,325 | $226 | $1,149 | $3,713 |
-| **285, sell-out** | $9,268 | $5,150 | $2,000 | $18,325 | $261 | $4,908 | **$5,148** |
+| **180, released as a block** | $5,100 | $3,575 | $1,800 | $10,430 | $139 |  | **$260** |
+| 200 | $5,500 | $3,875 | $2,000 | $11,746 | $159 |  | $762 |
+| 225 | $6,250 | $4,250 | $2,000 | $13,846 | $184 |  | $1,564 |
+| 250 | $6,750 | $4,625 | $2,000 | $15,629 | $209 |  | $2,245 |
+| **285, sell-out** | $7,700 | $5,150 | $2,000 | $18,325 | $244 | $125 | **$3,322** |
 
 **351 to 500 on site, the stretch: porto-potties and the second stage**
 
-Tickets 286 to 308 are the waitlist.
+Tickets 286 to 353 are the waitlist.
 
 | Tickets | Camp | Kinetic Desert | The Dome | Project Seismic | Artists, all 24 sets | Each paid crew | Step fund | You |
 |---|---|---|---|---|---|---|---|---|
-| **309, released as a block** | $9,880 | $5,510 | $2,000 | $3,240 | $18,325 | $285 |  | **$5,208** |
-| 350 | $10,925 | $6,125 | $2,000 | $3,650 | $18,325 | $326 |  | $11,633 |
-| **394, sell-out** | $12,047 | $6,785 | $2,000 | $4,090 | $18,325 | $370 |  | **$17,280** |
+| **354, released as a block** | $9,080 | $6,185 | $2,000 | $3,690 | $18,325 | $313 |  | **$3,408** |
+| 375 | $9,500 | $6,500 | $2,000 | $3,900 | $18,325 | $334 |  | $5,467 |
+| **394, sell-out** | $9,880 | $6,785 | $2,000 | $4,090 | $18,325 | $353 |  | **$7,321** |
 
-- **You are the only one who can lose money, and only below 124 tickets.** Everyone else is paid at every level.
+- **You are the only one who can lose money, and only below 141 tickets.** Everyone else is paid at every level.
 - **Nobody is paid less after a step up, you included.** The step is paid from the fund and the waitlist block.
 - **The step fund is not paid to anyone.** It is spent on the step, or carried forward if the event stays at that size.
 - **Camp** is the venue fee plus cabin rental, plus the $500 medical rep at the small size only.
@@ -236,20 +235,20 @@ The Pay tables tab of the planner prints one page per person: tickets sold on th
 
 ### The crew
 
-Each of the 12 paid crew (setup and strike, runners, gate) gets **$100 whatever sells, plus $1 for every ticket sold above 124.** Both are hard costs, and the $100 is in the break-even.
+Each of the 12 paid crew (setup and strike, runners, gate) gets **$100 whatever sells, plus $1 for every ticket sold above 141.** Both are hard costs, and the $100 is in the break-even.
 
-| Tickets sold | 90 | 124 | 151 | 200 | 285 | 394 |
+| Tickets sold | 90 | 141 | 151 | 200 | 285 | 394 |
 |---|---|---|---|---|---|---|
-| Each crew member | $100 | $100 | $127 | $176 | $261 | $370 |
-| All 12 | $1,200 | $1,200 | $1,524 | $2,112 | $3,132 | $4,440 |
+| Each crew member | $100 | $100 | $110 | $159 | $244 | $353 |
+| All 12 | $1,200 | $1,200 | $1,320 | $1,908 | $2,928 | $4,236 |
 
 I read your $1 a ticket as $1 to each crew member, counted from the break-even on. The rate and the ticket count it starts at are inputs on the Crew tab, one per role. The other readings:
 
 | Reading | Break-even | Each at 151 | Each at 285 | Your take at 285 |
 |---|---|---|---|---|
-| **$1 each, on tickets above 124** | **124 tickets** | **$127** | **$261** | **$5,148** |
-| $1 each, on every ticket from the first | 135 | $251 | $385 | $4,836 |
-| $1 a ticket into one pot, split between the 12 | 125 | $113 | $124 | $5,494 |
+| **$1 each, on tickets above 141** | **141 tickets** | **$110** | **$244** | **$3,322** |
+| $1 each, on every ticket from the first | 184 | $251 | $385 | $2,966 |
+| $1 a ticket into one pot, split between the 12 | 142 | $113 | $124 | $3,625 |
 
 ### The artists
 
@@ -266,19 +265,19 @@ These four percents are inputs on the Artists tab. Each slot's own minimum can s
 
 | Queue | Slot | Minimum | Deposit at 50% | Full fee | Minimums so far | Tickets it adds | Covered at |
 |---|---|---|---|---|---|---|---|
-| 1 | Friday 10:30 PM | $2,250 | $1,125 | $3,000 | $2,250 | +15 | 75 tickets |
-| 2 | Saturday 10:30 PM | $2,250 | $1,125 | $3,000 | $4,500 | +15 | 90 |
-| 3 | Sunday 10:30 PM | $1,700 | $850 | $2,250 | $6,200 | +9 | 99 |
-| 4 | Friday 9:00 PM | $1,000 | $500 | $2,000 | $7,200 | +7 | 106 |
-| 5 | Saturday 9:00 PM | $750 | $375 | $1,500 | $7,950 | +5 | 111 |
-| 6 | Sunday 9:00 PM | $625 | $313 | $1,250 | $8,575 | +5 | 116 |
-| 7 | Friday 7:30 PM | $500 | $250 | $1,000 | $9,075 | +3 | 119 |
-| 8 | Saturday 7:30 PM | $375 | $188 | $750 | $9,450 | +3 | 122 |
-| 9 | Sunday 7:30 PM | $300 | $150 | $600 | $9,750 | +2 | 124 |
+| 1 | Friday 10:30 PM | $2,250 | $1,125 | $3,000 | $2,250 | +19 | 90 tickets |
+| 2 | Saturday 10:30 PM | $2,250 | $1,125 | $3,000 | $4,500 | +13 | 103 |
+| 3 | Sunday 10:30 PM | $1,700 | $850 | $2,250 | $6,200 | +15 | 118 |
+| 4 | Friday 9:00 PM | $1,000 | $500 | $2,000 | $7,200 | +8 | 126 |
+| 5 | Saturday 9:00 PM | $750 | $375 | $1,500 | $7,950 | +5 | 131 |
+| 6 | Sunday 9:00 PM | $625 | $313 | $1,250 | $8,575 | +4 | 135 |
+| 7 | Friday 7:30 PM | $500 | $250 | $1,000 | $9,075 | +1 | 136 |
+| 8 | Saturday 7:30 PM | $375 | $188 | $750 | $9,450 | +3 | 139 |
+| 9 | Sunday 7:30 PM | $300 | $150 | $600 | $9,750 | +2 | 141 |
 
 - **The queue is the order to book and announce in.**
-- **"Tickets it adds" is what that guarantee costs in sales.** Friday's headliner has to bring 15 more buyers to pay for the guarantee. Near break-even, every $150 of minimum is one more ticket.
-- **"Covered at" is the break-even as it builds.** With no minimums at all the event would cover itself at 60 tickets. The last row is the break-even for the whole lineup.
+- **"Tickets it adds" is what that guarantee costs in sales.** Friday's headliner has to bring 19 more buyers to pay for the guarantee. Near break-even, every $140 of minimum is one more ticket.
+- **"Covered at" is the break-even as it builds.** With no minimums at all the event would cover itself at 71 tickets. The last row is the break-even for the whole lineup.
 
 Because most sales come late, the deposits go out before the tickets that cover them have sold. Treat the $4,875 as money you put in up front and get back from sales.
 
@@ -286,24 +285,24 @@ Because most sales come late, the deposits go out before the tickets that cover 
 
 | Headliner minimum | Fri / Sat / Sun | Break-even | Your loss at 90 tickets | Waitlist past 151 | Artists at 151 | You at 151 |
 |---|---|---|---|---|---|---|
-| 50% | $1,500 / $1,500 / $1,125 | 109 tickets | −$2,648 | 6 buyers | $9,476 | $688 |
-| 60% | $1,800 / $1,800 / $1,350 | 115 tickets | −$3,473 | 9 buyers | $10,074 | $601 |
-| **75%, the plan** | $2,250 / $2,250 / $1,700 | 124 tickets | −$4,723 | 13 buyers | $10,980 | $470 |
-| 100% | $3,000 / $3,000 / $2,250 | 135 tickets | −$6,773 | 20 buyers | $12,466 | $254 |
+| 50% | $1,500 / $1,500 / $1,125 | 129 tickets | −$4,729 | 21 buyers | $8,600 | $353 |
+| 60% | $1,800 / $1,800 / $1,350 | 135 tickets | −$5,554 | 24 buyers | $9,198 | $267 |
+| **75%, the plan** | $2,250 / $2,250 / $1,700 | 141 tickets | −$6,804 | 29 buyers | $10,105 | $135 |
+| 100% | $3,000 / $3,000 / $2,250 | 187 tickets | −$8,854 | 30 buyers | $11,800 | −$760 |
 
-A full guarantee leaves very little room at the small size: break-even would be only 16 tickets under the 151-ticket sell-out.
+A full guarantee would not be covered at the small size at all: break-even would be past its 151-ticket sell-out.
 
-**Making room for the guarantee.** Fri–Sun Presale and Tier 1 are now $10 higher, which is already in these figures. One more lever, not applied: guaranteeing the 7:30 slots 25% instead of half brings break-even to 120.
+**Making room for the guarantee.** Fri–Sun Presale and Tier 1 are now $10 higher, which is already in these figures. One more lever, not applied: guaranteeing the 7:30 slots 25% instead of half brings break-even to 136.
 
 **The rise.** Past break-even, 55% of the surplus lifts every open slot from its minimum toward its full fee. Each slot rises in proportion to how far it has to go, so they all arrive together. Up to 151 tickets the rise runs at half pace, because half goes into the step fund.
 
-| Tickets sold | 124 | 151 | 200 | 239 and up |
+| Tickets sold | 141 | 151 | 200 | 284 and up |
 |---|---|---|---|---|
-| Friday 10:30 PM, $2,250 minimum | $2,251 | $2,358 | $2,647 | $3,000 |
-| Friday 9:00 PM, $1,000 minimum | $1,002 | $1,143 | $1,530 | $2,000 |
-| Friday 6:00 PM, daytime, no minimum | $1 | $72 | $265 | $500 |
+| Friday 10:30 PM, $2,250 minimum | $2,252 | $2,281 | $2,425 | $3,000 |
+| Friday 9:00 PM, $1,000 minimum | $1,003 | $1,041 | $1,233 | $2,000 |
+| Friday 6:00 PM, daytime, no minimum | $1 | $21 | $116 | $500 |
 
-**Daytime slots** have no minimum, so they cost nothing below break-even. They are paid from 124 tickets on, which suits friends who will play for a per-ticket payment after a ticket count.
+**Daytime slots** have no minimum, so they cost nothing below break-even. They are paid from 141 tickets on, which suits friends who will play for a per-ticket payment after a ticket count.
 
 **Agreeing a deal.** When an artist agrees, tick Agreed on their slot. They are paid the minimum, plus a rate per ticket on every ticket above a ticket count, up to the full fee. The planner fills in a rate that follows the plan. Change it to what you actually agreed.
 
@@ -311,9 +310,9 @@ A full guarantee leaves very little room at the small size: break-even would be 
 
 | Deal | Step fund at 285 | Waitlist for the 500 size | Your take at 394 |
 |---|---|---|---|
-| Every slot rising to its full fee | $4,908 | 24 buyers | $17,280 |
-| Friday's headliner flat at $2,250 | $5,658 | 20 | $18,030 |
-| All three headliners flat at their minimums | $6,958 | 12 | $19,330 |
+| Every slot rising to its full fee | $125 | 69 buyers | $7,321 |
+| Friday's headliner flat at $2,250 | $875 | 63 | $8,071 |
+| All three headliners flat at their minimums | $2,175 | 53 | $9,371 |
 
 A flat deal does not move the break-even, because the minimum was already counted.
 
@@ -333,8 +332,8 @@ Kinetic Desert earns $2,225 at 90 tickets, $3,140 at 151, $5,150 at 285 and $6,7
 
 | Commitment | What it adds |
 |---|---|
-| Artist minimums for the nine night slots | $9,750, of which $6,200 is the three headliners. Without any minimums break-even would be 60 tickets |
-| $100 for each of the 12 paid crew | $1,200, about 8 tickets |
+| Artist minimums for the nine night slots | $9,750, of which $6,200 is the three headliners. Without any minimums break-even would be 71 tickets |
+| $100 for each of the 12 paid crew | $1,200, about 9 tickets |
 | Cabins rented as they sell | One 9-bed cabin sells per 45 tickets, up to six. You rent what sells plus two for artists and staff |
 | Groceries and supplies budgeted per ticket | $1,350 plus $5.40 a ticket for groceries, $550 plus $2.20 a ticket for supplies. They grow with the event instead of jumping at each size |
 
@@ -344,17 +343,17 @@ A sell-out under the permit line is 151 tickets. Ticket 152 brings in the permit
 
 **Two things pay for that step, and neither is your profit.**
 
-1. **The step fund.** Half of everything above the floors at the small size is held back, from every bucket alike. At 151 tickets it holds $2,236.
-2. **A waitlist block.** At 151 tickets the site sells out and switches to a waitlist. Buyers save a card and are not charged. When 13 are waiting they are all charged together and the event steps up at 164 tickets. If the list has not reached 13 by the deadline, nobody is charged and the event runs at 151.
+1. **The step fund.** Half of everything above the floors at the small size is held back, from every bucket alike. At 151 tickets it holds $645.
+2. **A waitlist block.** At 151 tickets the site sells out and switches to a waitlist. Buyers save a card and are not charged. When 29 are waiting they are all charged together and the event steps up at 180 tickets. If the list has not reached 29 by the deadline, nobody is charged and the event runs at 151.
 
 | | Past 151 tickets | Past 285 tickets, the stretch |
 |---|---|---|
-| New cost at the step | about $4,000 | about $8,700 |
-| Step fund at the sell-out | $2,236 | $4,908 |
-| Waitlist needed | 13 buyers | 24 buyers |
-| Sold together at | 164 tickets | 309 tickets |
-| Artists before and after | $10,980 → $11,022 | $18,325 → $18,325 |
-| Your take before and after | $470 → $486 | $5,148 → $5,208 |
+| New cost at the step | about $4,000 | about $8,800 |
+| Step fund at the sell-out | $645 | $125 |
+| Waitlist needed | 29 buyers | 69 buyers |
+| Sold together at | 180 tickets | 354 tickets |
+| Artists before and after | $10,105 → $10,430 | $18,325 → $18,325 |
+| Your take before and after | $135 → $260 | $3,322 → $3,408 |
 
 **Your take never falls.** It rises at its own share with every ticket, at the same pace as the artists and the Event bucket, and a step is only taken when it leaves you at least where you were.
 
@@ -364,25 +363,25 @@ A sell-out under the permit line is 151 tickets. Ticket 152 brings in the permit
 
 | Fund at the small size | In the fund at 151 | Artists at 151 | You at 151 | Waitlist needed |
 |---|---|---|---|---|
-| 0% | $0 | $12,210 | $939 | 28 buyers |
-| 25% | $1,118 | $11,595 | $704 | 20 buyers |
-| **50%, the plan** | $2,236 | $10,980 | $470 | 13 buyers |
-| 75% | $3,354 | $10,365 | $235 | 5 buyers |
+| 0% | $0 | $10,459 | $271 | 30 buyers |
+| 25% | $322 | $10,282 | $203 | 29 buyers |
+| **50%, the plan** | $645 | $10,105 | $135 | 29 buyers |
+| 75% | $967 | $9,927 | $68 | 27 buyers |
 
-After the step everyone rises at the full rate: artists are at $14,292 at 200 tickets and you are at $1,734.
+After the step everyone rises at the full rate: artists are at $11,746 at 200 tickets and you are at $762.
 
-**The 500 size is a stretch.** Open its waitlist only if 285 has sold out by March 1. The step is funded by the artists' share once every artist is at their full fee, which leaves $4,908 in the fund at a sell-out and a block of 24. A fund at the middle size shrinks the block and slows the artists:
+**The 500 size is a stretch.** Open its waitlist only if 285 has sold out by March 1. The step is funded by the artists' share once every artist is at their full fee, which leaves $125 in the fund at a sell-out and a block of 69. A fund at the middle size shrinks the block and slows the artists:
 
 | Fund at the middle size | In the fund at 285 | Artists at 285 | You at 285 | Waitlist needed |
 |---|---|---|---|---|
-| **0%, the plan** | $4,908 | $18,325 | $5,148 | 24 buyers |
-| 10% | $6,011 | $18,325 | $4,633 | 18 buyers |
-| 25% | $7,666 | $18,325 | $3,861 | 8 buyers |
+| **0%, the plan** | $125 | $18,325 | $3,322 | 69 buyers |
+| 10% | $1,582 | $17,580 | $2,990 | 57 buyers |
+| 25% | $3,955 | $16,275 | $2,491 | 39 buyers |
 
 **Two things still not done that would shrink the blocks:**
 
-- **Get the real permit fee.** I left it at your $3,000. At the county's listed $2,108 the blocks are 7 and 21 buyers.
-- **Add $10 to every ticket.** The blocks are 8 and 14, and break-even is 116.
+- **Get the real permit fee.** I left it at your $3,000. At the county's listed $2,108 the blocks are 22 and 65 buyers.
+- **Add $10 to every ticket.** The blocks are 22 and 53, and break-even is 135.
 
 **On the ticket site.** Stripe can save a card without charging it and charge it later. My understanding is that there is no fee until the charge. A few saved cards will be declined when charged, so release when the list is a few over the count.
 
@@ -404,22 +403,22 @@ Each of these is an input in the planner.
 | Assumption | Value used | Why it matters |
 |---|---|---|
 | The three buckets | 55% artists, 24% event, which leaves 21% as your profit | My split |
-| Headliner minimums | 75% of the full fee: $2,250, $2,250, $1,700 | My placeholder until quotes come in. At half the fee break-even is 109, at the full fee 135 |
+| Headliner minimums | 75% of the full fee: $2,250, $2,250, $1,700 | My placeholder until quotes come in. At half the fee break-even is 129, at the full fee 187 |
 | Other artist minimums | Half the full fee for the 9:00 and 7:30 slots, none for daytime | All nine night-slot minimums are hard costs |
 | Artist deposits | 50% of the minimum, paid before the artist is announced | The usual booking term. It is cash you need before the first lineup |
 | Kinetic Desert's fee | $15 for every ticket above 75, on top of the $2,000 | Agreed with Kinetic Desert |
-| Crew pay | $100 each for the 12 paid crew, plus $1 each for every ticket above 124 | The $100 is in the break-even. Counting the $1 from the first ticket would put break-even at 135 |
+| Crew pay | $100 each for the 12 paid crew, plus $1 each for every ticket above 141 | The $100 is in the break-even. Counting the $1 from the first ticket would put break-even at 184 |
 | Step fund | Half of everything above the floors at the small size, plus any share with nowhere to go. Not counted as your profit, and carried forward if the step is never taken | Your choice. A bigger fund means a smaller waitlist block and a slower rise at the small size |
 | People without a ticket | 48 up to 199 on site, 65 up to 350, 106 up to 500 | Ten fewer than before: I took them from the artists' guest list. Each place is one more ticket you can sell. Venue reps never count |
 | Groceries and supplies | $1,350 plus $5.40 a ticket, and $550 plus $2.20 a ticket | My estimate, set so the totals match the old figures at a sell-out |
-| Ticket prices | Fri–Sun $189 / $209 / $239 / $259. Sat–Sun $145 / $160 / $189. Sunday $85 / $105 | Untested. Fri–Sun went up and the shorter tickets came down, so more buyers may choose the shorter ones than the 65 / 25 / 10 mix assumes |
+| Ticket prices | Fri–Sun $189 / $209 / $239 / $259. Sat–Sun $145 / $160 / $189. Sunday $85 / $105 | Untested |
 | Cabin sales | One cabin per 45 tickets, up to six | My guess at how cabins track attendance |
 | Card fees | 2.9% + 30¢, all sales by card | About 3% of online sales |
 | Permits | $3,000 at 200 or more on site | Your ballpark. The one county figure I found is $2,108 |
 | Extra cost above 350 | $2,500 porto-potties, $1,000 second chef, $2,000 more groceries, $400 supplies, $3,000 for Project Seismic | The grocery and porto-potty figures are guesses |
 | Car camping demand | One pass per five tickets | 95 of the 120 spots are for sale after 25 crew passes |
-| Ticket mix | 65% Fri–Sun, 25% Sat–Sun, 10% Sunday | Drives average ticket price and the venue fee |
-| Merch, meal plan and vendor income | $10 per ticket | Untested. Without it and with half the car passes, break-even rises from 124 to 135 |
+| Ticket mix | 30% Fri–Sun, 40% Sat–Sun, 30% Sunday only | Your expected spread. It drives the average ticket price and the venue fee. At 65 / 25 / 10 break-even would be 124 |
+| Merch, meal plan and vendor income | $10 per ticket | Untested. Without it and with half the car passes, break-even rises from 141 to 194 |
 
 I could not verify current booking fees for Pando!, Chmura, Huck.Jorris or Ferrofluid.
 
@@ -429,9 +428,9 @@ Every limit is counted on people on site. Guest lists grow as the event does, so
 
 | People on site | Without a ticket | Tickets that fit | Opens at | What switches on |
 |---|---|---|---|---|
-| Up to 199 | 48 | 151 | 124 tickets cover it | The base plan, with the venue's medical rep and your own kit |
-| 200 to 350 | 65 | 285 | 164 tickets, as a block of 13 | Permits, the medical team, 15 Kinetic Desert guests |
-| 351 to 500, the stretch | 106 | 394 | 309 tickets, as a block of 24 | Porto-potties, Project Seismic and their 30 places, 10 more Kinetic Desert guests, a second chef, food for partners and all artists |
+| Up to 199 | 48 | 151 | 141 tickets cover it | The base plan, with the venue's medical rep and your own kit |
+| 200 to 350 | 65 | 285 | 180 tickets, as a block of 29 | Permits, the medical team, 15 Kinetic Desert guests |
+| 351 to 500, the stretch | 106 | 394 | 354 tickets, as a block of 69 | Porto-potties, Project Seismic and their 30 places, 10 more Kinetic Desert guests, a second chef, food for partners and all artists |
 
 Ten places came off the artists' guest list, which is why each size now fits ten more tickets.
 
@@ -443,21 +442,21 @@ The main stage moves to a larger area with Kinetic Desert's production, and The 
 
 Their deal: **$3,000 guaranteed, plus $10 for every ticket sold above 285, and no share of the profit.**
 
-| Deal | They earn at 319 / 354 / 394 tickets | You at 394 | Released at |
+| Deal | They earn at 354 / 374 / 394 tickets | You at 394 | Released at |
 |---|---|---|---|
-| $3,000 flat | $3,000 / $3,000 / $3,000 | $18,108 | 308 tickets |
-| **$3,000 plus $10 a ticket above 285** | **$3,340 / $3,690 / $4,090** | **$17,280** | **309** |
-| $3,000 plus 10% of profit | $3,724 / $4,267 / $4,811 | $16,297 | 311 |
+| $3,000 flat | $3,000 / $3,000 / $3,000 | $8,150 | 349 tickets |
+| **$3,000 plus $10 a ticket above 285** | **$3,690 / $3,890 / $4,090** | **$7,321** | **354** |
+| $3,000 plus 10% of profit | $3,394 / $3,605 / $3,815 | $7,335 | 352 |
 
 - **Their rentals are covered for certain.**
 - **Their upside is tied to the tickets the bigger event adds**, which is the thing they are there to help sell.
 - **There is no loss-sharing to argue about**, because they have no share.
 
-Their guest list is 30. Cutting it to 20 would free ten tickets and add about $1,300 to your take at a sell-out.
+Their guest list is 30. Cutting it to 20 would free ten tickets and add about $1,000 to your take at a sell-out.
 
-Your take at the 500 size is $5,208 at 309 tickets, $11,633 at 350 and $17,280 at 394.
+Your take at the 500 size is $3,408 at 354 tickets, $5,467 at 375 and $7,321 at 394.
 
-The 500 size costs about $8,700 more at the step, and 41 more places that cannot be sold. Afters still hold 145 people indoors, so at 500 on site that needs a third space or a late slot on one of the two stages.
+The 500 size costs about $8,800 more at the step, and 41 more places that cannot be sold. Afters still hold 145 people indoors, so at 500 on site that needs a third space or a late slot on one of the two stages.
 
 ## Tickets
 
@@ -467,15 +466,15 @@ Tiers sell in order. Averages are at a 285-ticket sell-out. These are the prices
 
 | Ticket | Presale | Tier 1 | Tier 2 | Final | Average at sell-out |
 |---|---|---|---|---|---|
-| Fri–Sun | $189 × 25 | $209 × 60 | $239 × 50 | $259 × the rest | $228 |
-| Sat–Sun | none | $145 × 20 | $160 × 30 | $189 × the rest | $164 |
-| Sunday only | none | none | $85 × 15 | $105 × the rest | $94 |
+| Fri–Sun | $189 × 25 | $209 × 60 | $239 × 50 | $259 × the rest | $203 |
+| Sat–Sun | none | $145 × 20 | $160 × 30 | $189 × the rest | $174 |
+| Sunday only | none | none | $85 × 15 | $105 × the rest | $101 |
 
 - Fri–Sun carries the increases: Presale and Tier 1 are $10 higher than before and the later tiers $20 higher. Those are the tickets the headliners sell, and they pay for the higher guarantees.
 - Sat–Sun and Sunday tickets came down a little, by $4 to $10.
-- Early tickets are the cheap ones, so the average is about $175 at 90 tickets and $199 at 285.
-- Fri–Sun now costs $64 more than Sat–Sun at Tier 1, up from $50. A wider gap makes arriving Saturday more tempting, so watch the mix in the presale. If Sat–Sun runs well ahead of a quarter of sales, narrow it again.
-- Hold Sunday-only tickets until set times are out, about a month before.
+- Early tickets are the cheap ones, so the average is about $146 at 90 tickets and $161 at 285.
+- **The plan expects 30% of buyers to take Fri–Sun, 40% Sat–Sun and 30% Sunday only.** At that spread a 285-ticket sell-out sells only about 86 Fri–Sun tickets, which barely gets past Presale and Tier 1. The $239 and $259 tiers are mostly reached at the 500 size. Enter the real split from the presale on the Overview tab.
+- **Sunday-only timing needs a decision.** The calendar below opens Sunday-only tickets on March 23, when set times are out. With 30% of sales expected to be Sunday only, that puts almost a third of sales after the March 15 waitlist deadline. Either open them with the full lineup on February 9, or move the waitlist deadline later.
 - Each Fri–Sun ticket nets its price less the $30 venue fee and about $6 of card fees. The Dome fee is capped at $2,000, so it stops costing anything after the 200th ticket.
 - Add single-day Friday or Saturday tickets only if sales are behind in March.
 
@@ -509,42 +508,42 @@ The plan at a 285-ticket sell-out, with every artist at their full fee.
 
 | Money in | |
 |---|---|
-| Tickets, 285 at a $199 average | $56,639 |
+| Tickets, 285 at a $161 average | $45,858 |
 | Cabins, 6 at $850 | $5,100 |
 | Car camping, 57 passes at $50 | $2,850 |
 | Merch, meal plan, vendors | $2,850 |
-| **Total in** | **$67,439** |
+| **Total in** | **$56,658** |
 
 | Mandatory hard costs | |
 |---|---|
 | Artist minimums, 9 slots | $9,750 |
-| Venue fee, 727 ticket-days at $10 | $7,268 |
+| Venue fee, 570 ticket-days at $10 | $5,700 |
 | Kinetic Desert: $2,000 plus $15 on 210 tickets | $5,150 |
-| Crew: 12 at $100, plus $1 each on 161 tickets | $3,132 |
 | Permits | $3,000 |
+| Crew: 12 at $100, plus $1 each on 144 tickets | $2,928 |
 | Groceries for crew and artists | $2,889 |
 | The Dome, at its cap | $2,000 |
 | Cabin rental, 8 at $250 | $2,000 |
-| Payment processing | $1,959 |
 | Medical team, 3 days at $600 | $1,800 |
+| Payment processing | $1,646 |
 | Site supplies: wristbands, signage, radios, trash, firewood | $1,177 |
 | Chef | $1,000 |
 | Insurance | $750 |
-| **Total hard costs** | **$41,874** |
+| **Total hard costs** | **$39,790** |
 
-**Surplus to share: $25,564.**
+**Surplus to share: $16,868.**
 
 | Bucket | Share | At 285 tickets |
 |---|---|---|
 | Artists, above their minimums | 55% | $8,575, which takes every slot to its full fee |
-| Event: art, drinks, hospitality, marketing, reserve | 24% | $6,933 |
-| **Total** | | **$15,508** |
+| Event: art, drinks, hospitality, marketing, reserve | 24% | $4,846 |
+| **Total** | | **$13,421** |
 
-**Step fund: $4,908.** This is the part of the artists' share left over once every artist is at their full fee. It pays for the step to the 500 size, or is carried forward.
+**Step fund: $125.** This is the part of the artists' share left over once every artist is at their full fee. It pays for the step to the 500 size, or is carried forward.
 
-**Profit: $5,148, all yours.** Artists receive $18,325 in all.
+**Profit: $3,322, all yours.** Artists receive $18,325 in all.
 
-A guide to the Event bucket at this size: about $2,700 for art, projection and lighting, $1,700 for drinks, $1,000 in reserve, $750 for marketing and $800 for artist hospitality.
+A guide to the Event bucket at this size: about $1,900 for art, projection and lighting, $1,100 for drinks, $600 in reserve, $550 for marketing and $600 for artist hospitality.
 
 ### Moving the artists' share
 
@@ -552,9 +551,9 @@ A lower share slows the rise and leaves you more in the middle.
 
 | Artists' share | Artists in all at 151 | Your take at 151 | Your take at 200 | Your take at 285 | Everyone at full fee from |
 |---|---|---|---|---|---|
-| 55% | $10,980 | $470 | $1,734 | $5,148 | 239 tickets |
-| 50% | $10,868 | $581 | $2,147 | $6,374 | 248 tickets |
-| 45% | $10,756 | $693 | $2,560 | $7,599 | 258 tickets |
+| 55% | $10,105 | $135 | $762 | $3,322 | 284 tickets |
+| 50% | $10,072 | $168 | $944 | $4,113 | not by 285 |
+| 45% | $10,040 | $200 | $1,125 | $4,904 | not by 285 |
 
 ## Artists
 
@@ -574,11 +573,11 @@ A lower share slows the rise and leaves you more in the middle.
 | **Day total** | | **$7,175** | **$6,225** | **$4,925** |
 | Share of budget | | 39% | 34% | 27% |
 
-Total: $18,325 across 24 sets. These are full fees. What artists are actually paid follows sales, as described under [How the money scales](#how-the-money-scales), and reaches this total at about 239 tickets, where every artist is at their full fee.
+Total: $18,325 across 24 sets. These are full fees. What artists are actually paid follows sales, as described under [How the money scales](#how-the-money-scales), and reaches this total at about 284 tickets, where every artist is at their full fee.
 
 **The 7:00 gap.** One-hour sets from 2:00 to 7:30 leave half an hour over. I put it at 7:00, when the sun is going down (sunset is around 7:25 PM that weekend). Use it to switch the stage to its night look and for one short shared moment each day. The alternative is to make 6:00–7:30 a single 90-minute sunset set.
 
-**Friday carries the most money, then Saturday, then Sunday.** A strong Friday is what makes someone buy the Fri–Sun ticket instead of arriving Saturday, and the longer ticket is worth $64 or more to you. The artist budget slider keeps these day shares at any total. Every ticket type includes Sunday, so the Sunday headliner sells almost no extra tickets. Its job is to keep people on site. A one-time back-to-back from two acts already there from Friday or Saturday, at $750–$1,000 extra each, does that without a new booking.
+**Friday carries the most money, then Saturday, then Sunday.** A strong Friday is what makes someone buy the Fri–Sun ticket instead of arriving Saturday, and the longer ticket is worth $64 or more to you. The artist budget slider keeps these day shares at any total. At the expected spread, though, only 30% of buyers are there on Friday and 70% on Saturday, while everyone is there on Sunday. Friday's $3,000 headliner plays to about 86 ticket holders at a 285-ticket sell-out, and Sunday's lineup is now what sells the 30% who buy Sunday only. If that spread holds in the presale, consider moving money from Friday toward Sunday.
 
 **What each artist gets.** The fee, a room in the K Lodge apartment on the night they play one of the top three slots, a bed in a shared cabin if they stay longer, meals for their whole stay, and rides to and from Ontario or Palm Springs. They book their own flights.
 
@@ -670,7 +669,7 @@ The medical team is on site for the event itself. The two build days and two str
 
 That leaves 37 shifts uncovered. Twelve volunteers on your existing trade (three shifts for a full ticket, no $100) cover 36. They are already counted among the people without a ticket. Nine top-slot acts arriving and leaving could mean 18 airport runs, so ask artists to pick one airport and land in batches.
 
-**Pay.** Each of the 12 paid crew gets $100 whatever sells, which is part of the break-even, plus $1 for every ticket sold above 124. That is $127 each at 151 tickets, $176 at 200, $261 at a 285-ticket sell-out and $370 at 394. Every crew member gets a ticket and a car pass at any size.
+**Pay.** Each of the 12 paid crew gets $100 whatever sells, which is part of the break-even, plus $1 for every ticket sold above 141. That is $110 each at 151 tickets, $159 at 200, $244 at a 285-ticket sell-out and $353 at 394. Every crew member gets a ticket and a car pass at any size.
 
 ## Kitchen
 
@@ -680,11 +679,11 @@ The chef will need the six kitchen-help shifts above. Extras in order of value: 
 
 **Above 350 on site** a second chef comes in at $1,000 and the kitchen also feeds Project Seismic's 30, Kinetic Desert's 25 guests and every artist for the whole weekend. I budgeted $2,000 more in groceries for that: about 70 more people a day, three days, at the same cost per meal. Two chefs feeding around 115 people will need more than one kitchen helper per meal, so add volunteer shifts.
 
-**Drinks.** Bulk seltzers and other drinks for everyone come out of the Event bucket. At 7 parts in 24 that is about $600 at 200 tickets, $1,700 at a 285-ticket sell-out and $2,400 at 394. Buy late, from the final figure. I assumed this means everyone on site, at every size, and non-alcoholic. If the drinks are hard seltzers for ticket buyers, check the licensing first: my understanding is that California can treat alcohol included with paid admission as a sale.
+**Drinks.** Bulk seltzers and other drinks for everyone come out of the Event bucket. At 7 parts in 24 that is about $300 at 200 tickets, $1,100 at a 285-ticket sell-out and $1,500 at 394. Buy late, from the final figure. I assumed this means everyone on site, at every size, and non-alcoholic. If the drinks are hard seltzers for ticket buyers, check the licensing first: my understanding is that California can treat alcohol included with paid admission as a sale.
 
 ## Art, projection and lighting
 
-This comes out of the Event bucket. At 9 parts in 24, with the $500 floor for path lighting, it is about $1,200 at 200 tickets, $2,700 at a 285-ticket sell-out and $3,600 at 394. The split below is for $3,000, in the order to spend it as the money comes in.
+This comes out of the Event bucket. At 9 parts in 24, with the $500 floor for path lighting, it is about $800 at 200 tickets, $1,900 at a 285-ticket sell-out and $2,400 at 394. The split below is for $3,000, in the order to spend it as the money comes in.
 
 | Item | Budget |
 |---|---|
@@ -726,10 +725,10 @@ If the budget has to shrink, path lighting is the one line to keep whole.
 
 ## Questions that would change this plan
 
-1. **What will the headliners actually ask to be guaranteed?** I used 75% of the fee. Near break-even, every $150 of guarantee is one more ticket to sell.
+1. **What will the headliners actually ask to be guaranteed?** I used 75% of the fee. Near break-even, every $140 of guarantee is one more ticket to sell.
 2. **Which ten places come off the list of people without a ticket?** I took them from the artists' guest list: one guest for each artist playing 7:30 or later, none for daytime.
-3. **Is the crew's $1 a ticket paid to each crew member, and from which ticket?** I counted it for each of the 12, on tickets above 124. From the first ticket, break-even is 135.
-4. **What is the real permit fee, and how long does the county take to issue it?** At the listed $2,108 the waitlist block is 7 instead of 13. The turnaround sets how late the waitlist can run.
+3. **Is the crew's $1 a ticket paid to each crew member, and from which ticket?** I counted it for each of the 12, on tickets above 141. From the first ticket, break-even is 184.
+4. **What is the real permit fee, and how long does the county take to issue it?** At the listed $2,108 the waitlist block is 22 instead of 29. The turnaround sets how late the waitlist can run.
 5. **Will headliners take a flat fee?** It does not change break-even, and above it the money stays with the other artists and the step fund.
 6. **Does The Dome have a minimum?** It earns $900 at 90 tickets for travel and setup.
 7. **Does the venue have a minimum rental** below some ticket count?
