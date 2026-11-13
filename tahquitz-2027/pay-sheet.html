@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Tahquitz 2027 Pay Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column on granite paper; the pay table is the centrepiece, sell-out columns lit like lanterns. */
+:root {
+  --bg: #eef1ed; --surface: #fbfcfa; --ink: #16211c; --ink-2: #4b5b53; --ink-3: #6f7d75; --rule: #d3dbd5; --rule-2: #e3e9e4;
+  --pine: #1d5a43; --pine-soft: #dcebe3; --lantern: #b7780c; --lantern-soft: #f6ead0; --loss: #ad3328;
+  --display: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1512; --surface: #151f1a; --ink: #e5ece8; --ink-2: #a9b8b0; --ink-3: #85958d; --rule: #2b3a33; --rule-2: #1f2b25;
+  --pine: #6cc59d; --pine-soft: #1b3329; --lantern: #e7b04b; --lantern-soft: #2e2512; --loss: #ec8578; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1512; --surface: #151f1a; --ink: #e5ece8; --ink-2: #a9b8b0; --ink-3: #85958d; --rule: #2b3a33; --rule-2: #1f2b25;
+  --pine: #6cc59d; --pine-soft: #1b3329; --lantern: #e7b04b; --lantern-soft: #2e2512; --loss: #ec8578; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.page { max-width: 1040px; margin: 0 auto; padding-block: 40px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(36px, 6vw, 60px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 17px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pine); }
+.muted { color: var(--ink-2); }
+section { display: grid; gap: 16px; min-width: 0; }
+header.top { display: grid; gap: 14px; }
+.lede { font-size: 19px; line-height: 1.5; color: var(--ink-2); max-width: 60ch; }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; margin-top: 6px; }
+.facts div { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; align-content: start; }
+.facts b { font-family: var(--display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.facts span { font-size: 13px; color: var(--ink-2); }
+.two { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.two > * { min-width: 0; }
+ul.list, ol.steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+ul.list li { padding-left: 18px; position: relative; }
+ul.list li::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--pine); }
+ol.steps { counter-reset: s; gap: 14px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; }
+ol.steps li::before { content: counter(s); font-family: var(--display); font-weight: 800; font-size: 18px; color: var(--pine); background: var(--pine-soft); border-radius: 8px; height: 34px; display: grid; place-items: center; }
+ol.steps b { display: block; }
+/* the Bowl's day, 2 PM to midnight in half hours */
+.dayline { overflow-x: auto; }
+.strip { min-width: 640px; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 3px; }
+.strip div { border-radius: 6px; padding: 8px 6px; font-size: 12px; line-height: 1.25; background: var(--pine-soft); color: var(--ink); }
+.strip div b { display: block; font-variant-numeric: tabular-nums; }
+.strip .night { background: var(--pine); color: var(--surface); }
+.strip .sun { background: repeating-linear-gradient(135deg, var(--lantern-soft) 0 6px, transparent 6px 12px); border: 1px dashed var(--lantern); color: var(--ink-2); }
+.ticks { min-width: 640px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); font-size: 11px; color: var(--ink-3); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.afters { font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+/* sizes */
+.sizes { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; }
+.size { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.size b { font-family: var(--display); font-size: 24px; font-variant-numeric: tabular-nums; }
+.size .k { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.size p { font-size: 13px; color: var(--ink-2); }
+.size.stretch { border-style: dashed; }
+.arrow { display: grid; place-items: center; text-align: center; font-size: 12px; color: var(--lantern); font-weight: 600; max-width: 110px; }
+.arrow span { display: block; font-size: 20px; line-height: 1; }
+/* tables */
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 12px; text-align: right; white-space: nowrap; }
+thead th { font-size: 12px; font-weight: 700; color: var(--ink); vertical-align: bottom; border-bottom: 1px solid var(--rule); padding-top: 12px; }
+thead th small { display: block; font-weight: 500; color: var(--ink-3); font-size: 11px; letter-spacing: 0.01em; }
+th.l, tbody th, tfoot th { text-align: left; }
+tbody td, tbody th { border-bottom: 1px solid var(--rule-2); font-size: 14px; }
+.pay tbody th { font-weight: 500; }
+.pay .time { display: inline-block; min-width: 68px; }
+.pay .role { font-size: 12px; color: var(--ink-3); margin-left: 6px; }
+.pay .len { color: var(--ink-3); font-size: 13px; text-align: left; }
+.pay tr.day th { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--pine); padding-top: 16px; border-bottom: 1px solid var(--rule); text-align: left; }
+.pay tr.night-start th, .pay tr.night-start td { border-top: 1px dashed var(--rule); }
+.pay tr.subtotal th, .pay tr.subtotal td { font-weight: 700; border-bottom: 0; }
+.pay tfoot th, .pay tfoot td { font-family: var(--display); font-weight: 700; font-size: 16px; border-top: 2px solid var(--ink); padding-block: 12px; }
+td.g, th.g { background: var(--pine-soft); }
+td.sell, th.sell { background: var(--lantern-soft); }
+.nil { color: var(--ink-3); }
+.who tbody th { font-weight: 600; }
+.who tbody th small { display: block; font-weight: 400; color: var(--ink-3); font-size: 12px; white-space: normal; max-width: 34ch; }
+.who td { vertical-align: top; }
+.who tr.org th, .who tr.org td { border-top: 2px solid var(--ink); font-weight: 700; }
+td.loss { color: var(--loss); }
+.note { font-size: 13px; color: var(--ink-2); max-width: 80ch; }
+.key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--ink-2); }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid var(--rule); }
+footer { font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 16px; display: grid; gap: 6px; }
+@media (max-width: 820px) {
+  .two { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sizes { grid-template-columns: minmax(0, 1fr); }
+  .arrow { max-width: none; grid-auto-flow: column; gap: 8px; justify-content: start; padding-left: 16px; }
+  .arrow span { transform: rotate(90deg); }
+}
+@media print {
+  body { font-size: 10px; background: #fff; color: #000; }
+  .page { padding: 0; gap: 14px; max-width: none; }
+  h1 { font-size: 26px; } h2 { font-size: 15px; } .lede { font-size: 11px; }
+  th, td { padding: 2px 6px; } tbody td, tbody th { font-size: 9.5px; }
+  .tablewrap { border: 0; overflow: visible; }
+  .dayline, .strip, .ticks { min-width: 0; }
+}
+</style>
+
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="eyebrow">Camp Tahquitz · Friday April 23 to Monday April 26, 2027</div>
+    <h1>Tahquitz 2027</h1>
+    <p class="lede">A three-day experimental bass and dubstep campout in the mountains. One main stage at The Bowl, afters in the K Lodge and The Dome until sunrise, and a pay plan built so that every ticket sold raises what the artists, the crew and the partners take home.</p>
+    <div class="facts" role="list">
+      <div role="listitem"><b>24 sets</b><span>Eight a day at The Bowl, Friday to Sunday</span></div>
+      <div role="listitem"><b>141 tickets</b><span>Break-even, with every guarantee paid</span></div>
+      <div role="listitem"><b>151 · 285 · 394</b><span>Tickets at each sell-out: 199, 350 and 500 on site</span></div>
+      <div role="listitem"><b>$18,325</b><span>All 24 full fees, reached at 284 tickets</span></div>
+    </div>
+  </header>
+
+  <section class="two">
+    <div style="display:grid;gap:14px">
+      <h2>The weekend</h2>
+      <p>Three days of music at The Bowl from 2:00 PM to midnight, with a sunset changeover at 7:00 when the stage switches to its night look. Five one-hour daytime sets lead into three 90-minute night sets. Friday carries the biggest lineup, then Saturday, then Sunday.</p>
+    </div>
+    <div style="display:grid;gap:14px">
+      <h2>What every artist gets</h2>
+      <ul class="list">
+        <li>A fee that rises with ticket sales, shown in the table below.</li>
+        <li>The night slots are guaranteed whatever sells: headliners 75% of their full fee, the 9:00 and 7:30 slots 50%. Half of the guarantee is paid as a deposit before the name is announced.</li>
+        <li>A room in the K Lodge apartment on the night you play one of the top three slots, and a bed in a shared cabin if you stay longer.</li>
+        <li>Meals for your whole stay, and rides to and from Ontario or Palm Springs airport. You book your own flight.</li>
+        <li>A guest for every artist playing 7:30 or later.</li>
+      </ul>
+      <p class="note">Production is by Kinetic Desert. Tickets are all-in: Fri–Sun from $189, Sat–Sun from $145 and Sunday from $85.</p>
+    </div>
+  </section>
+
+  <section aria-label="The Bowl, one day">
+    <div class="dayline" aria-label="The Bowl, one day, 2 PM to midnight">
+      <div class="strip">
+        <div style="grid-column: span 2"><b>2:00</b>1 hr</div>
+        <div style="grid-column: span 2"><b>3:00</b>1 hr</div>
+        <div style="grid-column: span 2"><b>4:00</b>1 hr</div>
+        <div style="grid-column: span 2"><b>5:00</b>1 hr</div>
+        <div style="grid-column: span 2"><b>6:00</b>1 hr</div>
+        <div class="sun" style="grid-column: span 1"><b>7:00</b>sunset</div>
+        <div class="night" style="grid-column: span 3"><b>7:30</b>Opener · 90 min</div>
+        <div class="night" style="grid-column: span 3"><b>9:00</b>Direct support · 90 min</div>
+        <div class="night" style="grid-column: span 3"><b>10:30</b>Headliner · 90 min</div>
+      </div>
+      <div class="ticks"><span>2 PM</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11 PM</span></div>
+      <p class="afters">After midnight: the K Lodge (105 people) and The Dome (40) run open sign-up afters until just past sunrise.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the money moves</h2>
+    <ol class="steps">
+      <li><div><b>Fixed costs and guarantees come first.</b><span class="muted">The venue, production, insurance, food, crew pay and the $9,750 of artist guarantees are owed whatever sells. Covering all of it takes 141 tickets. Below that the organiser carries the loss, and every guarantee is still paid in full.</span></div></li>
+      <li><div><b>Everything above break-even is shared in fixed parts.</b><span class="muted">55% lifts the artists, 24% goes into the event itself (art, lighting, drinks, hospitality, marketing and a reserve) and 21% is the organiser's. The crew get $1 each for every ticket past break-even, and the production partners earn per ticket from the start.</span></div></li>
+      <li><div><b>All artists rise together.</b><span class="muted">Every slot moves from its guarantee toward its full fee at the same pace, so no one is left behind while another is paid out. Daytime sets have no guarantee and are paid from break-even on. Every slot reaches its full fee at about 284 tickets.</span></div></li>
+      <li><div><b>The event only grows when growing costs no one anything.</b><span class="muted">Each bigger size adds costs at once: permits, a medical team, porto-potties and a second stage. So the next size is sold as one block from a waitlist, and buyers are charged only when the block is full. A step fund, held back from what is above break-even at the small size, pays part of the cost. After a step, nobody is paid less than before it, the organiser included.</span></div></li>
+      <li><div><b>One settlement, in the open.</b><span class="muted">Deposits go out before the announcement. Everything else is paid once, after the event, on the final ticket count, using the table below. Sales and costs are shown on the event's financials page.</span></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Three sizes, one block at a time</h2>
+    <div class="sizes">
+      <div class="size"><span class="k">Up to 199 on site</span><b>151 tickets</b><p>On the camp's own facilities. Break-even at 141. At the sell-out, $645 is held in the step fund.</p></div>
+      <div class="arrow"><span>→</span>29 on the waitlist</div>
+      <div class="size"><span class="k">Up to 350 on site</span><b>285 tickets</b><p>Adds the permit and the medical team. Opens at 180 tickets, when 29 buyers are waiting. Every artist is at full fee by its sell-out.</p></div>
+      <div class="arrow"><span>→</span>69 on the waitlist</div>
+      <div class="size stretch"><span class="k">Up to 500 on site · stretch</span><b>394 tickets</b><p>Adds porto-potties and a side stage at The Bowl run by Project Seismic. Opens at 354 tickets, only if 285 sell out by March 1.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Artist pay at every size</h2>
+    <p class="muted">What each set is paid at the final ticket count. Between a sell-out and the next block, buyers are on the waitlist and nothing changes.</p>
+    <div class="key"><span><i style="background:var(--pine-soft)"></i>Guaranteed, paid whatever sells</span><span><i style="background:var(--lantern-soft)"></i>Sell-out of each size</span></div>
+    <div class="tablewrap"><table class="pay"><thead><tr><th scope="col" class="l">Set time</th><th scope="col" class="l">Length</th><th scope="col" class=" g">Guaranteed<small>up to break-even, 141 tickets</small></th><th scope="col" class="sell">151 tickets<small>sell-out, 199 on site</small></th><th scope="col" class="">200 tickets</th><th scope="col" class="">250 tickets</th><th scope="col" class="sell">285 tickets<small>sell-out, 350 on site</small></th><th scope="col" class="sell">394 tickets<small>sell-out, 500 on site</small></th></tr></thead><tbody><tr class="day"><th scope="rowgroup" colspan="8">Friday</th></tr><tr><th scope="row"><span class="time">2:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$3</td><td class="">$17</td><td class="">$51</td><td class="sell">$75</td><td class="sell">$75</td></tr><tr><th scope="row"><span class="time">3:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$4</td><td class="">$23</td><td class="">$69</td><td class="sell">$100</td><td class="sell">$100</td></tr><tr><th scope="row"><span class="time">4:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$8</td><td class="">$47</td><td class="">$137</td><td class="sell">$200</td><td class="sell">$200</td></tr><tr><th scope="row"><span class="time">5:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$12</td><td class="">$70</td><td class="">$206</td><td class="sell">$300</td><td class="sell">$300</td></tr><tr><th scope="row"><span class="time">6:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$21</td><td class="">$116</td><td class="">$343</td><td class="sell">$500</td><td class="sell">$500</td></tr><tr class="night-start"><th scope="row"><span class="time">7:30 PM</span><span class="role">Opener</span></th><td class="len">90 min</td><td class=" g">$500</td><td class="sell">$521</td><td class="">$616</td><td class="">$843</td><td class="sell">$1,000</td><td class="sell">$1,000</td></tr><tr><th scope="row"><span class="time">9:00 PM</span><span class="role">Direct support</span></th><td class="len">90 min</td><td class=" g">$1,000</td><td class="sell">$1,041</td><td class="">$1,233</td><td class="">$1,686</td><td class="sell">$2,000</td><td class="sell">$2,000</td></tr><tr><th scope="row"><span class="time">10:30 PM</span><span class="role">Headliner</span></th><td class="len">90 min</td><td class=" g">$2,250</td><td class="sell">$2,281</td><td class="">$2,425</td><td class="">$2,764</td><td class="sell">$3,000</td><td class="sell">$3,000</td></tr><tr class="subtotal"><th scope="row">Friday total</th><td></td><td class="">$3,750</td><td class="sell">$3,891</td><td class="">$4,547</td><td class="">$6,099</td><td class="sell">$7,175</td><td class="sell">$7,175</td></tr></tbody><tbody><tr class="day"><th scope="rowgroup" colspan="8">Saturday</th></tr><tr><th scope="row"><span class="time">2:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$3</td><td class="">$17</td><td class="">$51</td><td class="sell">$75</td><td class="sell">$75</td></tr><tr><th scope="row"><span class="time">3:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$4</td><td class="">$23</td><td class="">$69</td><td class="sell">$100</td><td class="sell">$100</td></tr><tr><th scope="row"><span class="time">4:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$6</td><td class="">$35</td><td class="">$103</td><td class="sell">$150</td><td class="sell">$150</td></tr><tr><th scope="row"><span class="time">5:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$10</td><td class="">$58</td><td class="">$171</td><td class="sell">$250</td><td class="sell">$250</td></tr><tr><th scope="row"><span class="time">6:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$17</td><td class="">$93</td><td class="">$274</td><td class="sell">$400</td><td class="sell">$400</td></tr><tr class="night-start"><th scope="row"><span class="time">7:30 PM</span><span class="role">Opener</span></th><td class="len">90 min</td><td class=" g">$375</td><td class="sell">$391</td><td class="">$462</td><td class="">$632</td><td class="sell">$750</td><td class="sell">$750</td></tr><tr><th scope="row"><span class="time">9:00 PM</span><span class="role">Direct support</span></th><td class="len">90 min</td><td class=" g">$750</td><td class="sell">$781</td><td class="">$925</td><td class="">$1,264</td><td class="sell">$1,500</td><td class="sell">$1,500</td></tr><tr><th scope="row"><span class="time">10:30 PM</span><span class="role">Headliner</span></th><td class="len">90 min</td><td class=" g">$2,250</td><td class="sell">$2,281</td><td class="">$2,425</td><td class="">$2,764</td><td class="sell">$3,000</td><td class="sell">$3,000</td></tr><tr class="subtotal"><th scope="row">Saturday total</th><td></td><td class="">$3,375</td><td class="sell">$3,493</td><td class="">$4,038</td><td class="">$5,328</td><td class="sell">$6,225</td><td class="sell">$6,225</td></tr></tbody><tbody><tr class="day"><th scope="rowgroup" colspan="8">Sunday</th></tr><tr><th scope="row"><span class="time">2:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$3</td><td class="">$17</td><td class="">$51</td><td class="sell">$75</td><td class="sell">$75</td></tr><tr><th scope="row"><span class="time">3:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$4</td><td class="">$23</td><td class="">$69</td><td class="sell">$100</td><td class="sell">$100</td></tr><tr><th scope="row"><span class="time">4:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$6</td><td class="">$35</td><td class="">$103</td><td class="sell">$150</td><td class="sell">$150</td></tr><tr><th scope="row"><span class="time">5:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$8</td><td class="">$47</td><td class="">$137</td><td class="sell">$200</td><td class="sell">$200</td></tr><tr><th scope="row"><span class="time">6:00 PM</span></th><td class="len">1 hr</td><td class=" g"><span class="nil">$0</span></td><td class="sell">$12</td><td class="">$70</td><td class="">$206</td><td class="sell">$300</td><td class="sell">$300</td></tr><tr class="night-start"><th scope="row"><span class="time">7:30 PM</span><span class="role">Opener</span></th><td class="len">90 min</td><td class=" g">$300</td><td class="sell">$312</td><td class="">$370</td><td class="">$506</td><td class="sell">$600</td><td class="sell">$600</td></tr><tr><th scope="row"><span class="time">9:00 PM</span><span class="role">Direct support</span></th><td class="len">90 min</td><td class=" g">$625</td><td class="sell">$651</td><td class="">$770</td><td class="">$1,054</td><td class="sell">$1,250</td><td class="sell">$1,250</td></tr><tr><th scope="row"><span class="time">10:30 PM</span><span class="role">Headliner</span></th><td class="len">90 min</td><td class=" g">$1,700</td><td class="sell">$1,723</td><td class="">$1,828</td><td class="">$2,077</td><td class="sell">$2,250</td><td class="sell">$2,250</td></tr><tr class="subtotal"><th scope="row">Sunday total</th><td></td><td class="">$2,625</td><td class="sell">$2,719</td><td class="">$3,160</td><td class="">$4,203</td><td class="sell">$4,925</td><td class="sell">$4,925</td></tr></tbody><tfoot><tr><th scope="row">All 24 sets</th><td></td><td class="">$9,750</td><td class="sell">$10,103</td><td class="">$11,745</td><td class="">$15,630</td><td class="sell">$18,325</td><td class="sell">$18,325</td></tr></tfoot></table></div>
+    <p class="note">The 285 and 394 columns are each set's full fee: past about 284 tickets the artists' share has reached every full fee, and more sales go to the next size and the other lines. Figures are rounded to the dollar and assume 30% of buyers take Fri–Sun, 40% Sat–Sun and 30% Sunday only. An artist who agrees different terms (a flat fee, or a rate per ticket) is paid on those terms.</p>
+  </section>
+
+  <section>
+    <h2>Everyone, at each size</h2>
+    <p class="muted">Payments to each party, alongside the organiser's result. At 90 tickets, the size of last year's Reeguez Rocks, every guarantee is still paid and the organiser covers a $6,804 loss.</p>
+    <div class="tablewrap"><table class="who"><thead><tr><th scope="col" class="l">Who</th><th scope="col">90 tickets<small>what Reeguez Rocks sold</small></th><th scope="col">141 tickets<small>break-even</small></th><th scope="col">151 tickets<small>sell-out, 199 on site</small></th><th scope="col">285 tickets<small>sell-out, 350 on site</small></th><th scope="col">394 tickets<small>sell-out, 500 on site</small></th></tr></thead><tbody><tr><th scope="row">Camp Tahquitz<small>venue fee per ticket per day, cabins, medical rep</small></th><td>$3,300</td><td>$4,570</td><td>$4,770</td><td>$7,700</td><td>$9,880</td></tr><tr><th scope="row">Kinetic Desert<small>production: $2,000 plus $15 a ticket above 75</small></th><td>$2,225</td><td>$2,990</td><td>$3,140</td><td>$5,150</td><td>$6,785</td></tr><tr><th scope="row">The Dome<small>$10 a ticket, up to $2,000</small></th><td>$900</td><td>$1,410</td><td>$1,510</td><td>$2,000</td><td>$2,000</td></tr><tr><th scope="row">Project Seismic<small>side stage at 500: $3,000 plus $10 a ticket above 285</small></th><td><span class="nil">–</span></td><td><span class="nil">–</span></td><td><span class="nil">–</span></td><td><span class="nil">–</span></td><td>$4,090</td></tr><tr><th scope="row">Artists, all 24 sets<small>the table above</small></th><td>$9,750</td><td>$9,773</td><td>$10,103</td><td>$18,325</td><td>$18,325</td></tr><tr><th scope="row">Each of the 12 paid crew<small>$100 plus $1 a ticket above 141, a ticket and a car pass</small></th><td>$100</td><td>$100</td><td>$110</td><td>$244</td><td>$353</td></tr><tr><th scope="row">Chefs<small>$1,000 each, a second chef at 500</small></th><td>$1,000</td><td>$1,000</td><td>$1,000</td><td>$1,000</td><td>$2,000</td></tr><tr><th scope="row">The event itself<small>art, lighting, drinks, hospitality, marketing, reserve</small></th><td>$1,050</td><td>$1,061</td><td>$1,205</td><td>$4,846</td><td>$6,070</td></tr><tr><th scope="row">Step fund<small>held to pay for the next size up</small></th><td><span class="nil">–</span></td><td>$46</td><td>$645</td><td>$125</td><td><span class="nil">–</span></td></tr><tr class="org"><th scope="row">Organiser<small>what is left, and every loss below break-even</small></th><td class="loss">−$6,804</td><td>$10</td><td>$135</td><td>$3,322</td><td>$7,321</td></tr></tbody></table></div>
+  </section>
+
+  <footer>
+    <span>These are planned figures from the Tahquitz 2027 planner, not signed agreements. Artist names, full fees and guarantees will be updated as quotes come in.</span>
+    <span>Ticket counts are paid tickets. Each size also counts crew, artists, partners and guests on site, which is why 199 on site holds 151 tickets.</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -22,7 +22,9 @@ The numbers in this plan come from one planning model. Open [`budget.html`](budg
 
 Partners, crew roles, budgets, hard costs, stages and timeline rows can all be added and removed.
 
-**Saving.** Save plan stores the plan for everyone you share the page with. Changes you have not saved stay yours, so you can try a what-if without disturbing the saved plan. The copy in this repository saves in your browser only.
+**Saving.** Opened as a file, the planner saves in your browser only. Use Save plan before closing it.
+
+**How it is built.** [`budget.html`](budget.html), the one-page summary [`pay-sheet.html`](pay-sheet.html) and most figures in this plan are built from [`model.js`](model.js). [`AGENTS.md`](AGENTS.md) lists the commands, and the decisions and open questions behind the plan.
 
 ## The short version
 
